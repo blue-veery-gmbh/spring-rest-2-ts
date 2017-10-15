@@ -2,6 +2,7 @@ package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -9,15 +10,24 @@ import java.util.Map;
  */
 public class DefaultModuleConverter implements ModuleConverter {
     private int skipParentPackages = 0;
+    private Map<String, String> packagesMap = new HashMap<>();
 
     public DefaultModuleConverter(int skipParentPackages) {
         this.skipParentPackages = skipParentPackages;
     }
 
+    public Map<String, String> getPackagesMap() {
+        return packagesMap;
+    }
+
     @Override
     public void convert(String packageName, Map<String, TSModule> moduleMap) {
-        if(!moduleMap.containsKey(packageName)) {
-            String[] packageNameComponents = packageName.split("\\.");
+        String mappedPackageName = packageName;
+        if(packagesMap.containsKey(packageName)){
+            mappedPackageName = packagesMap.get(packageName);
+        }
+        if(!moduleMap.containsKey(mappedPackageName)) {
+            String[] packageNameComponents = mappedPackageName.split("\\.");
             StringBuilder moduleName = new StringBuilder();
             for (int i = skipParentPackages; i < packageNameComponents.length; i++) {
                 moduleName.append(packageNameComponents[i]);
@@ -27,7 +37,10 @@ public class DefaultModuleConverter implements ModuleConverter {
             }
 
             TSModule tsModule = new TSModule(moduleName.toString());
-            moduleMap.put(packageName, tsModule);
+            moduleMap.put(mappedPackageName, tsModule);
+        }
+        if(mappedPackageName!=packageName){
+            moduleMap.put(packageName, moduleMap.get(mappedPackageName));
         }
     }
 }

@@ -18,6 +18,7 @@ import java.util.*;
 public class SpringREST2tsGenerator {
 
     private GenerationContext generationContext;
+    private ModuleConverter moduleConverter = new DefaultModuleConverter(2);;
 
     private ClassLoader getClassLoader(){
         return this.getClass().getClassLoader();
@@ -25,6 +26,10 @@ public class SpringREST2tsGenerator {
 
     public void setGenerationContext(GenerationContext generationContext) {
         this.generationContext = generationContext;
+    }
+
+    public void setModuleConverter(ModuleConverter moduleConverter) {
+        this.moduleConverter = moduleConverter;
     }
 
     public void loadAndGenerate(Set<String> packagesNames, Set<String> modelClassNamesConditions, Set<String> restClassNamesConditions, File outputDir) throws ClassNotFoundException, IOException {
@@ -57,9 +62,9 @@ public class SpringREST2tsGenerator {
         exploreModelClasses(modelClasses, modelBaseClassesConditions, modelAnnotationsConditions);
 
 
-        convertModules(enumClasses, tsModuleMap, new DefaultModuleConverter(2));
-        convertModules(modelClasses, tsModuleMap, new DefaultModuleConverter(2));
-        convertModules(restClasses, tsModuleMap, new DefaultModuleConverter(2));
+        convertModules(enumClasses, tsModuleMap, moduleConverter);
+        convertModules(modelClasses, tsModuleMap, moduleConverter);
+        convertModules(restClasses, tsModuleMap, moduleConverter);
 
         convertTypes(enumClasses, tsModuleMap, new EnumConverter());
         convertTypes(modelClasses, tsModuleMap, new ModelClassToTsConverter());
