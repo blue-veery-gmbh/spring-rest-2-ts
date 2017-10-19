@@ -43,4 +43,9 @@ public class EmptyImplementationGenerator implements ImplementationGenerator {
     public void addComplexTypeUsage(TSClass tsClass) {
 
     }
+
+    @Override
+    public void setupCustom(TSComplexType tsComplexType) {
+
+    }
 }
