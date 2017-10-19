@@ -17,6 +17,8 @@ import java.util.*;
  */
 public class SpringREST2tsGenerator {
 
+    public static final String CUSTOM_MODULE_RAI_URL_SERVICE = "rai-url-service";
+
     private GenerationContext generationContext;
     private ModuleConverter moduleConverter = new DefaultModuleConverter(2);;
 
@@ -73,6 +75,35 @@ public class SpringREST2tsGenerator {
         writeTypeScriptTypes(tsModuleMap, generationContext, outputDir);
     }
 
+    public void generateCustomModule(String name, File outputDir) throws IOException{
+        switch (name) {
+            case CUSTOM_MODULE_RAI_URL_SERVICE:
+                SortedMap<String, TSModule> tsModuleMap = new TreeMap<>();
+                TSModule raiUrlServiceModule = new TSModule(CUSTOM_MODULE_RAI_URL_SERVICE, false);
+                TSClass raiUrlService = new TSClass("UrlService", raiUrlServiceModule);
+                raiUrlService.addTsMethod(
+                        new TSMethod("getBackendUrl",
+                                raiUrlService,
+                                new TSSimpleType("string"),
+                                false,
+                                false)
+                );
+                raiUrlService.addTsMethod(
+                    new TSMethod("constructor",
+                            raiUrlService,
+                            null,
+                            false,
+                            true)
+                );
+                generationContext.getImplementationGenerator().addComplexTypeUsage(raiUrlService);
+                raiUrlServiceModule.addScopedType(raiUrlService);
+                tsModuleMap.put(CUSTOM_MODULE_RAI_URL_SERVICE, raiUrlServiceModule);
+                writeTypeScriptTypes(tsModuleMap, generationContext, outputDir);
+                break;
+            default:
+        }
+    }
+
     private void registerCustomTypesMapping(Map<Class, String> customTypeMapping, SortedMap<String, TSModule> tsModuleSortedMap) {
         for(Class nextJavaType:customTypeMapping.keySet()){
             String tsTypeName = customTypeMapping.get(nextJavaType);
@@ -98,6 +129,7 @@ public class SpringREST2tsGenerator {
         if(!outputDir.exists()){
             outputDir.mkdirs();
         }
+
         for(TSModule tsModule:tsModuleSortedMap.values()){
             File tsModuleFile = new File(outputDir, tsModule.getName()+".ts");
             BufferedWriter writer = new BufferedWriter(new FileWriter(tsModuleFile));

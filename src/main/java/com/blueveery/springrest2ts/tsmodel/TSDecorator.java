@@ -30,9 +30,12 @@ public class TSDecorator extends TSElement {
         writer.write("@");
         writer.write(tsFunction.getName());
         writer.write("(");
-        for (TSLiteral tsLiteral : tsLiteralList) {
+        for (int i = 0; i < tsLiteralList.size(); i++) {
+            TSLiteral tsLiteral = tsLiteralList.get(i);
             tsLiteral.write(generationContext, writer);
-            writer.write(".");
+            if (i < tsLiteralList.size()-1) {
+                writer.write(",");
+            }
         }
         writer.write(")");
     }

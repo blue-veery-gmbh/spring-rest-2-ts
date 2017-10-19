@@ -21,4 +21,6 @@ public interface ImplementationGenerator {
     List<TSDecorator> getDecorators(TSClass tsClass);
 
     void addComplexTypeUsage(TSClass tsClass);
+
+    void setupCustom(TSComplexType tsComplexType);
 }

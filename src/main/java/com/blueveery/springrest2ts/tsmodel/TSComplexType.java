@@ -54,6 +54,7 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
     }
 
     protected void writeMembers(GenerationContext generationContext, BufferedWriter writer) throws IOException {
+        generationContext.getImplementationGenerator().setupCustom(this);
         writeFields(generationContext, writer, tsFields);
         SortedSet<TSField> implementationSpecificFields = generationContext.getImplementationGenerator().getImplementationSpecificFields(this);
         writeFields(generationContext, writer, implementationSpecificFields);
