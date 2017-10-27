@@ -16,9 +16,16 @@ import java.util.TreeSet;
 public class TSClass extends TSComplexType {
     private TSClass extendsClass;
     private SortedSet<TSInterface> implementsInterfaces = new TreeSet<>();
+    private boolean isAbstract;
 
     public TSClass(String name, TSModule module) {
         super(name, module);
+        isAbstract = false;
+    }
+
+    public TSClass(String name, TSModule module, boolean isAbstract) {
+        this(name, module);
+        this.isAbstract = isAbstract;
     }
 
     public TSClass getExtendsClass() {
@@ -42,7 +49,11 @@ public class TSClass extends TSComplexType {
         List<TSDecorator> decorators = implementationGenerator.getDecorators(this);
         writeDecorators(generationContext, writer, decorators);
 
-        writer.write("export class " + getName() + " ");
+        writer.write("export");
+        if (isAbstract) {
+            writer.write(" abstract");
+        }
+        writer.write(" class " + getName() + " ");
 
         if(extendsClass!=null){
             writer.write("extends " + extendsClass.getName() + " ");

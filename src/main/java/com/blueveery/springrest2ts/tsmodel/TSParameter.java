@@ -44,7 +44,11 @@ public class TSParameter extends TSElement implements IAnnotated, IDecorated {
         writeDecorators(generationContext, writer, tsDecoratorList);
         writer.write(getName());
         writer.write(": ");
-        writer.write(tsType.getName());
+        if (tsType instanceof TSArrowFuncType) {
+            tsType.write(generationContext, writer);
+        } else {
+            writer.write(tsType.getName());
+        }
         if (defaultValue.compareTo("") != 0) {
             writer.write(" = ");
             writer.write(defaultValue);

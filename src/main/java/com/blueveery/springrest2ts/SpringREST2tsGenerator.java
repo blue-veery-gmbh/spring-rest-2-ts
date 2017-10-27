@@ -17,12 +17,14 @@ import java.util.*;
  */
 public class SpringREST2tsGenerator {
 
-    public static final String CUSTOM_MODULE_RAI_URL_SERVICE = "rai-url-service";
+    public static final String CUSTOM_MODULE_URL_SERVICE = "url-service";
+    public static final String CUSTOM_MODULE_ERROR_HANDLER = "error-handler";
 
     private GenerationContext generationContext;
-    private ModuleConverter moduleConverter = new DefaultModuleConverter(2);;
+    private ModuleConverter moduleConverter = new DefaultModuleConverter(2);
+    ;
 
-    private ClassLoader getClassLoader(){
+    private ClassLoader getClassLoader() {
         return this.getClass().getClassLoader();
     }
 
@@ -75,63 +77,160 @@ public class SpringREST2tsGenerator {
         writeTypeScriptTypes(tsModuleMap, generationContext, outputDir);
     }
 
-    public void generateCustomModule(String name, File outputDir) throws IOException{
+    public void generateCustomModule(String name, File outputDir) throws IOException {
+        SortedMap<String, TSModule> tsModuleMap = new TreeMap<>();
+
         switch (name) {
-            case CUSTOM_MODULE_RAI_URL_SERVICE:
-                SortedMap<String, TSModule> tsModuleMap = new TreeMap<>();
-                TSModule raiUrlServiceModule = new TSModule(CUSTOM_MODULE_RAI_URL_SERVICE, false);
-                TSClass raiUrlService = new TSClass("UrlService", raiUrlServiceModule);
-                raiUrlService.addTsMethod(
-                        new TSMethod("getBackendUrl",
-                                raiUrlService,
-                                new TSSimpleType("string"),
-                                false,
-                                false)
+            case CUSTOM_MODULE_URL_SERVICE:
+                TSModule urlServiceModule = new TSModule(CUSTOM_MODULE_URL_SERVICE, false);
+                TSClass urlService = new TSClass("UrlService", urlServiceModule);
+                urlService.addTsMethod(
+                    new TSMethod("getBackendUrl",
+                        urlService,
+                        TypeMapper.tsString,
+                        false,
+                        false)
                 );
-                raiUrlService.addTsMethod(
+                urlService.addTsMethod(
                     new TSMethod("constructor",
-                            raiUrlService,
-                            null,
-                            false,
-                            true)
+                        urlService,
+                        null,
+                        false,
+                        true)
                 );
-                generationContext.getImplementationGenerator().addComplexTypeUsage(raiUrlService);
-                raiUrlServiceModule.addScopedType(raiUrlService);
-                tsModuleMap.put(CUSTOM_MODULE_RAI_URL_SERVICE, raiUrlServiceModule);
-                writeTypeScriptTypes(tsModuleMap, generationContext, outputDir);
+                generationContext.getImplementationGenerator().addComplexTypeUsage(urlService);
+                urlServiceModule.addScopedType(urlService);
+                tsModuleMap.put(CUSTOM_MODULE_URL_SERVICE, urlServiceModule);
                 break;
+            case CUSTOM_MODULE_ERROR_HANDLER:
+                TSModule errorHandler = new TSModule("error-handler", false);
+
+                TSModule httpModule = new TSModule("@angular/http", true);
+                TSClass responseClass = new TSClass("Response", httpModule);
+
+                TSClass handlerCondition = new TSClass("HandlerCondition", errorHandler, true);
+                TSMethod isMet = new TSMethod(
+                    "isMetForGivenResponse",
+                    handlerCondition,
+                    TypeMapper.tsBoolean,
+                    true,
+                    false
+                );
+                isMet.getParameterList().add(new TSParameter("response", responseClass));
+                handlerCondition.addTsMethod(isMet);
+
+                TSClass simpleErrorHandler = new TSClass("SimpleErrorHandler", errorHandler);
+                simpleErrorHandler.addTsField(
+                    new TSField(
+                        "condition",
+                        simpleErrorHandler,
+                        handlerCondition
+                    )
+                );
+                simpleErrorHandler.addTsField(
+                    new TSField(
+                        "action",
+                        simpleErrorHandler,
+                        new TSArrowFuncType(TypeMapper.tsVoid)
+                    )
+                );
+                TSMethod simpleErrorHandlerConstructor = new TSMethod(
+                    "constructor",
+                    simpleErrorHandler,
+                    null,
+                    false,
+                    true
+                );
+                simpleErrorHandlerConstructor.getParameterList().add(new TSParameter("condition", handlerCondition));
+                simpleErrorHandlerConstructor.getParameterList().add(new TSParameter("action", new TSArrowFuncType(TypeMapper.tsVoid)));
+                simpleErrorHandler.addTsMethod(simpleErrorHandlerConstructor);
+                TSMethod handleError = new TSMethod(
+                    "handleErrorIfPresent",
+                    simpleErrorHandler,
+                    TypeMapper.tsBoolean,
+                    false,
+                    false
+                );
+                handleError.getParameterList().add(new TSParameter("response", responseClass));
+                simpleErrorHandler.addTsMethod(handleError);
+
+                TSClass defaultErrorHandlerService = new TSClass("DefaultErrorHandlerService", errorHandler);
+                defaultErrorHandlerService.addTsField(
+                    new TSField(
+                        "handlers",
+                        defaultErrorHandlerService,
+                        new TSArray(simpleErrorHandler)
+                    )
+                );
+                defaultErrorHandlerService.addTsMethod(
+                    new TSMethod(
+                        "constructor",
+                        defaultErrorHandlerService,
+                        null,
+                        false,
+                        true
+                    )
+                );
+                TSMethod handleErrors = new TSMethod(
+                    "handleErrorsIfPresent",
+                    simpleErrorHandler,
+                    TypeMapper.tsBoolean,
+                    false,
+                    false
+                );
+                handleErrors.getParameterList().add(new TSParameter("response", responseClass));
+                defaultErrorHandlerService.addTsMethod(handleErrors);
+                TSMethod addHandler = new TSMethod(
+                    "addHandler",
+                    simpleErrorHandler,
+                    TypeMapper.tsVoid,
+                    false,
+                    false
+                );
+                addHandler.getParameterList().add(new TSParameter("errorHandler", simpleErrorHandler));
+                defaultErrorHandlerService.addTsMethod(addHandler);
+
+                errorHandler.scopedTypeUsage(responseClass);
+                errorHandler.addScopedType(handlerCondition);
+                errorHandler.addScopedType(simpleErrorHandler);
+                errorHandler.addScopedType(defaultErrorHandlerService);
+
+                generationContext.getImplementationGenerator().addComplexTypeUsage(defaultErrorHandlerService);
+                tsModuleMap.put(CUSTOM_MODULE_ERROR_HANDLER, errorHandler);
             default:
         }
+        writeTypeScriptTypes(tsModuleMap, generationContext, outputDir);
+
     }
 
     private void registerCustomTypesMapping(Map<Class, String> customTypeMapping, SortedMap<String, TSModule> tsModuleSortedMap) {
-        for(Class nextJavaType:customTypeMapping.keySet()){
+        for (Class nextJavaType : customTypeMapping.keySet()) {
             String tsTypeName = customTypeMapping.get(nextJavaType);
             int typeNameStartIndex = tsTypeName.lastIndexOf("\\.");
-            if(typeNameStartIndex>0) {
+            if (typeNameStartIndex > 0) {
                 String tsShortTypeName = tsTypeName.substring(typeNameStartIndex);
                 String tsModuleName = tsTypeName.substring(0, typeNameStartIndex);
                 TSModule tsModule = tsModuleSortedMap.values().stream().findFirst().filter(m -> tsModuleName.equals(m.getName())).orElseGet(null);
-                if(tsModule==null) {
+                if (tsModule == null) {
                     tsModule = new TSModule(tsModuleName, true);
                 }
                 tsModuleSortedMap.put(nextJavaType.getPackage().getName(), tsModule);
                 TSComplexType tsComplexType = new TSClass(tsShortTypeName, tsModule);
                 tsModule.addScopedType(tsComplexType);
                 TypeMapper.registerTsType(nextJavaType, tsComplexType);
-            }else {
+            } else {
                 TypeMapper.registerTsType(nextJavaType, new TSSimpleType(tsTypeName));
             }
         }
     }
 
     private void writeTypeScriptTypes(SortedMap<String, TSModule> tsModuleSortedMap, GenerationContext context, File outputDir) throws IOException {
-        if(!outputDir.exists()){
+        if (!outputDir.exists()) {
             outputDir.mkdirs();
         }
 
-        for(TSModule tsModule:tsModuleSortedMap.values()){
-            File tsModuleFile = new File(outputDir, tsModule.getName()+".ts");
+        for (TSModule tsModule : tsModuleSortedMap.values()) {
+            File tsModuleFile = new File(outputDir, tsModule.getName() + ".ts");
             BufferedWriter writer = new BufferedWriter(new FileWriter(tsModuleFile));
             tsModule.write(context, writer);
             writer.close();
@@ -139,24 +238,24 @@ public class SpringREST2tsGenerator {
     }
 
     private void convertModules(Set<Class> javaClasses, SortedMap<String, TSModule> tsModulesMap, ModuleConverter moduleConverter) {
-        for(Class javaType:javaClasses){
+        for (Class javaType : javaClasses) {
             moduleConverter.convert(javaType.getPackage().getName(), tsModulesMap);
         }
     }
 
     private void convertTypes(Set<Class> javaTypes, SortedMap<String, TSModule> tsModuleSortedMap, ComplexTypeConverter complexTypeConverter) {
-        for(Class javaType:javaTypes){
+        for (Class javaType : javaTypes) {
             complexTypeConverter.preConvert(tsModuleSortedMap, javaType);
         }
 
-        for(Class javaType:javaTypes){
+        for (Class javaType : javaTypes) {
             complexTypeConverter.convert(tsModuleSortedMap, javaType, generationContext.getImplementationGenerator());
         }
 
     }
 
     private void exploreModelClasses(Set<Class> modelClasses, Set<Class> modelBaseClassesConditions, Set<Class> modelAnnotationsConditions) {
-        
+
     }
 
     private void exploreRestClasses(Set<Class> restClasses, Set<Class> modelBaseClassesConditions, Set<Class> modelAnnotationsConditions, Set<Class> modelClasses) {
@@ -167,27 +266,27 @@ public class SpringREST2tsGenerator {
         Reflections reflections = new Reflections(new ConfigurationBuilder().setScanners(new SubTypesScanner(false)).forPackages(packagesNames.toArray(new String[0])));
 
         Set<Class<?>> packageClassesSet = reflections.getSubTypesOf(Object.class);
-        for(Class packageClass:packageClassesSet){
-           if(classConditionsAreMet(baseClassesConditions, annotationsConditions, packageClass)){
+        for (Class packageClass : packageClassesSet) {
+            if (classConditionsAreMet(baseClassesConditions, annotationsConditions, packageClass)) {
                 classesSet.add(packageClass);
             }
         }
 
         Set<Class<? extends Enum>> packageEnumsSet = reflections.getSubTypesOf(Enum.class);
-        for(Class packageEnumClass:packageEnumsSet){
+        for (Class packageEnumClass : packageEnumsSet) {
             enumClasses.add(packageEnumClass);
         }
     }
 
     private boolean classConditionsAreMet(Set<Class> baseClassesConditions, Set<Class> annotationsConditions, Class packageClass) {
-        for (Class baseClass:baseClassesConditions){
+        for (Class baseClass : baseClassesConditions) {
             if (baseClass.isAssignableFrom(packageClass)) {
                 return true;
             }
         }
 
-        for(Class annotationClass:annotationsConditions){
-            if(packageClass.isAnnotationPresent(annotationClass)){
+        for (Class annotationClass : annotationsConditions) {
+            if (packageClass.isAnnotationPresent(annotationClass)) {
                 return true;
             }
         }
@@ -195,10 +294,10 @@ public class SpringREST2tsGenerator {
     }
 
     private void splitClasses(Set<Class> classesConditions, Set<Class> baseClassesConditions, Set<Class> annotationsConditions) {
-        for(Class classCondition:classesConditions){
-            if(classCondition.isAnnotation()){
+        for (Class classCondition : classesConditions) {
+            if (classCondition.isAnnotation()) {
                 annotationsConditions.add(classCondition);
-            }else {
+            } else {
                 baseClassesConditions.add(classCondition);
             }
         }
@@ -206,7 +305,7 @@ public class SpringREST2tsGenerator {
 
     private Set<Class> loadClasses(Set<String> classNamesConditions) throws ClassNotFoundException {
         Set<Class> classSet = new HashSet<>();
-        for(String className:classNamesConditions){
+        for (String className : classNamesConditions) {
             classSet.add(getClassLoader().loadClass(className));
         }
         return classSet;

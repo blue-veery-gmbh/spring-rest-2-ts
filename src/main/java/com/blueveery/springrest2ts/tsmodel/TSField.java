@@ -17,8 +17,14 @@ public class TSField extends TSComplexTypeMember {
     @Override
     public void write(GenerationContext generationContext, BufferedWriter writer) throws IOException {
         writer.write(getName());
-        if(getType()!=null){
-            writer.write(": " + getType().getName());
+        TSType type = getType();
+        if(type != null) {
+            writer.write(": ");
+            if (type instanceof TSArrowFuncType) {
+                type.write(generationContext, writer);
+            } else {
+                writer.write(type.getName());
+            }
         }
         writer.write(";");
     }

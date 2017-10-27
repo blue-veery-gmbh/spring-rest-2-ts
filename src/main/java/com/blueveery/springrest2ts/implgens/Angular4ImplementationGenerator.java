@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.implgens;
 
+import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,12 +18,15 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
     private TSClass responseClass;
     private TSClass requestOptionsClass;
     private TSClass urlServiceClass;
-    private TSClass mapFunction;
+    private TSClass errorHandlerServiceClass;
+    private TSClass subjectClass;
 
     private Set<TSField> implementationSpecificFieldsSet;
 
     private final String FIELD_NAME_HTTP_SERVICE = "httpService";
     private final String FIELD_NAME_URL_SERVICE = "urlService";
+    private final String FIELD_NAME_ERROR_HANDLER_SERVICE = "errorHandlerService";
+    private final String FIELD_NAME_SUBJECT = "subject";
 
     public Angular4ImplementationGenerator() {
         TSModule angularCoreModule = new TSModule("@angular/core");
@@ -39,13 +43,18 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
         responseClass = new TSClass("Response", angularHttpModule);
         requestOptionsClass = new TSClass("RequestOptionsArgs", angularHttpModule);
 
-        TSModule urlServiceModule = new TSModule("rai-url-service");
+        TSModule urlServiceModule = new TSModule("url-service");
         urlServiceModule.setExternal(false);
         urlServiceClass = new TSClass("UrlService", urlServiceModule);
 
-        TSModule mapFunctionModule = new TSModule("rxjs/operator/map");
-        mapFunctionModule.setExternal(true);
-        mapFunction = new TSClass("map", mapFunctionModule);
+        TSModule errorHandlerServiceModule = new TSModule("error-handler");
+        errorHandlerServiceModule.setExternal(false);
+        errorHandlerServiceClass = new TSClass("DefaultErrorHandlerService", errorHandlerServiceModule);
+
+        TSModule subjectModule = new TSModule("rxjs/Subject");
+        subjectModule.setExternal(true);
+        subjectClass = new TSClass("Subject", subjectModule);
+
     }
 
     @Override
@@ -129,13 +138,22 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
                 tsPath = tsPath.replace("{id}", "' + entity.id + '"); //TODO: ugly workaround
             }
 
-
+            TSParameterisedType subjectAnyType = new TSParameterisedType("", subjectClass, TypeMapper.tsAny);
+            writer.write("const " + FIELD_NAME_SUBJECT + " = new " + subjectAnyType.getName() + "();");
+            writer.newLine();
             writer.write(
-                    "return " + mapFunction.getName() + ".bind(this." + FIELD_NAME_HTTP_SERVICE + ".request("
+                    "this." + FIELD_NAME_HTTP_SERVICE + ".request("
                             + tsPath
                             + ", " + requestOptionsVar + ")"
-                            + ", res => res.json())();"
+                            + ".subscribe("
+                            + "res => " + FIELD_NAME_SUBJECT + ".next(res.text() ? res.json() : {}),"
+                            + "(err) => {"
+                            + "this." + FIELD_NAME_ERROR_HANDLER_SERVICE + ".handleErrorsIfPresent(err); "
+                            + FIELD_NAME_SUBJECT + ".next(err.text() ? err.json() : {}) ;});"
             );
+            writer.newLine();
+
+            writer.write("return " + FIELD_NAME_SUBJECT + ".asObservable();");
             writer.newLine();
 
         }
@@ -208,7 +226,8 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
             tsClass.addScopedTypeUsage(responseClass);
             tsClass.addScopedTypeUsage(requestOptionsClass);
             tsClass.addScopedTypeUsage(urlServiceClass);
-            tsClass.addScopedTypeUsage(mapFunction);
+            tsClass.addScopedTypeUsage(errorHandlerServiceClass);
+            tsClass.addScopedTypeUsage(subjectClass);
             tsClass.addScopedTypeUsage(injectableDecorator.getTsFunction());
         }
     }
@@ -218,5 +237,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
         implementationSpecificFieldsSet = new HashSet<>();
         implementationSpecificFieldsSet.add(new TSField(FIELD_NAME_HTTP_SERVICE, tsComplexType, httpClass));
         implementationSpecificFieldsSet.add(new TSField(FIELD_NAME_URL_SERVICE, tsComplexType, urlServiceClass));
+        implementationSpecificFieldsSet.add(new TSField(FIELD_NAME_ERROR_HANDLER_SERVICE, tsComplexType, errorHandlerServiceClass));
     }
 }

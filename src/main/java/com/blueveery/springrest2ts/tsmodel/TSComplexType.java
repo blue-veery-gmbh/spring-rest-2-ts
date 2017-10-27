@@ -35,6 +35,10 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
         return annotationList;
     }
 
+    public SortedSet<TSField> getTsFields() {
+        return tsFields;
+    }
+
     public void addTsMethod(TSMethod tsMethod){
         addScopedTypeUsage(tsMethod.getType());
         tsMethod.getParameterList().forEach(p -> addScopedTypeUsage(p.getTsType()));
