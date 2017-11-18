@@ -72,9 +72,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
             String tsPath = "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" + getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "?'";
             String methodString = methodRequestMapping.method()[0].toString();
 
-            writer.write("// path = " + tsPath);
-            writer.newLine();
-            writer.write("// HTTP method = " + methodString);
             writer.newLine();
 
             StringBuilder pathStringBuilder = new StringBuilder(tsPath);
@@ -87,18 +84,12 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
 
                 if(tsParameter.findAnnotation(RequestBody.class)!=null){
                     RequestBody requestBody = tsParameter.findAnnotation(RequestBody.class);
-                    writer.write(String.format("// parameter %s is sent in request body ", tsParameter.getName()));
-
                     bodyStringBuilder.append(tsParameter.getName());
-                    bodyStringBuilder.append(": ");
-                    bodyStringBuilder.append(tsParameter.getName());
-                    bodyStringBuilder.append(", ");
 
                     continue;
                 }
                 if(tsParameter.findAnnotation(PathVariable.class)!=null){
                     PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
-                    writer.write(String.format("// parameter %s is sent in path variable %s ", tsParameter.getName(), pathVariable.value()));
 
                     String targetToReplace = "{" + pathVariable.value() + "}";
                     int start = pathStringBuilder.lastIndexOf(targetToReplace);
@@ -114,7 +105,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
                 }
                 if(tsParameter.findAnnotation(RequestParam.class)!=null){
                     RequestParam requestParam = tsParameter.findAnnotation(RequestParam.class);
-                    writer.write(String.format("// parameter %s is sent as request param %s ", tsParameter.getName(), requestParam.value()));
 
                     pathStringBuilder.append(" + '");
                     pathStringBuilder.append(requestParam.value());
