@@ -17,6 +17,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
     private TSClass httpClass;
     private TSClass responseClass;
     private TSClass requestOptionsClass;
+    private TSClass headersClass;
     private TSClass urlServiceClass;
     private TSClass errorHandlerServiceClass;
     private TSClass subjectClass;
@@ -42,6 +43,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
         httpClass = new TSClass("Http", angularHttpModule);
         responseClass = new TSClass("Response", angularHttpModule);
         requestOptionsClass = new TSClass("RequestOptionsArgs", angularHttpModule);
+        headersClass = new TSClass("Headers", angularHttpModule);
 
         TSModule urlServiceModule = new TSModule("url-service");
         urlServiceModule.setExternal(false);
@@ -79,7 +81,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
 
             StringBuilder pathStringBuilder = new StringBuilder(tsPath);
 
-            StringBuilder bodyStringBuilder = new StringBuilder();
+            String bodyString = "{}";
 
             for(TSParameter tsParameter:method.getParameterList()){
 
@@ -89,10 +91,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
                     RequestBody requestBody = tsParameter.findAnnotation(RequestBody.class);
                     writer.write(String.format("// parameter %s is sent in request body ", tsParameter.getName()));
 
-                    bodyStringBuilder.append(tsParameter.getName());
-                    bodyStringBuilder.append(": ");
-                    bodyStringBuilder.append(tsParameter.getName());
-                    bodyStringBuilder.append(", ");
+                    bodyString = tsParameter.getName();
 
                     continue;
                 }
@@ -129,7 +128,9 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
 
             String requestOptionsVar = "requestOptions";
 
-            writer.write("const "+ requestOptionsVar +": RequestOptionsArgs = { method: '"+ methodString +"', body: {" + bodyStringBuilder.toString() + "}};");
+            writer.write("const "+ requestOptionsVar +": RequestOptionsArgs = { method: '"+ methodString +
+                "', body: " + bodyString +
+                ",  headers: new Headers({'content-type': 'application/json'})};");
             writer.newLine();
 
             tsPath = pathStringBuilder.toString();
@@ -225,6 +226,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
             tsClass.addScopedTypeUsage(httpClass);
             tsClass.addScopedTypeUsage(responseClass);
             tsClass.addScopedTypeUsage(requestOptionsClass);
+            tsClass.addScopedTypeUsage(headersClass);
             tsClass.addScopedTypeUsage(urlServiceClass);
             tsClass.addScopedTypeUsage(errorHandlerServiceClass);
             tsClass.addScopedTypeUsage(subjectClass);
