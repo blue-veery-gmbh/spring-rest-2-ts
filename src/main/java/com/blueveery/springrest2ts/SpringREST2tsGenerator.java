@@ -43,7 +43,7 @@ public class SpringREST2tsGenerator {
         generate(packagesNames, modelClassesConditions, restClassesConditions, null, outputDir);
     }
 
-    public void generate(Set<String> packagesNames, Set<Class> modelClassesConditions, Set<Class> restClassesConditions, Map<Class, String> customTypeMapping, File outputDir) throws IOException {
+    public SortedMap<String, TSModule> generate(Set<String> packagesNames, Set<Class> modelClassesConditions, Set<Class> restClassesConditions, Map<Class, String> customTypeMapping, File outputDir) throws IOException {
         SortedMap<String, TSModule> tsModuleMap = new TreeMap<>();
         Set<Class> modelClasses = new HashSet<>();
         Set<Class> restClasses = new HashSet<>();
@@ -75,6 +75,8 @@ public class SpringREST2tsGenerator {
         convertTypes(restClasses, tsModuleMap, new SpringRestToTsConverter());
 
         writeTypeScriptTypes(tsModuleMap, generationContext, outputDir);
+
+        return tsModuleMap;
     }
 
     public void generateCustomModule(String name, File outputDir) throws IOException {
