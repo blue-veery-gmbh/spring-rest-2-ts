@@ -103,11 +103,15 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
                     int start = pathStringBuilder.lastIndexOf(targetToReplace);
                     int end = start + targetToReplace.length();
 
-                    pathStringBuilder.replace(
-                            start,
-                            end,
-                            "' + " + tsParameter.getName() + " + '"
-                    );
+                    if("id".equals(pathVariable.value())) {
+                        if (methodString.startsWith("PUT")) {
+                            tsPath = tsPath.replace("{id}", "' + entity.id.split('/')[1] + '");
+                        }else {
+                            pathStringBuilder.replace(start, end, "' + " + tsParameter.getName() + ".split('/')[1] + '");
+                        }
+                    }else{
+                        pathStringBuilder.replace(start, end,  "' + " + tsParameter.getName() + " + '");
+                    }
 
                     continue;
                 }
@@ -136,7 +140,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
             tsPath = pathStringBuilder.toString();
 
             if (methodString.compareTo("PUT") == 0) {
-                tsPath = tsPath.replace("{id}", "' + entity.id + '"); //TODO: ugly workaround
+                tsPath = tsPath.replace("{id}", "' + entity.id.split('/')[1] + '"); //TODO: ugly workaround
             }
 
             TSParameterisedType subjectAnyType = new TSParameterisedType("", subjectClass, TypeMapper.tsAny);
