@@ -132,9 +132,11 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
             String requestOptionsVar = "requestOptions";
 
-            writer.write("const " + requestOptionsVar + ": RequestOptionsArgs = { method: '" + methodString +
-                    "', body: " + bodyString +
-                    ",  headers: new Headers({'content-type': 'application/json'})};");
+            writer.write("const " + requestOptionsVar + ": RequestOptionsArgs = { method: '"
+                    + methodString
+                    + "', body: "
+                    + bodyString
+                    + getHeaderFromRequestMapping(methodRequestMapping) + "};");
             writer.newLine();
 
             tsPath = pathStringBuilder.toString();
@@ -183,6 +185,13 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             return requestMapping.value()[0];
         }
 
+        return "";
+    }
+
+    private String getHeaderFromRequestMapping(RequestMapping requestMapping) {
+        if (requestMapping.consumes().length > 0) {
+            return ",  headers: new Headers({'content-type': " + "'" + requestMapping.consumes()[0] + "'})";
+        }
         return "";
     }
 
