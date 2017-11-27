@@ -16,6 +16,10 @@ public class TSArray extends TSType {
         this.elementType = elementType;
     }
 
+    public TSType getElementType() {
+        return elementType;
+    }
+
     @Override
     public void write(GenerationContext context, BufferedWriter writer) throws IOException {
         writer.write(": " + elementType.getName() + getName());

@@ -17,7 +17,7 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
 
 
     private SortedSet<TSField> tsFields = new TreeSet<>();
-    private SortedSet<TSMethod>  tsMethods = new TreeSet<>();
+    private SortedSet<TSMethod> tsMethods = new TreeSet<>();
     private List<TSDecorator> tsDecoratorList = new ArrayList<>();
 
     private List<Annotation> annotationList = new ArrayList<>();
@@ -39,7 +39,7 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
         return tsFields;
     }
 
-    public void addTsMethod(TSMethod tsMethod){
+    public void addTsMethod(TSMethod tsMethod) {
         addScopedTypeUsage(tsMethod.getType());
         tsMethod.getParameterList().forEach(p -> addScopedTypeUsage(p.getTsType()));
         tsMethods.add(tsMethod);
@@ -51,7 +51,14 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
     }
 
     public void addScopedTypeUsage(TSType tsType) {
-        if(tsType instanceof TSScopedType){
+        if (tsType instanceof TSArray) {
+            TSArray tsArray = (TSArray) tsType;
+            if (tsArray.getElementType() instanceof TSScopedType) {
+                TSScopedType tsScopedType = (TSScopedType) tsArray.getElementType();
+                module.scopedTypeUsage(tsScopedType);
+            }
+        }
+        if (tsType instanceof TSScopedType) {
             TSScopedType tsScopedType = (TSScopedType) tsType;
             module.scopedTypeUsage(tsScopedType);
         }
@@ -63,7 +70,7 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
         SortedSet<TSField> implementationSpecificFields = generationContext.getImplementationGenerator().getImplementationSpecificFields(this);
         writeFields(generationContext, writer, implementationSpecificFields);
 
-        if(!tsMethods.isEmpty()) {
+        if (!tsMethods.isEmpty()) {
             writer.newLine();
             writer.newLine();
 
@@ -77,7 +84,7 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
     }
 
     private void writeFields(GenerationContext generationContext, BufferedWriter writer, SortedSet<TSField> fieldList) throws IOException {
-        if(!fieldList.isEmpty()) {
+        if (!fieldList.isEmpty()) {
             writer.newLine();
             for (TSField tsField : fieldList) {
                 tsField.write(generationContext, writer);

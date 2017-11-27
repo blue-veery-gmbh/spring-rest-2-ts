@@ -18,6 +18,7 @@ public abstract class TSComplexTypeMember extends TSElement implements IAnnotate
         super(name);
         this.owner = owner;
         this.type = type;
+        this.owner.addScopedTypeUsage(type);
     }
 
     public List<TSDecorator> getTsDecoratorList() {
