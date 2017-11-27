@@ -11,7 +11,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.*;
 
-public class Angular4ImplementationGenerator implements ImplementationGenerator{
+public class Angular4ImplementationGenerator implements ImplementationGenerator {
     private TSDecorator injectableDecorator;
     private TSClass observableClass;
     private TSClass httpClass;
@@ -61,13 +61,13 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
 
     @Override
     public void write(BufferedWriter writer, TSMethod method) throws IOException {
-        if(method.isConstructor()){
+        if (method.isConstructor()) {
             TSComplexType methodClass = method.getOwner();
-            for (TSField field: implementationSpecificFieldsSet) {
+            for (TSField field : implementationSpecificFieldsSet) {
                 writer.write("this." + field.getName() + " = " + field.getName() + ";");
                 writer.newLine();
             }
-        }else{
+        } else {
             RequestMapping methodRequestMapping = method.findAnnotation(RequestMapping.class);
             RequestMapping classRequestMapping = method.getOwner().findAnnotation(RequestMapping.class);
 
@@ -83,11 +83,11 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
 
             String bodyString = "{}";
 
-            for(TSParameter tsParameter:method.getParameterList()){
+            for (TSParameter tsParameter : method.getParameterList()) {
 
                 writer.newLine();
 
-                if(tsParameter.findAnnotation(RequestBody.class)!=null){
+                if (tsParameter.findAnnotation(RequestBody.class) != null) {
                     RequestBody requestBody = tsParameter.findAnnotation(RequestBody.class);
                     writer.write(String.format("// parameter %s is sent in request body ", tsParameter.getName()));
 
@@ -95,7 +95,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
 
                     continue;
                 }
-                if(tsParameter.findAnnotation(PathVariable.class)!=null){
+                if (tsParameter.findAnnotation(PathVariable.class) != null) {
                     PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
                     writer.write(String.format("// parameter %s is sent in path variable %s ", tsParameter.getName(), pathVariable.value()));
 
@@ -103,19 +103,19 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
                     int start = pathStringBuilder.lastIndexOf(targetToReplace);
                     int end = start + targetToReplace.length();
 
-                    if("id".equals(pathVariable.value())) {
+                    if ("id".equals(pathVariable.value())) {
                         if (methodString.startsWith("PUT")) {
                             tsPath = tsPath.replace("{id}", "' + entity.id.split('/')[1] + '");
-                        }else {
+                        } else {
                             pathStringBuilder.replace(start, end, "' + " + tsParameter.getName() + ".split('/')[1] + '");
                         }
-                    }else{
-                        pathStringBuilder.replace(start, end,  "' + " + tsParameter.getName() + " + '");
+                    } else {
+                        pathStringBuilder.replace(start, end, "' + " + tsParameter.getName() + " + '");
                     }
 
                     continue;
                 }
-                if(tsParameter.findAnnotation(RequestParam.class)!=null){
+                if (tsParameter.findAnnotation(RequestParam.class) != null) {
                     RequestParam requestParam = tsParameter.findAnnotation(RequestParam.class);
                     writer.write(String.format("// parameter %s is sent as request param %s ", tsParameter.getName(), requestParam.value()));
 
@@ -132,15 +132,24 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
 
             String requestOptionsVar = "requestOptions";
 
-            writer.write("const "+ requestOptionsVar +": RequestOptionsArgs = { method: '"+ methodString +
-                "', body: " + bodyString +
-                ",  headers: new Headers({'content-type': 'application/json'})};");
+            writer.write("const " + requestOptionsVar + ": RequestOptionsArgs = { method: '" + methodString +
+                    "', body: " + bodyString +
+                    ",  headers: new Headers({'content-type': 'application/json'})};");
             writer.newLine();
 
             tsPath = pathStringBuilder.toString();
 
             if (methodString.compareTo("PUT") == 0) {
-                tsPath = tsPath.replace("{id}", "' + entity.id.split('/')[1] + '"); //TODO: ugly workaround
+                for (TSParameter tsParameter : method.getParameterList()) {
+                    if (tsParameter.findAnnotation(RequestBody.class) != null) {
+                        tsPath = tsPath.replace("{id}", "' + entity.id.split('/')[1] + '"); //TODO: ugly workaround
+                    } else if (tsParameter.findAnnotation(PathVariable.class) != null) {
+                        PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
+                        if ("id".equals(pathVariable.value())) {
+                            tsPath = tsPath.replace("{id}", "' + id.split('/')[1] + '"); //TODO: ugly workaround
+                        }
+                    }
+                }
             }
 
             TSParameterisedType subjectAnyType = new TSParameterisedType("", subjectClass, TypeMapper.tsAny);
@@ -165,12 +174,12 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
 
     }
 
-    private String getPathFromRequestMapping(RequestMapping requestMapping){
-        if(requestMapping.path().length>0){
+    private String getPathFromRequestMapping(RequestMapping requestMapping) {
+        if (requestMapping.path().length > 0) {
             return requestMapping.path()[0];
         }
 
-        if(requestMapping.value().length>0){
+        if (requestMapping.value().length > 0) {
             return requestMapping.value()[0];
         }
 
@@ -179,7 +188,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
 
     @Override
     public TSType mapReturnType(TSMethod tsMethod, TSType tsType) {
-        if(isRestClass(tsMethod.getOwner())) {
+        if (isRestClass(tsMethod.getOwner())) {
             return new TSParameterisedType("", observableClass, tsType);
         }
 
@@ -188,7 +197,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
 
     @Override
     public SortedSet<TSField> getImplementationSpecificFields(TSComplexType tsComplexType) {
-        if(isRestClass(tsComplexType)) {
+        if (isRestClass(tsComplexType)) {
             SortedSet<TSField> fieldsSet = new TreeSet<>();
             fieldsSet.addAll(implementationSpecificFieldsSet);
             return fieldsSet;
@@ -198,9 +207,9 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
 
     @Override
     public List<TSParameter> getImplementationSpecificParameters(TSMethod method) {
-        if(method.isConstructor() && isRestClass(method.getOwner())){
+        if (method.isConstructor() && isRestClass(method.getOwner())) {
             List<TSParameter> tsParameters = new ArrayList<>();
-            for (TSField field: implementationSpecificFieldsSet) {
+            for (TSField field : implementationSpecificFieldsSet) {
                 TSParameter newParameter = new TSParameter(field.getName(), field.getType());
                 tsParameters.add(newParameter);
             }
@@ -225,7 +234,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator{
 
     @Override
     public void addComplexTypeUsage(TSClass tsClass) {
-        if(isRestClass(tsClass)) {
+        if (isRestClass(tsClass)) {
             tsClass.addScopedTypeUsage(observableClass);
             tsClass.addScopedTypeUsage(httpClass);
             tsClass.addScopedTypeUsage(responseClass);
