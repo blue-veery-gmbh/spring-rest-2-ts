@@ -162,7 +162,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                             + tsPath
                             + ", " + requestOptionsVar + ")"
                             + ".subscribe("
-                            + "res => " + FIELD_NAME_SUBJECT + ".next(res.text() ? res.json() : {}),"
+                            + "res => " + FIELD_NAME_SUBJECT + getResponseTypeFromRequestMapping(methodRequestMapping, method.getType())
                             + "(err) => {"
                             + "this." + FIELD_NAME_ERROR_HANDLER_SERVICE + ".handleErrorsIfPresent(err); "
                             + FIELD_NAME_SUBJECT + ".next(err.text() ? err.json() : {}) ;});"
@@ -190,9 +190,24 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
     private String getHeaderFromRequestMapping(RequestMapping requestMapping) {
         if (requestMapping.consumes().length > 0) {
-            return ",  headers: new Headers({'content-type': " + "'" + requestMapping.consumes()[0] + "'})";
+            return ",  headers: new Headers({'Content-type': " + "'" + requestMapping.consumes()[0] + "'})";
         }
         return "";
+    }
+
+    private String getResponseTypeFromRequestMapping(RequestMapping requestMapping, TSType methodType) {
+
+        if(methodType == TypeMapper.tsNumber) {
+            return ".next(res.text() ? Number(res.text()) : null),";
+        }
+        if(methodType == TypeMapper.tsBoolean) {
+            return ".next(res.text() ? res.text().toLowerCase() === 'true' : false),";
+        }
+        if(methodType == TypeMapper.tsString) {
+            return ".next(res.text() ? res.text() : null),";
+        }
+
+        return ".next(res.text() ? res.json() : null),";
     }
 
     @Override
