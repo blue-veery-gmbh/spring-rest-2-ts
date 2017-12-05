@@ -165,7 +165,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                             + "res => " + FIELD_NAME_SUBJECT + getResponseTypeFromRequestMapping(methodRequestMapping, method.getType())
                             + "(err) => {"
                             + "this." + FIELD_NAME_ERROR_HANDLER_SERVICE + ".handleErrorsIfPresent(err); "
-                            + FIELD_NAME_SUBJECT + ".next(err.text() ? err.json() : {}) ;});"
+                            + FIELD_NAME_SUBJECT + ".error(err ? err : {});});"
             );
             writer.newLine();
 
