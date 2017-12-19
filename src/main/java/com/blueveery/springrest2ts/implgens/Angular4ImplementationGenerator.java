@@ -21,6 +21,8 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
     private TSClass urlServiceClass;
     private TSClass errorHandlerServiceClass;
     private TSClass subjectClass;
+    private TSClass jsonScope;
+    private TSClass jsonScopedSerializer;
 
     private Set<TSField> implementationSpecificFieldsSet;
 
@@ -56,6 +58,14 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         TSModule subjectModule = new TSModule("rxjs/Subject");
         subjectModule.setExternal(true);
         subjectClass = new TSClass("Subject", subjectModule);
+
+        TSModule jsonScopeModule = new TSModule("jsonScope");
+        jsonScopeModule.setExternal(false);
+        jsonScope = new TSClass("JsonScope", jsonScopeModule);
+
+        TSModule jsonScopedSerializerModule = new TSModule("jsonScopedSerializer");
+        jsonScopeModule.setExternal(false);
+        jsonScopedSerializer = new TSClass("JsonScopedSerializer", jsonScopedSerializerModule);
 
     }
 
@@ -135,7 +145,9 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             writer.write("const " + requestOptionsVar + ": RequestOptionsArgs = { method: '"
                     + methodString
                     + "', body: "
+                    + "JsonScopedSerializer.stringify( "
                     + bodyString
+                    + ", new JsonScope(false, []))"
                     + getHeaderFromRequestMapping(methodRequestMapping) + "};");
             writer.newLine();
 
@@ -197,13 +209,13 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
     private String getResponseTypeFromRequestMapping(RequestMapping requestMapping, TSType methodType) {
 
-        if(methodType == TypeMapper.tsNumber) {
+        if (methodType == TypeMapper.tsNumber) {
             return ".next(res.text() ? Number(res.text()) : null),";
         }
-        if(methodType == TypeMapper.tsBoolean) {
+        if (methodType == TypeMapper.tsBoolean) {
             return ".next(res.text() ? res.text().toLowerCase() === 'true' : false),";
         }
-        if(methodType == TypeMapper.tsString) {
+        if (methodType == TypeMapper.tsString) {
             return ".next(res.text() ? res.text() : null),";
         }
 
@@ -266,6 +278,8 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             tsClass.addScopedTypeUsage(headersClass);
             tsClass.addScopedTypeUsage(urlServiceClass);
             tsClass.addScopedTypeUsage(errorHandlerServiceClass);
+            tsClass.addScopedTypeUsage(jsonScope);
+            tsClass.addScopedTypeUsage(jsonScopedSerializer);
             tsClass.addScopedTypeUsage(subjectClass);
             tsClass.addScopedTypeUsage(injectableDecorator.getTsFunction());
         }
