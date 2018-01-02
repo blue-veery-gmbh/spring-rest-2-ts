@@ -145,8 +145,8 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             boolean isUpdateOperation = "PUT".equals(methodString) || "POST".equals(methodString);
 
             writer.write("const " + requestOptionsVar + ": RequestOptionsArgs = { method: '"
-                    + methodString + "',"
-                    + (isUpdateOperation ? " body: JsonScopedSerializer.stringify( "+ bodyString + ", jsonScope )" : "")
+                    + methodString
+                    + (isUpdateOperation ? "', body: JsonScopedSerializer.stringify( "+ bodyString + ", jsonScope )" : "")
                     + getHeaderFromRequestMapping(methodRequestMapping) + "};");
             writer.newLine();
 
