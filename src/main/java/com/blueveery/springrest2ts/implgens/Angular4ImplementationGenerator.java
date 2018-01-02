@@ -142,12 +142,11 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
             String requestOptionsVar = "requestOptions";
 
+            boolean isUpdateOperation = "PUT".equals(methodString) || "POST".equals(methodString);
+
             writer.write("const " + requestOptionsVar + ": RequestOptionsArgs = { method: '"
-                    + methodString
-                    + "', body: "
-                    + "JsonScopedSerializer.stringify( "
-                    + bodyString
-                    + ", new JsonScope(false, []))"
+                    + methodString + "',"
+                    + (isUpdateOperation ? " body: JsonScopedSerializer.stringify( "+ bodyString + ", jsonScope )" : "")
                     + getHeaderFromRequestMapping(methodRequestMapping) + "};");
             writer.newLine();
 
@@ -250,6 +249,16 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 tsParameters.add(newParameter);
             }
             return tsParameters;
+        }
+        RequestMapping methodRequestMapping = method.findAnnotation(RequestMapping.class);
+        if(methodRequestMapping != null){
+            String methodString = methodRequestMapping.method()[0].toString();
+            if("PUT".equals(methodString) || "POST".equals(methodString)){
+                List<TSParameter> tsParameters = new ArrayList<>();
+                TSParameter jsonScopeParameter = new TSParameter("jsonScope", jsonScope, "new JsonScope(false, [])");
+                tsParameters.add(jsonScopeParameter);
+                return tsParameters;
+            }
         }
         return Collections.emptyList();
     }
