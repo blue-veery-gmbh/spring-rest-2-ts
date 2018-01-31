@@ -146,7 +146,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
             writer.write("const " + requestOptionsVar + ": RequestOptionsArgs = { method: '"
                     + methodString + "'"
-                    + (isUpdateOperation ? ", body: JsonScopedSerializer.stringify( "+ bodyString + ", jsonScope )" : "")
+                    + (isUpdateOperation ? ", body: JsonScopedSerializer.stringify( " + bodyString + ", jsonScope )" : "")
                     + getHeaderFromRequestMapping(methodRequestMapping) + "};");
             writer.newLine();
 
@@ -159,7 +159,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                     } else if (tsParameter.findAnnotation(PathVariable.class) != null) {
                         PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
                         if ("id".equals(pathVariable.value())) {
-                            tsPath = tsPath.replace("{id}", "' + id.split('/')[1] + '"); //TODO: ugly workaround
+                            tsPath = tsPath.replace("{id}", "' +" + tsParameter.getName() + ".split('/')[1] + '"); //TODO: ugly workaround
                         }
                     }
                 }
@@ -251,9 +251,9 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             return tsParameters;
         }
         RequestMapping methodRequestMapping = method.findAnnotation(RequestMapping.class);
-        if(methodRequestMapping != null){
+        if (methodRequestMapping != null) {
             String methodString = methodRequestMapping.method()[0].toString();
-            if("PUT".equals(methodString) || "POST".equals(methodString)){
+            if ("PUT".equals(methodString) || "POST".equals(methodString)) {
                 List<TSParameter> tsParameters = new ArrayList<>();
                 TSParameter jsonScopeParameter = new TSParameter("jsonScope", jsonScope, "new JsonScope(false, [])");
                 tsParameters.add(jsonScopeParameter);
