@@ -23,6 +23,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
     private TSClass subjectClass;
     private TSClass jsonScope;
     private TSClass jsonScopedSerializer;
+    private TSClass raiJsonParser;
 
     private Set<TSField> implementationSpecificFieldsSet;
 
@@ -64,8 +65,12 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         jsonScope = new TSClass("JsonScope", jsonScopeModule);
 
         TSModule jsonScopedSerializerModule = new TSModule("jsonScopedSerializer");
-        jsonScopeModule.setExternal(false);
+        jsonScopedSerializerModule.setExternal(false);
         jsonScopedSerializer = new TSClass("JsonScopedSerializer", jsonScopedSerializerModule);
+
+        TSModule raiJsonParserModule = new TSModule("raiJsonParser");
+        raiJsonParserModule.setExternal(false);
+        raiJsonParser = new TSClass("RaiJsonParser", raiJsonParserModule);
 
     }
 
@@ -218,7 +223,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             return ".next(res.text() ? res.text() : null),";
         }
 
-        return ".next(res.text() ? res.json() : null),";
+        return ".next(res.text() ? new RaiJsonParser().parse(res.text()) : null),";
     }
 
     @Override
@@ -291,6 +296,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             tsClass.addScopedTypeUsage(jsonScopedSerializer);
             tsClass.addScopedTypeUsage(subjectClass);
             tsClass.addScopedTypeUsage(injectableDecorator.getTsFunction());
+            tsClass.addScopedTypeUsage(raiJsonParser);
         }
     }
 
