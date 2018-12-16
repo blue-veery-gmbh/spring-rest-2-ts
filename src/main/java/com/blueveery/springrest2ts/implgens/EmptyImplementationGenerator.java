@@ -1,11 +1,13 @@
 package com.blueveery.springrest2ts.implgens;
 
+import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.tsmodel.*;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.SortedMap;
 import java.util.SortedSet;
 
 public class EmptyImplementationGenerator implements ImplementationGenerator {
@@ -45,7 +47,12 @@ public class EmptyImplementationGenerator implements ImplementationGenerator {
     }
 
     @Override
-    public void setupCustom(TSComplexType tsComplexType) {
+    public void addImplementationSpecificFields(TSComplexType tsComplexType) {
+
+    }
+
+    @Override
+    public void generateImplementationSpecificUtilTypes(GenerationContext generationContext, SortedMap<String, TSModule> tsModuleMap) {
 
     }
 }

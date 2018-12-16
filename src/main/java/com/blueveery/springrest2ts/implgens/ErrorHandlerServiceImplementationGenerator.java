@@ -1,11 +1,11 @@
 package com.blueveery.springrest2ts.implgens;
 
+import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.security.cert.CollectionCertStoreParameters;
 import java.util.*;
 
 public class ErrorHandlerServiceImplementationGenerator implements ImplementationGenerator {
@@ -18,6 +18,10 @@ public class ErrorHandlerServiceImplementationGenerator implements Implementatio
         injectableDecorator = new TSDecorator("", new TSFunction("Injectable", angularCoreModule));
         injectDecorator = new TSDecorator("", new TSFunction("Inject", angularCoreModule));
         injectDecorator.getTsLiteralList().add(new TSLiteral("", TypeMapper.tsString, "BACKEND_URL"));
+    }
+
+    @Override
+    public void generateImplementationSpecificUtilTypes(GenerationContext generationContext, SortedMap<String, TSModule> tsModuleMap) {
 
     }
 
@@ -84,6 +88,6 @@ public class ErrorHandlerServiceImplementationGenerator implements Implementatio
     }
 
     @Override
-    public void setupCustom(TSComplexType tsComplexType) {
+    public void addImplementationSpecificFields(TSComplexType tsComplexType) {
     }
 }

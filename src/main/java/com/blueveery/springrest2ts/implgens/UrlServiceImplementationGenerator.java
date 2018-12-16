@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.implgens;
 
+import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
 
@@ -21,6 +22,11 @@ public class UrlServiceImplementationGenerator implements ImplementationGenerato
         injectableDecorator = new TSDecorator("", new TSFunction("Injectable", angularCoreModule));
         injectDecorator = new TSDecorator("", new TSFunction("Inject", angularCoreModule));
         injectDecorator.getTsLiteralList().add(new TSLiteral("", TypeMapper.tsString, "BACKEND_URL"));
+    }
+
+    @Override
+    public void generateImplementationSpecificUtilTypes(GenerationContext generationContext, SortedMap<String, TSModule> tsModuleMap) {
+
     }
 
     @Override
@@ -80,7 +86,7 @@ public class UrlServiceImplementationGenerator implements ImplementationGenerato
     }
 
     @Override
-    public void setupCustom(TSComplexType tsComplexType) {
+    public void addImplementationSpecificFields(TSComplexType tsComplexType) {
         implementationSpecificFieldsMap = new TreeMap<>();
         implementationSpecificFieldsMap.put(FIELD_NAME_BACKEND_URL, new TSField(FIELD_NAME_BACKEND_URL, tsComplexType, new TSSimpleType("string")));
     }

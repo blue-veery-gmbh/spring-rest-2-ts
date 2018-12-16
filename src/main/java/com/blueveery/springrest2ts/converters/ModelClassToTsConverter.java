@@ -1,6 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
-import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
+import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.tsmodel.*;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -22,7 +22,7 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
 
     }
     @Override
-    public void convert(Map<String, TSModule> modulesMap, Class javaType, ImplementationGenerator implementationGenerator) {
+    public void convert(Map<String, TSModule> modulesMap, Class javaType, GenerationContext generationContext) {
         TSInterface tsInterface = (TSInterface) TypeMapper.map(javaType);
         if(javaType.getSuperclass() != Object.class) {
             TSType superClass = TypeMapper.map(javaType.getSuperclass());

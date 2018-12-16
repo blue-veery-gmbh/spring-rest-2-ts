@@ -1,6 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
-import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
+import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.tsmodel.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -26,7 +26,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
     }
 
     @Override
-    public void convert(Map<String, TSModule> modulesMap, Class javaType, ImplementationGenerator implementationGenerator) {
+    public void convert(Map<String, TSModule> modulesMap, Class javaType, GenerationContext generationContext) {
         TSClass tsClass = (TSClass) TypeMapper.map(javaType);
 
         setSupperClass(javaType, tsClass);
@@ -59,8 +59,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
             }
         }
 
-        implementationGenerator.addComplexTypeUsage(tsClass);
-
+        generationContext.getImplementationGenerator(tsClass).addComplexTypeUsage(tsClass);
     }
 
     private Map<String,TSType> createTypeParametersMap(Type... genericInterfaces) {
