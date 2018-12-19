@@ -9,6 +9,8 @@ import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 /**
@@ -30,7 +32,7 @@ public class SpringREST2tsGeneratorTest {
 
         rest2tsGenerator.getCustomTypeMapping().put(UUID.class, "string");
 
-        File outputDir = new File("./target/generated-sources/ts");
+        Path outputDir = Paths.get("./target/generated-sources/ts");
 
         rest2tsGenerator.setGenerationContext(new GenerationContext(new Angular4ImplementationGenerator()));
 

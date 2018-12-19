@@ -12,6 +12,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -54,7 +56,7 @@ public class SpringREST2tsGenerator {
         this.moduleConverter = moduleConverter;
     }
 
-    public SortedMap<String, TSModule> generate(File outputDir) throws IOException {
+    public SortedMap<String, TSModule> generate(Path outputDir) throws IOException {
         SortedMap<String, TSModule> tsModuleMap = new TreeMap<>();
         Set<Class> modelClasses = new HashSet<>();
         Set<Class> restClasses = new HashSet<>();
@@ -113,14 +115,14 @@ public class SpringREST2tsGenerator {
         }
     }
 
-    private void writeTypeScriptTypes(SortedMap<String, TSModule> tsModuleSortedMap, GenerationContext context, File outputDir) throws IOException {
-        if (!outputDir.exists()) {
-            outputDir.mkdirs();
+    private void writeTypeScriptTypes(SortedMap<String, TSModule> tsModuleSortedMap, GenerationContext context, Path outputDir) throws IOException {
+        if (Files.notExists(outputDir)) {
+            Files.createDirectories(outputDir);
         }
 
         for (TSModule tsModule : tsModuleSortedMap.values()) {
-            File tsModuleFile = new File(outputDir, tsModule.getName() + ".ts");
-            BufferedWriter writer = new BufferedWriter(new FileWriter(tsModuleFile));
+            Path tsModuleFile = outputDir.resolve(tsModule.getName() + ".ts");
+            BufferedWriter writer = Files.newBufferedWriter(tsModuleFile);
             tsModule.write(context, writer);
             writer.close();
         }
