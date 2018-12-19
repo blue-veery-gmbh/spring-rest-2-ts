@@ -7,7 +7,6 @@ import com.blueveery.core.model.BaseEntity;
 import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
 
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
