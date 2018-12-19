@@ -41,24 +41,19 @@
             <groupId>com.blueveery</groupId>
             <artifactId>jackson-scopes</artifactId>
             <version>1.0</version>
-            <scope>test</scope>
+            <!--<scope>test</scope>-->
         </dependency>
         <dependency>
             <groupId>com.blueveery</groupId>
             <artifactId>bluehr-model</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <!--<scope>test</scope>-->
         </dependency>
         <dependency>
             <groupId>com.blueveery</groupId>
             <artifactId>bluehr-ctrls</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.blueveery</groupId>
-            <artifactId>bluehr-ctrls</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>test</scope>
+            <!--<scope>test</scope>-->
         </dependency>
 
     </dependencies>

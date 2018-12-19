@@ -10,6 +10,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 
 /**
@@ -17,12 +19,31 @@ import java.util.*;
  */
 public class SpringREST2tsGenerator {
 
+    private Set<Class> modelClassesConditions = new HashSet<>();
+    private Set<Class> restClassesConditions = new HashSet<>();
+    private Set<String> packagesNames = new HashSet<>();
+    private Map<Class, String> customTypeMapping = new HashMap<>();
     private GenerationContext generationContext;
     private ModuleConverter moduleConverter = new DefaultModuleConverter(2);
-    ;
 
     private ClassLoader getClassLoader() {
         return this.getClass().getClassLoader();
+    }
+
+    public Set<Class> getModelClassesConditions() {
+        return modelClassesConditions;
+    }
+
+    public Set<Class> getRestClassesConditions() {
+        return restClassesConditions;
+    }
+
+    public Set<String> getPackagesNames() {
+        return packagesNames;
+    }
+
+    public Map<Class, String> getCustomTypeMapping() {
+        return customTypeMapping;
     }
 
     public void setGenerationContext(GenerationContext generationContext) {
@@ -33,14 +54,7 @@ public class SpringREST2tsGenerator {
         this.moduleConverter = moduleConverter;
     }
 
-    public void loadAndGenerate(Set<String> packagesNames, Set<String> modelClassNamesConditions, Set<String> restClassNamesConditions, File outputDir) throws ClassNotFoundException, IOException {
-        Set<Class> modelClassesConditions = loadClasses(modelClassNamesConditions);
-        Set<Class> restClassesConditions = loadClasses(restClassNamesConditions);
-
-        generate(packagesNames, modelClassesConditions, restClassesConditions, null, outputDir);
-    }
-
-    public SortedMap<String, TSModule> generate(Set<String> packagesNames, Set<Class> modelClassesConditions, Set<Class> restClassesConditions, Map<Class, String> customTypeMapping, File outputDir) throws IOException {
+    public SortedMap<String, TSModule> generate(File outputDir) throws IOException {
         SortedMap<String, TSModule> tsModuleMap = new TreeMap<>();
         Set<Class> modelClasses = new HashSet<>();
         Set<Class> restClasses = new HashSet<>();
@@ -138,20 +152,18 @@ public class SpringREST2tsGenerator {
     }
 
     private void scanPackages(Set<String> packagesNames, Set<Class> baseClassesConditions, Set<Class> annotationsConditions, Set<Class> classesSet, Set<Class> enumClasses) {
-        for (String packagesName : packagesNames) {
-            Reflections reflections = new Reflections(new ConfigurationBuilder().setScanners(new SubTypesScanner(true)).forPackages(packagesName));
+        Reflections reflections = new Reflections(new ConfigurationBuilder().setScanners(new SubTypesScanner(false)).forPackages(packagesNames.toArray(new String[0])));
 
-            Set<Class<?>> packageClassesSet = reflections.getSubTypesOf(Object.class);
-            for (Class packageClass : packageClassesSet) {
-                if (classConditionsAreMet(baseClassesConditions, annotationsConditions, packageClass)) {
-                    classesSet.add(packageClass);
-                }
+        Set<Class<?>> packageClassesSet = reflections.getSubTypesOf(Object.class);
+        for (Class packageClass : packageClassesSet) {
+            if (classConditionsAreMet(baseClassesConditions, annotationsConditions, packageClass)) {
+                classesSet.add(packageClass);
             }
+        }
 
-            Set<Class<? extends Enum>> packageEnumsSet = reflections.getSubTypesOf(Enum.class);
-            for (Class packageEnumClass : packageEnumsSet) {
-                enumClasses.add(packageEnumClass);
-            }
+        Set<Class<? extends Enum>> packageEnumsSet = reflections.getSubTypesOf(Enum.class);
+        for (Class packageEnumClass : packageEnumsSet) {
+            enumClasses.add(packageEnumClass);
         }
     }
 
@@ -178,13 +190,5 @@ public class SpringREST2tsGenerator {
                 baseClassesConditions.add(classCondition);
             }
         }
-    }
-
-    private Set<Class> loadClasses(Set<String> classNamesConditions) throws ClassNotFoundException {
-        Set<Class> classSet = new HashSet<>();
-        for (String className : classNamesConditions) {
-            classSet.add(getClassLoader().loadClass(className));
-        }
-        return classSet;
     }
 }
