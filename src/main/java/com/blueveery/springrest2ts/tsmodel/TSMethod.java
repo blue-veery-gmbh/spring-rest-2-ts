@@ -55,13 +55,10 @@ public class TSMethod extends TSComplexTypeMember {
         writer.write("(");
         List<TSParameter> totalTsParametersList = new ArrayList<>(parameterList);
         totalTsParametersList.addAll(implementationGenerator.getImplementationSpecificParameters(this));
-        for (int i = 0; i < totalTsParametersList.size(); i++) {
-            TSParameter p = totalTsParametersList.get(i);
-            p.write(generationContext, writer);
-            if(i<totalTsParametersList.size()-1){
-                writer.write(", ");
-            }
-        }
+
+        int counter = writeParameters(totalTsParametersList, generationContext, writer, false, 0);
+        writeParameters(totalTsParametersList, generationContext, writer, true, counter);
+
         writer.write(")");
         if(!isConstructor) {
             writer.write(": ");
@@ -81,5 +78,18 @@ public class TSMethod extends TSComplexTypeMember {
 
     }
 
-
+    private int writeParameters(List<TSParameter> totalTsParametersList, GenerationContext generationContext, BufferedWriter writer, boolean writeOptional, int counter) throws IOException {
+        for (int i = 0; i < totalTsParametersList.size(); i++) {
+            TSParameter p = totalTsParametersList.get(i);
+            boolean isOptional = p.isOptional() || p.getDefaultValue() != null;
+            if ((writeOptional && isOptional) || (!writeOptional && !isOptional)) {
+                p.write(generationContext, writer);
+                if(counter<totalTsParametersList.size()-1){
+                    writer.write(", ");
+                }
+                counter++;
+            }
+        }
+        return counter;
+    }
 }

@@ -2,7 +2,7 @@ package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.tsmodel.*;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -10,6 +10,7 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SpringRestToTsConverter extends ComplexTypeConverter{
@@ -51,7 +52,10 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
                     for (Parameter parameter :method.getParameters()) {
                         TSParameter tsParameter = new TSParameter(parameter.getName(), TypeMapper.map(parameter.getParameterizedType(), fallbackTSType));
                         addRestAnnotations(parameter.getAnnotations(), tsParameter);
-                        tsMethod.getParameterList().add(tsParameter);
+                        if (parameterIsMapped(tsParameter.getAnnotationList())) {
+                            setOptional(tsParameter);
+                            tsMethod.getParameterList().add(tsParameter);
+                        }
                     }
                     addRestAnnotations(method.getAnnotations(), tsMethod);
                     tsClass.addTsMethod(tsMethod);
@@ -60,6 +64,44 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
         }
 
         generationContext.getImplementationGenerator(tsClass).addComplexTypeUsage(tsClass);
+    }
+
+    private void setOptional(TSParameter tsParameter) {
+        for (Annotation annotation : tsParameter.getAnnotationList()) {
+            if(annotation instanceof PathVariable){
+                PathVariable pathVariable = (PathVariable) annotation;
+                tsParameter.setOptional(!pathVariable.required());
+                return;
+            }
+            if(annotation instanceof RequestParam){
+                RequestParam requestParam = (RequestParam) annotation;
+                tsParameter.setOptional(!requestParam.required());
+                if(!ValueConstants.DEFAULT_NONE.equals(requestParam.defaultValue())) {
+                    tsParameter.setDefaultValue(requestParam.defaultValue());
+                }
+                return;
+            }
+            if(annotation instanceof RequestBody) {
+                RequestBody requestBody = (RequestBody) annotation;
+                tsParameter.setOptional(!requestBody.required());
+                return;
+            }
+       }
+    }
+
+    private boolean parameterIsMapped(List<Annotation> annotations) {
+        for (Annotation annotation : annotations) {
+            if(annotation instanceof PathVariable){
+                return true;
+            }
+            if(annotation instanceof RequestParam){
+                return true;
+            }
+            if(annotation instanceof RequestBody) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Map<String,TSType> createTypeParametersMap(Type... genericInterfaces) {
@@ -73,10 +115,10 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
         return typeParametersMap;
     }
 
-    private void addRestAnnotations(Annotation[] annotations, IAnnotated tsMethod) {
+    private void addRestAnnotations(Annotation[] annotations, IAnnotated annotatedElement) {
         for(Annotation annotation:annotations){
             if (annotation.annotationType().getPackage().equals(RequestMapping.class.getPackage())) {
-                tsMethod.getAnnotationList().add(annotation);
+                annotatedElement.getAnnotationList().add(annotation);
             }
         }
     }
