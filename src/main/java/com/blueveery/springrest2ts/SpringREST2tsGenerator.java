@@ -139,7 +139,7 @@ public class SpringREST2tsGenerator {
 
     private void scanPackages(Set<String> packagesNames, Set<Class> baseClassesConditions, Set<Class> annotationsConditions, Set<Class> classesSet, Set<Class> enumClasses) {
         for (String packagesName : packagesNames) {
-            Reflections reflections = new Reflections(new ConfigurationBuilder().setScanners(new SubTypesScanner(false)).forPackages(packagesName));
+            Reflections reflections = new Reflections(new ConfigurationBuilder().setScanners(new SubTypesScanner(true)).forPackages(packagesName));
 
             Set<Class<?>> packageClassesSet = reflections.getSubTypesOf(Object.class);
             for (Class packageClass : packageClassesSet) {
