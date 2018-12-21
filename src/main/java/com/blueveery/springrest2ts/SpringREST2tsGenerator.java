@@ -112,15 +112,8 @@ public class SpringREST2tsGenerator {
     }
 
     private void writeTypeScriptTypes(SortedMap<String, TSModule> tsModuleSortedMap, GenerationContext context, Path outputDir) throws IOException {
-        if (Files.notExists(outputDir)) {
-            Files.createDirectories(outputDir);
-        }
-
         for (TSModule tsModule : tsModuleSortedMap.values()) {
-            Path tsModuleFile = outputDir.resolve(tsModule.getName() + ".ts");
-            BufferedWriter writer = Files.newBufferedWriter(tsModuleFile);
-            tsModule.write(context, writer);
-            writer.close();
+            tsModule.writeModule(context, outputDir);
         }
     }
 

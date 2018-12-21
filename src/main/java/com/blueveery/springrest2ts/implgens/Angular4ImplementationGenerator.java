@@ -316,7 +316,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
     }
 
     private void createUrlService(GenerationContext generationContext, Map<String, TSModule> tsModuleMap){
-        String urlServiceName = "url-service";
+        String urlServiceName = "services/url-service";
         TSModule urlServiceModule = new TSModule(urlServiceName, false);
         TSClass urlService = new TSClass("UrlService", urlServiceModule);
         urlService.addTsMethod(
@@ -340,7 +340,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
     }
 
     private void createErrorHandlerService(GenerationContext generationContext, Map<String, TSModule> tsModuleMap){
-        TSModule errorHandlerModule = new TSModule("error-handler", false);
+        TSModule errorHandlerModule = new TSModule("services/error-handler", false);
 
         TSModule httpModule = new TSModule("@angular/http", true);
         TSClass responseClass = new TSClass("Response", httpModule);

@@ -4,6 +4,8 @@ import com.blueveery.springrest2ts.GenerationContext;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -29,6 +31,19 @@ public class TSModule extends TSElement {
 
     public boolean isExternal() {
         return isExternal;
+    }
+
+    public void writeModule(GenerationContext context, Path outputDir) throws IOException {
+        Path modulePath = outputDir;
+        String[] nameComponents = getName().split("/");
+        for (int i = 0; i < nameComponents.length-1; i++) {
+            modulePath = modulePath.resolve(nameComponents[i]);
+        }
+        Files.createDirectories(modulePath);
+        Path tsModuleFile = modulePath.resolve(nameComponents[nameComponents.length-1]);
+        BufferedWriter writer = Files.newBufferedWriter(tsModuleFile);
+        write(context, writer);
+        writer.close();
     }
 
     @Override
