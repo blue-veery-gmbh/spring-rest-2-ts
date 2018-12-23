@@ -6,6 +6,7 @@ import com.blueveery.core.ctrls.BaseCtrl;
 import com.blueveery.core.model.BaseEntity;
 import com.blueveery.springrest2ts.converters.ModulePerJavaPackageConverter;
 import com.blueveery.springrest2ts.converters.TypeMapper;
+import com.blueveery.springrest2ts.filters.BaseClassJavaTypeFilter;
 import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSSimpleType;
@@ -34,8 +35,8 @@ public class SpringREST2tsGeneratorTest {
 
         packagesMap.keySet().forEach(packageName -> rest2tsGenerator.getPackagesNames().add(packageName));
 
-        rest2tsGenerator.getModelClassesConditions().add(BaseEntity.class);
-        rest2tsGenerator.getRestClassesConditions().add(BaseCtrl.class);
+        rest2tsGenerator.setModelClassesCondition(new BaseClassJavaTypeFilter(BaseEntity.class));
+        rest2tsGenerator.setRestClassesCondition(new BaseClassJavaTypeFilter(BaseCtrl.class));
 
         rest2tsGenerator.getCustomTypeMapping().put(UUID.class, TypeMapper.tsString);
 

@@ -1,6 +1,7 @@
 package com.blueveery.springrest2ts;
 
 import com.blueveery.springrest2ts.converters.*;
+import com.blueveery.springrest2ts.filters.JavaTypeFilter;
 import com.blueveery.springrest2ts.tsmodel.*;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
@@ -15,23 +16,18 @@ import java.util.*;
  */
 public class SpringREST2tsGenerator {
 
-    private Set<Class> modelClassesConditions = new HashSet<>();
-    private Set<Class> restClassesConditions = new HashSet<>();
+    private JavaTypeFilter modelClassesCondition;
+    private JavaTypeFilter restClassesCondition;
     private Set<String> packagesNames = new HashSet<>();
     private Map<Class, TSType> customTypeMapping = new HashMap<>();
     private GenerationContext generationContext;
-    private ModuleConverter moduleConverter;
 
-    private ClassLoader getClassLoader() {
-        return this.getClass().getClassLoader();
+    public void setModelClassesCondition(JavaTypeFilter modelClassesCondition) {
+        this.modelClassesCondition = modelClassesCondition;
     }
 
-    public Set<Class> getModelClassesConditions() {
-        return modelClassesConditions;
-    }
-
-    public Set<Class> getRestClassesConditions() {
-        return restClassesConditions;
+    public void setRestClassesCondition(JavaTypeFilter restClassesCondition) {
+        this.restClassesCondition = restClassesCondition;
     }
 
     public Set<String> getPackagesNames() {
@@ -46,30 +42,19 @@ public class SpringREST2tsGenerator {
         this.generationContext = generationContext;
     }
 
-    public void setModuleConverter(ModuleConverter moduleConverter) {
-        this.moduleConverter = moduleConverter;
-    }
-
     public SortedSet<TSModule> generate(ModuleConverter moduleConverter, Path outputDir) throws IOException {
         Set<Class> modelClasses = new HashSet<>();
         Set<Class> restClasses = new HashSet<>();
         Set<Class> enumClasses = new HashSet<>();
-        Set<Class> modelBaseClassesConditions = new HashSet<>();
-        Set<Class> modelAnnotationsConditions = new HashSet<>();
-        splitClasses(modelClassesConditions, modelBaseClassesConditions, modelAnnotationsConditions);
 
-        Set<Class> restBaseClassesConditions = new HashSet<>();
-        Set<Class> restAnnotationsConditions = new HashSet<>();
-        splitClasses(restClassesConditions, restBaseClassesConditions, restAnnotationsConditions);
-
-        scanPackages(packagesNames, modelBaseClassesConditions, modelAnnotationsConditions, modelClasses, enumClasses);
-        scanPackages(packagesNames, restBaseClassesConditions, restAnnotationsConditions, restClasses, enumClasses);
+        scanPackages(packagesNames, modelClassesCondition, modelClasses, enumClasses);
+        scanPackages(packagesNames, restClassesCondition, restClasses, enumClasses);
 
 
         registerCustomTypesMapping(customTypeMapping);
 
-        exploreRestClasses(restClasses, modelBaseClassesConditions, modelAnnotationsConditions, modelClasses);
-        exploreModelClasses(modelClasses, modelBaseClassesConditions, modelAnnotationsConditions);
+        exploreRestClasses(restClasses, modelClassesCondition, modelClasses);
+        exploreModelClasses(modelClasses, restClassesCondition);
 
         generationContext.getDefaultImplementationGenerator().generateImplementationSpecificUtilTypes(generationContext, moduleConverter);
 
@@ -117,20 +102,20 @@ public class SpringREST2tsGenerator {
 
     }
 
-    private void exploreModelClasses(Set<Class> modelClasses, Set<Class> modelBaseClassesConditions, Set<Class> modelAnnotationsConditions) {
+    private void exploreModelClasses(Set<Class> modelClasses, JavaTypeFilter javaTypeFilter) {
 
     }
 
-    private void exploreRestClasses(Set<Class> restClasses, Set<Class> modelBaseClassesConditions, Set<Class> modelAnnotationsConditions, Set<Class> modelClasses) {
+    private void exploreRestClasses(Set<Class> restClasses, JavaTypeFilter javaTypeFilter, Set<Class> modelClasses) {
 
     }
 
-    private void scanPackages(Set<String> packagesNames, Set<Class> baseClassesConditions, Set<Class> annotationsConditions, Set<Class> classesSet, Set<Class> enumClasses) {
+    private void scanPackages(Set<String> packagesNames, JavaTypeFilter javaTypeFilter, Set<Class> classesSet, Set<Class> enumClasses) {
         Reflections reflections = new Reflections(new ConfigurationBuilder().setScanners(new SubTypesScanner(false)).forPackages(packagesNames.toArray(new String[0])));
 
         Set<Class<?>> packageClassesSet = reflections.getSubTypesOf(Object.class);
         for (Class packageClass : packageClassesSet) {
-            if (classConditionsAreMet(baseClassesConditions, annotationsConditions, packageClass)) {
+            if (javaTypeFilter.filter(packageClass)) {
                 classesSet.add(packageClass);
             }
         }
@@ -138,31 +123,6 @@ public class SpringREST2tsGenerator {
         Set<Class<? extends Enum>> packageEnumsSet = reflections.getSubTypesOf(Enum.class);
         for (Class packageEnumClass : packageEnumsSet) {
             enumClasses.add(packageEnumClass);
-        }
-    }
-
-    private boolean classConditionsAreMet(Set<Class> baseClassesConditions, Set<Class> annotationsConditions, Class packageClass) {
-        for (Class baseClass : baseClassesConditions) {
-            if (baseClass.isAssignableFrom(packageClass)) {
-                return true;
-            }
-        }
-
-        for (Class annotationClass : annotationsConditions) {
-            if (packageClass.isAnnotationPresent(annotationClass)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void splitClasses(Set<Class> classesConditions, Set<Class> baseClassesConditions, Set<Class> annotationsConditions) {
-        for (Class classCondition : classesConditions) {
-           if (classCondition.isAnnotation()) {
-                annotationsConditions.add(classCondition);
-            } else {
-                baseClassesConditions.add(classCondition);
-            }
         }
     }
 }
