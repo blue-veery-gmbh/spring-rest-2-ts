@@ -6,15 +6,14 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Map;
 
 /**
  * Created by tomaszw on 03.08.2017.
  */
 public class ModelClassToTsConverter extends ComplexTypeConverter {
-    public void preConvert(Map<String, TSModule> modulesMap, Class javaClass){
+    public void preConvert(ModuleConverter moduleConverter, Class javaClass){
         if(TypeMapper.map(javaClass) == TypeMapper.tsAny){
-            TSModule tsModule = modulesMap.get(javaClass.getPackage().getName());
+            TSModule tsModule = moduleConverter.getTsModule(javaClass);
             TSInterface tsInterface = new TSInterface(javaClass.getSimpleName(), tsModule);
             tsModule.addScopedType(tsInterface);
             TypeMapper.registerTsType(javaClass, tsInterface);
@@ -22,7 +21,7 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
 
     }
     @Override
-    public void convert(Map<String, TSModule> modulesMap, Class javaType, GenerationContext generationContext) {
+    public void convert(ModuleConverter moduleConverter, GenerationContext generationContext, Class javaType) {
         TSInterface tsInterface = (TSInterface) TypeMapper.map(javaType);
         if(javaType.getSuperclass() != Object.class) {
             TSType superClass = TypeMapper.map(javaType.getSuperclass());

@@ -15,9 +15,9 @@ import java.util.Map;
 
 public class SpringRestToTsConverter extends ComplexTypeConverter{
 
-    public void preConvert(Map<String, TSModule> modulesMap, Class javaClass){
+    public void preConvert(ModuleConverter moduleConverter, Class javaClass){
         if(TypeMapper.map(javaClass) == TypeMapper.tsAny && !javaClass.isInterface()){
-            TSModule tsModule = modulesMap.get(javaClass.getPackage().getName());
+            TSModule tsModule = moduleConverter.getTsModule(javaClass);
             String simpleName = javaClass.getSimpleName().replace("Ctrl", "Service");
             TSClass tsClass = new TSClass(simpleName, tsModule);
             tsModule.addScopedType(tsClass);
@@ -27,7 +27,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
     }
 
     @Override
-    public void convert(Map<String, TSModule> modulesMap, Class javaType, GenerationContext generationContext) {
+    public void convert(ModuleConverter moduleConverter, GenerationContext generationContext, Class javaType) {
         TSClass tsClass = (TSClass) TypeMapper.map(javaType);
 
         setSupperClass(javaType, tsClass);

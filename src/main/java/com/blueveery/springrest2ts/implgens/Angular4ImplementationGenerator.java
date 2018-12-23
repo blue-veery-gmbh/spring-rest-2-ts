@@ -1,6 +1,7 @@
 package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.GenerationContext;
+import com.blueveery.springrest2ts.converters.ModuleConverter;
 import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -304,12 +305,12 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
     }
 
     @Override
-    public void generateImplementationSpecificUtilTypes(GenerationContext generationContext, SortedMap<String, TSModule> tsModuleMap) {
-        createUrlService(generationContext, tsModuleMap);
-        createErrorHandlerService(generationContext, tsModuleMap);
+    public void generateImplementationSpecificUtilTypes(GenerationContext generationContext, ModuleConverter moduleConverter) {
+        createUrlService(generationContext, moduleConverter);
+        createErrorHandlerService(generationContext, moduleConverter);
     }
 
-    private void createUrlService(GenerationContext generationContext, Map<String, TSModule> tsModuleMap){
+    private void createUrlService(GenerationContext generationContext, ModuleConverter moduleConverter){
         urlServiceClass.addTsMethod(
                 new TSMethod("getBackendUrl",
                         urlServiceClass,
@@ -328,11 +329,11 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         addComplexTypeUsage(urlServiceClass);
         TSModule module = urlServiceClass.getModule();
         module.addScopedType(urlServiceClass);
-        tsModuleMap.put(urlServiceClass.getName(), module);
         generationContext.addImplementationGenerator(urlServiceClass, new UrlServiceImplementationGenerator());
+        moduleConverter.getTsModules().add(module);
     }
 
-    private void createErrorHandlerService(GenerationContext generationContext, Map<String, TSModule> tsModuleMap){
+    private void createErrorHandlerService(GenerationContext generationContext, ModuleConverter moduleConverter){
 
         TSModule httpModule = new TSModule("@angular/http", null, true);
         TSClass responseClass = new TSClass("Response", httpModule);
@@ -425,7 +426,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         errorHandlerModule.addScopedType(errorHandlerServiceClass);
 
         addComplexTypeUsage(errorHandlerServiceClass);
-        tsModuleMap.put(errorHandlerModule.getName(), errorHandlerModule);
         generationContext.addImplementationGenerator(simpleErrorHandlerClass, new ErrorHandlerServiceImplementationGenerator());
+        moduleConverter.getTsModules().add(errorHandlerModule);
     }
 }

@@ -6,9 +6,7 @@ import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ConfigurationBuilder;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -20,9 +18,9 @@ public class SpringREST2tsGenerator {
     private Set<Class> modelClassesConditions = new HashSet<>();
     private Set<Class> restClassesConditions = new HashSet<>();
     private Set<String> packagesNames = new HashSet<>();
-    private Map<Class, String> customTypeMapping = new HashMap<>();
+    private Map<Class, TSType> customTypeMapping = new HashMap<>();
     private GenerationContext generationContext;
-    private ModuleConverter moduleConverter = new DefaultModuleConverter(2);
+    private ModuleConverter moduleConverter;
 
     private ClassLoader getClassLoader() {
         return this.getClass().getClassLoader();
@@ -40,7 +38,7 @@ public class SpringREST2tsGenerator {
         return packagesNames;
     }
 
-    public Map<Class, String> getCustomTypeMapping() {
+    public Map<Class, TSType> getCustomTypeMapping() {
         return customTypeMapping;
     }
 
@@ -52,8 +50,7 @@ public class SpringREST2tsGenerator {
         this.moduleConverter = moduleConverter;
     }
 
-    public SortedMap<String, TSModule> generate(Path outputDir) throws IOException {
-        SortedMap<String, TSModule> tsModuleMap = new TreeMap<>();
+    public SortedSet<TSModule> generate(ModuleConverter moduleConverter, Path outputDir) throws IOException {
         Set<Class> modelClasses = new HashSet<>();
         Set<Class> restClasses = new HashSet<>();
         Set<Class> enumClasses = new HashSet<>();
@@ -69,67 +66,53 @@ public class SpringREST2tsGenerator {
         scanPackages(packagesNames, restBaseClassesConditions, restAnnotationsConditions, restClasses, enumClasses);
 
 
-        registerCustomTypesMapping(customTypeMapping, tsModuleMap);
+        registerCustomTypesMapping(customTypeMapping);
 
         exploreRestClasses(restClasses, modelBaseClassesConditions, modelAnnotationsConditions, modelClasses);
         exploreModelClasses(modelClasses, modelBaseClassesConditions, modelAnnotationsConditions);
 
-        generationContext.getDefaultImplementationGenerator().generateImplementationSpecificUtilTypes(generationContext,tsModuleMap);
+        generationContext.getDefaultImplementationGenerator().generateImplementationSpecificUtilTypes(generationContext, moduleConverter);
 
 
-        convertModules(enumClasses, tsModuleMap, moduleConverter);
-        convertModules(modelClasses, tsModuleMap, moduleConverter);
-        convertModules(restClasses, tsModuleMap, moduleConverter);
+        convertModules(enumClasses, moduleConverter);
+        convertModules(modelClasses, moduleConverter);
+        convertModules(restClasses, moduleConverter);
 
-        convertTypes(enumClasses, tsModuleMap, new EnumConverter());
-        convertTypes(modelClasses, tsModuleMap, new ModelClassToTsConverter());
-        convertTypes(restClasses, tsModuleMap, new SpringRestToTsConverter());
+        convertTypes(enumClasses, moduleConverter, new EnumConverter());
+        convertTypes(modelClasses, moduleConverter, new ModelClassToTsConverter());
+        convertTypes(restClasses, moduleConverter, new SpringRestToTsConverter());
 
-        writeTypeScriptTypes(tsModuleMap, generationContext, outputDir);
+        writeTypeScriptTypes(moduleConverter.getTsModules(), generationContext, outputDir);
 
-        return tsModuleMap;
+        return moduleConverter.getTsModules();
     }
 
-    private void registerCustomTypesMapping(Map<Class, String> customTypeMapping, SortedMap<String, TSModule> tsModuleSortedMap) {
+    private void registerCustomTypesMapping(Map<Class, TSType> customTypeMapping) {
         for (Class nextJavaType : customTypeMapping.keySet()) {
-            String tsTypeName = customTypeMapping.get(nextJavaType);
-            int typeNameStartIndex = tsTypeName.lastIndexOf("\\.");
-            if (typeNameStartIndex > 0) {
-                String tsShortTypeName = tsTypeName.substring(typeNameStartIndex);
-                String tsModuleName = tsTypeName.substring(0, typeNameStartIndex);
-                TSModule tsModule = tsModuleSortedMap.values().stream().findFirst().filter(m -> tsModuleName.equals(m.getName())).orElseGet(null);
-                if (tsModule == null) {
-                    tsModule = new TSModule(tsModuleName, null, true);
-                }
-                tsModuleSortedMap.put(nextJavaType.getPackage().getName(), tsModule);
-                TSComplexType tsComplexType = new TSClass(tsShortTypeName, tsModule);
-                tsModule.addScopedType(tsComplexType);
-                TypeMapper.registerTsType(nextJavaType, tsComplexType);
-            } else {
-                TypeMapper.registerTsType(nextJavaType, new TSSimpleType(tsTypeName));
-            }
+            TSType tsType = customTypeMapping.get(nextJavaType);
+            TypeMapper.registerTsType(nextJavaType, tsType);
         }
     }
 
-    private void writeTypeScriptTypes(SortedMap<String, TSModule> tsModuleSortedMap, GenerationContext context, Path outputDir) throws IOException {
-        for (TSModule tsModule : tsModuleSortedMap.values()) {
+    private void writeTypeScriptTypes(SortedSet<TSModule> tsModuleSortedSet, GenerationContext context, Path outputDir) throws IOException {
+        for (TSModule tsModule : tsModuleSortedSet) {
             tsModule.writeModule(context, outputDir);
         }
     }
 
-    private void convertModules(Set<Class> javaClasses, SortedMap<String, TSModule> tsModulesMap, ModuleConverter moduleConverter) {
+    private void convertModules(Set<Class> javaClasses, ModuleConverter moduleConverter) {
         for (Class javaType : javaClasses) {
-            moduleConverter.convert(javaType.getPackage().getName(), tsModulesMap);
+            moduleConverter.mapJavaTypeToTsModule(javaType);
         }
     }
 
-    private void convertTypes(Set<Class> javaTypes, SortedMap<String, TSModule> tsModuleSortedMap, ComplexTypeConverter complexTypeConverter) {
+    private void convertTypes(Set<Class> javaTypes, ModuleConverter tsModuleSortedMap, ComplexTypeConverter complexTypeConverter) {
         for (Class javaType : javaTypes) {
             complexTypeConverter.preConvert(tsModuleSortedMap, javaType);
         }
 
         for (Class javaType : javaTypes) {
-            complexTypeConverter.convert(tsModuleSortedMap, javaType, generationContext);
+            complexTypeConverter.convert(tsModuleSortedMap, generationContext, javaType);
         }
 
     }
