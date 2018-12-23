@@ -37,7 +37,7 @@ public class TSImport extends TSElement{
                 whatString.append(", ");
             }
         }
-        String relativePath = fromModule.isExternal() ? "" : "./";
+        String relativePath = fromModule.getModuleRelativePath() == null ? "" : fromModule.getModuleRelativePath() + "/";
         writer.write("import {" + whatString.toString() + "} from '" + relativePath + getFromModule().getName()+"';");
     }
 }

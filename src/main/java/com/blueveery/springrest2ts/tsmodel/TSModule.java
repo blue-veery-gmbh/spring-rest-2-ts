@@ -8,21 +8,27 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import static com.blueveery.springrest2ts.tsmodel.ModuleExtensionType.implementation;
+import static com.blueveery.springrest2ts.tsmodel.ModuleExtensionType.typing;
+
 /**
  * Created by tomaszw on 30.07.2017.
  */
 public class TSModule extends TSElement {
-    private boolean isExternal;
+    private boolean isExternal = false;
     private Map<TSModule, TSImport> importMap = new TreeMap<>();
     private SortedSet<TSScopedType> scopedTypesSet = new TreeSet<>();
+    private Path moduleRelativePath;
+    private ModuleExtensionType moduleExtensionType = typing;
 
-    public TSModule(String name) {
-        this(name, false);
+    public TSModule(String name, Path moduleRelativePath, boolean isExternal) {
+        super(name);
+        this.moduleRelativePath = moduleRelativePath;
+        this.isExternal = isExternal;
     }
 
-    public TSModule(String tsModuleName, boolean isExternal) {
-        super(tsModuleName);
-        this.isExternal = isExternal;
+    public Path getModuleRelativePath() {
+        return moduleRelativePath;
     }
 
     public void setExternal(boolean external) {
@@ -34,13 +40,9 @@ public class TSModule extends TSElement {
     }
 
     public void writeModule(GenerationContext context, Path outputDir) throws IOException {
-        Path modulePath = outputDir;
-        String[] nameComponents = getName().split("/");
-        for (int i = 0; i < nameComponents.length-1; i++) {
-            modulePath = modulePath.resolve(nameComponents[i]);
-        }
-        Files.createDirectories(modulePath);
-        Path tsModuleFile = modulePath.resolve(nameComponents[nameComponents.length-1]);
+        Path tsModuleDir = outputDir.resolve(moduleRelativePath);
+        Files.createDirectories(tsModuleDir);
+        Path tsModuleFile = tsModuleDir.resolve(getName() + "." + moduleExtensionType);
         BufferedWriter writer = Files.newBufferedWriter(tsModuleFile);
         write(context, writer);
         writer.close();
@@ -63,6 +65,9 @@ public class TSModule extends TSElement {
 
     public void addScopedType(TSScopedType tsScopedType) {
         scopedTypesSet.add(tsScopedType);
+        if(tsScopedType instanceof TSClass){
+            moduleExtensionType = implementation;
+        }
     }
 
     public void scopedTypeUsage(TSScopedType tsScopedType) {
@@ -76,4 +81,20 @@ public class TSModule extends TSElement {
             tsImport.getWhat().add(tsScopedType);
         }
     }
+
+    @Override
+    public int hashCode() {
+        return moduleRelativePath != null ? getName().hashCode() : moduleRelativePath.resolve(getName()).hashCode();
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof TSModule)) {
+            return false;
+        }
+        TSModule otherTsModule = (TSModule) object;
+        return getName().equals(otherTsModule.getName()) && Objects.equals(moduleRelativePath, otherTsModule.moduleRelativePath);
+    }
+
+
 }

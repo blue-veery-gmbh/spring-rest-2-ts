@@ -2,6 +2,7 @@ package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,7 +37,7 @@ public class DefaultModuleConverter implements ModuleConverter {
                 }
             }
 
-            TSModule tsModule = new TSModule(moduleName.toString());
+            TSModule tsModule = new TSModule(moduleName.toString(), Paths.get("services"), false);
             moduleMap.put(mappedPackageName, tsModule);
         }
         if(mappedPackageName!=packageName){

@@ -17,8 +17,7 @@ public class UrlServiceImplementationGenerator implements ImplementationGenerato
     private final String FIELD_NAME_BACKEND_URL = "backendUrl";
 
     public UrlServiceImplementationGenerator() {
-        TSModule angularCoreModule = new TSModule("@angular/core");
-        angularCoreModule.setExternal(true);
+        TSModule angularCoreModule = new TSModule("@angular/core", null,true);
         injectableDecorator = new TSDecorator("", new TSFunction("Injectable", angularCoreModule));
         injectDecorator = new TSDecorator("", new TSFunction("Inject", angularCoreModule));
         injectDecorator.getTsLiteralList().add(new TSLiteral("", TypeMapper.tsString, "BACKEND_URL"));

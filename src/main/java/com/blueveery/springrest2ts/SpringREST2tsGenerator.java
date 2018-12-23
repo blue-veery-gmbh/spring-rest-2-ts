@@ -99,7 +99,7 @@ public class SpringREST2tsGenerator {
                 String tsModuleName = tsTypeName.substring(0, typeNameStartIndex);
                 TSModule tsModule = tsModuleSortedMap.values().stream().findFirst().filter(m -> tsModuleName.equals(m.getName())).orElseGet(null);
                 if (tsModule == null) {
-                    tsModule = new TSModule(tsModuleName, true);
+                    tsModule = new TSModule(tsModuleName, null, true);
                 }
                 tsModuleSortedMap.put(nextJavaType.getPackage().getName(), tsModule);
                 TSComplexType tsComplexType = new TSClass(tsShortTypeName, tsModule);

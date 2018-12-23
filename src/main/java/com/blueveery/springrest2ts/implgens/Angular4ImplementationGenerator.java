@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Angular4ImplementationGenerator implements ImplementationGenerator {
@@ -34,43 +36,35 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
     private final String FIELD_NAME_SUBJECT = "subject";
 
     public Angular4ImplementationGenerator() {
-        TSModule angularCoreModule = new TSModule("@angular/core");
-        angularCoreModule.setExternal(true);
+        TSModule angularCoreModule = new TSModule("@angular/core", null,true);
         injectableDecorator = new TSDecorator("", new TSFunction("Injectable", angularCoreModule));
 
-        TSModule rxjsObservableModule = new TSModule("rxjs/Observable");
-        rxjsObservableModule.setExternal(true);
+        TSModule rxjsObservableModule = new TSModule("rxjs/Observable", null,true);
         observableClass = new TSClass("Observable", rxjsObservableModule);
 
-        TSModule angularHttpModule = new TSModule("@angular/http");
-        angularHttpModule.setExternal(true);
+        TSModule angularHttpModule = new TSModule("@angular/http", null,true);
         httpClass = new TSClass("Http", angularHttpModule);
         responseClass = new TSClass("Response", angularHttpModule);
         requestOptionsClass = new TSClass("RequestOptionsArgs", angularHttpModule);
         headersClass = new TSClass("Headers", angularHttpModule);
 
-        TSModule urlServiceModule = new TSModule("../shared/url.service");
-        urlServiceModule.setExternal(false);
+        TSModule urlServiceModule = new TSModule("url.service", Paths.get("shared"), false);
         urlServiceClass = new TSClass("UrlService", urlServiceModule);
 
-        TSModule errorHandlerServiceModule = new TSModule("../error-handling/default-error-handler.service");
-        errorHandlerServiceModule.setExternal(false);
+        TSModule errorHandlerServiceModule = new TSModule("default-error-handler.service", Paths.get("error-handling"), false);
         errorHandlerServiceClass = new TSClass("DefaultErrorHandlerService", errorHandlerServiceModule);
 
-        TSModule subjectModule = new TSModule("rxjs/Subject");
-        subjectModule.setExternal(true);
+        TSModule subjectModule = new TSModule("rxjs/Subject", null,true);
         subjectClass = new TSClass("Subject", subjectModule);
 
-        TSModule jsonScopeModule = new TSModule("jsonScope");
-        jsonScopeModule.setExternal(false);
+        Path commonsPath = Paths.get("commons");
+        TSModule jsonScopeModule = new TSModule("jsonScope", commonsPath, true);
         jsonScope = new TSClass("JsonScope", jsonScopeModule);
 
-        TSModule jsonScopedSerializerModule = new TSModule("jsonScopedSerializer");
-        jsonScopedSerializerModule.setExternal(false);
+        TSModule jsonScopedSerializerModule = new TSModule("jsonScopedSerializer", commonsPath, true);
         jsonScopedSerializer = new TSClass("JsonScopedSerializer", jsonScopedSerializerModule);
 
-        TSModule bvJsonParserModule = new TSModule("jsonParser");
-        bvJsonParserModule.setExternal(false);
+        TSModule bvJsonParserModule = new TSModule("jsonParser", commonsPath, true);
         jsonParser = new TSClass("BvJsonParser", bvJsonParserModule);
 
     }
@@ -316,36 +310,34 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
     }
 
     private void createUrlService(GenerationContext generationContext, Map<String, TSModule> tsModuleMap){
-        String urlServiceName = "services/url-service";
-        TSModule urlServiceModule = new TSModule(urlServiceName, false);
-        TSClass urlService = new TSClass("UrlService", urlServiceModule);
-        urlService.addTsMethod(
+        urlServiceClass.addTsMethod(
                 new TSMethod("getBackendUrl",
-                        urlService,
+                        urlServiceClass,
                         TypeMapper.tsString,
                         false,
                         false)
         );
-        urlService.addTsMethod(
+        urlServiceClass.addTsMethod(
                 new TSMethod("constructor",
-                        urlService,
+                        urlServiceClass,
                         null,
                         false,
                         true)
         );
-        addComplexTypeUsage(urlService);
-        urlServiceModule.addScopedType(urlService);
-        tsModuleMap.put(urlServiceName, urlServiceModule);
-        generationContext.addImplementationGenerator(urlService, new UrlServiceImplementationGenerator());
+
+        addComplexTypeUsage(urlServiceClass);
+        TSModule module = urlServiceClass.getModule();
+        module.addScopedType(urlServiceClass);
+        tsModuleMap.put(urlServiceClass.getName(), module);
+        generationContext.addImplementationGenerator(urlServiceClass, new UrlServiceImplementationGenerator());
     }
 
     private void createErrorHandlerService(GenerationContext generationContext, Map<String, TSModule> tsModuleMap){
-        TSModule errorHandlerModule = new TSModule("services/error-handler", false);
 
-        TSModule httpModule = new TSModule("@angular/http", true);
+        TSModule httpModule = new TSModule("@angular/http", null, true);
         TSClass responseClass = new TSClass("Response", httpModule);
 
-        TSClass handlerCondition = new TSClass("HandlerCondition", errorHandlerModule, true);
+        TSClass handlerCondition = new TSClass("HandlerCondition", errorHandlerServiceClass.getModule(), true);
         TSMethod isMet = new TSMethod(
                 "isMetForGivenResponse",
                 handlerCondition,
@@ -356,7 +348,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         isMet.getParameterList().add(new TSParameter("response", responseClass));
         handlerCondition.addTsMethod(isMet);
 
-        TSClass simpleErrorHandlerClass = new TSClass("SimpleErrorHandler", errorHandlerModule);
+        TSClass simpleErrorHandlerClass = new TSClass("SimpleErrorHandler", errorHandlerServiceClass.getModule());
         simpleErrorHandlerClass.addTsField(
                 new TSField(
                         "condition",
@@ -391,18 +383,17 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         handleError.getParameterList().add(new TSParameter("response", responseClass));
         simpleErrorHandlerClass.addTsMethod(handleError);
 
-        TSClass defaultErrorHandlerService = new TSClass("DefaultErrorHandlerService", errorHandlerModule);
-        defaultErrorHandlerService.addTsField(
+        errorHandlerServiceClass.addTsField(
                 new TSField(
                         "handlers",
-                        defaultErrorHandlerService,
+                        errorHandlerServiceClass,
                         new TSArray(simpleErrorHandlerClass)
                 )
         );
-        defaultErrorHandlerService.addTsMethod(
+        errorHandlerServiceClass.addTsMethod(
                 new TSMethod(
                         "constructor",
-                        defaultErrorHandlerService,
+                        errorHandlerServiceClass,
                         null,
                         false,
                         true
@@ -416,7 +407,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 false
         );
         handleErrors.getParameterList().add(new TSParameter("response", responseClass));
-        defaultErrorHandlerService.addTsMethod(handleErrors);
+        errorHandlerServiceClass.addTsMethod(handleErrors);
         TSMethod addHandler = new TSMethod(
                 "addHandler",
                 simpleErrorHandlerClass,
@@ -425,15 +416,16 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 false
         );
         addHandler.getParameterList().add(new TSParameter("errorHandlerModule", simpleErrorHandlerClass));
-        defaultErrorHandlerService.addTsMethod(addHandler);
+        errorHandlerServiceClass.addTsMethod(addHandler);
 
+        TSModule errorHandlerModule = errorHandlerServiceClass.getModule();
         errorHandlerModule.scopedTypeUsage(responseClass);
         errorHandlerModule.addScopedType(handlerCondition);
         errorHandlerModule.addScopedType(simpleErrorHandlerClass);
-        errorHandlerModule.addScopedType(defaultErrorHandlerService);
+        errorHandlerModule.addScopedType(errorHandlerServiceClass);
 
-        addComplexTypeUsage(defaultErrorHandlerService);
-        tsModuleMap.put("error-handler", errorHandlerModule);
+        addComplexTypeUsage(errorHandlerServiceClass);
+        tsModuleMap.put(errorHandlerModule.getName(), errorHandlerModule);
         generationContext.addImplementationGenerator(simpleErrorHandlerClass, new ErrorHandlerServiceImplementationGenerator());
     }
 }

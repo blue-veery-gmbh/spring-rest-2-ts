@@ -13,8 +13,7 @@ public class ErrorHandlerServiceImplementationGenerator implements Implementatio
     private TSDecorator injectDecorator;
 
     public ErrorHandlerServiceImplementationGenerator() {
-        TSModule angularCoreModule = new TSModule("@angular/core");
-        angularCoreModule.setExternal(true);
+        TSModule angularCoreModule = new TSModule("@angular/core", null,true);
         injectableDecorator = new TSDecorator("", new TSFunction("Injectable", angularCoreModule));
         injectDecorator = new TSDecorator("", new TSFunction("Inject", angularCoreModule));
         injectDecorator.getTsLiteralList().add(new TSLiteral("", TypeMapper.tsString, "BACKEND_URL"));
