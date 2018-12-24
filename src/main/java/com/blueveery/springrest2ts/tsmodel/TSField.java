@@ -10,6 +10,7 @@ import java.io.IOException;
  */
 public class TSField extends TSComplexTypeMember {
     private boolean optional;
+    private boolean readOnly;
 
     public TSField(String name, TSComplexType owner, TSType type) {
         super(name, owner, type);
@@ -24,8 +25,19 @@ public class TSField extends TSComplexTypeMember {
         this.optional = optional;
     }
 
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+    }
+
+    public boolean getReadOnly() {
+        return readOnly;
+    }
+
     @Override
     public void write(GenerationContext generationContext, BufferedWriter writer) throws IOException {
+        if(readOnly){
+            writer.write("readonly ");
+        }
         writer.write(getName());
         TSType type = getType();
         if(type != null) {

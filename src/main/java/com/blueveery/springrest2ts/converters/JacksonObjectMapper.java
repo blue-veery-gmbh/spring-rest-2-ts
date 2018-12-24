@@ -3,10 +3,7 @@ package com.blueveery.springrest2ts.converters;
 import com.blueveery.springrest2ts.tsmodel.TSComplexType;
 import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.blueveery.springrest2ts.tsmodel.TSType;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
@@ -73,8 +70,20 @@ public class JacksonObjectMapper implements ObjectMapper {
         List<TSField> tsFieldList = new ArrayList<>();
         TSType fieldType = TypeMapper.map(field.getGenericType());
         TSField tsField = new TSField(field.getName(), tsComplexType, fieldType);
+        applyJsonProperty(tsField, field.getDeclaredAnnotation(JsonProperty.class));
         tsFieldList.add(tsField);
         return tsFieldList;
+    }
+
+    private void applyJsonProperty(TSField tsField, JsonProperty jsonProperty) {
+        if(jsonProperty != null){
+            if(!JsonProperty.USE_DEFAULT_NAME.equals(jsonProperty.value())){
+                tsField.setName(jsonProperty.value());
+            }
+            if(jsonProperty.access() == JsonProperty.Access.READ_ONLY){
+                tsField.setReadOnly(true);
+            }
+        }
     }
 
     @Override
