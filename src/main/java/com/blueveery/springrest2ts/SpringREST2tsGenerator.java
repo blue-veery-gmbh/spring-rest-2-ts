@@ -3,6 +3,7 @@ package com.blueveery.springrest2ts;
 import com.blueveery.springrest2ts.converters.*;
 import com.blueveery.springrest2ts.filters.JavaTypeFilter;
 import com.blueveery.springrest2ts.tsmodel.*;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ConfigurationBuilder;
@@ -64,7 +65,7 @@ public class SpringREST2tsGenerator {
         convertModules(restClasses, moduleConverter);
 
         convertTypes(enumClasses, moduleConverter, new EnumConverter());
-        convertTypes(modelClasses, moduleConverter, new ModelClassToTsConverter());
+        convertTypes(modelClasses, moduleConverter, new ModelClassToTsConverter(new JacksonObjectMapper(JsonAutoDetect.Visibility.ANY, JsonAutoDetect.Visibility.NONE, JsonAutoDetect.Visibility.NONE)));
         convertTypes(restClasses, moduleConverter, new SpringRestToTsConverter());
 
         writeTypeScriptTypes(moduleConverter.getTsModules(), generationContext, outputDir);
