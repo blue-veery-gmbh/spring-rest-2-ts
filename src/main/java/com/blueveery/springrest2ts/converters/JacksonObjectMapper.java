@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.tsmodel.TSArray;
 import com.blueveery.springrest2ts.tsmodel.TSComplexType;
 import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.blueveery.springrest2ts.tsmodel.TSType;
@@ -73,13 +74,39 @@ public class JacksonObjectMapper implements ObjectMapper {
         TSType fieldType = TypeMapper.map(fieldJavaType);
         TSField tsField = new TSField(field.getName(), tsComplexType, fieldType);
         applyJsonProperty(tsField, field.getDeclaredAnnotation(JsonProperty.class));
-        if(applyJsonIgnoreProperties(field.getDeclaringClass(), tsField)) {
+        if(applyJsonIgnoreProperties(tsField, field.getDeclaringClass())) {
+            applyJsonFormat(tsField, field.getDeclaredAnnotation(JsonFormat.class));
             tsFieldList.add(tsField);
         }
         return tsFieldList;
     }
 
-    private boolean applyJsonIgnoreProperties(Class<?> declaringClass, TSField tsField) {
+    private void applyJsonFormat(TSField tsField, JsonFormat jsonFormat) {
+        if (jsonFormat != null) {
+            switch (jsonFormat.shape()) {
+                case ANY: tsField.setType(TypeMapper.tsAny);
+                    return;
+                case SCALAR: tsField.setType(TypeMapper.tsAny);
+                    return;
+                case ARRAY: tsField.setType(new TSArray(TypeMapper.tsAny));
+                    return;
+                case OBJECT: tsField.setType(TypeMapper.tsAny);
+                    return;
+                case NUMBER: tsField.setType(TypeMapper.tsNumber);
+                    return;
+                case NUMBER_FLOAT: tsField.setType(TypeMapper.tsNumber);
+                    return;
+                case NUMBER_INT: tsField.setType(TypeMapper.tsNumber);
+                    return;
+                case STRING: tsField.setType(TypeMapper.tsString);
+                    return;
+                case BOOLEAN: tsField.setType(TypeMapper.tsBoolean);
+                    return;
+            }
+        }
+    }
+
+    private boolean applyJsonIgnoreProperties(TSField tsField, Class<?> declaringClass) {
         List<JsonIgnoreProperties> jsonIgnorePropertiesList = discoverJsonIgnoreProperties(declaringClass);
         for (JsonIgnoreProperties jsonIgnoreProperties : jsonIgnorePropertiesList) {
             for (String propertyName : jsonIgnoreProperties.value()) {

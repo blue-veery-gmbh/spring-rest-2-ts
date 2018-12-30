@@ -36,4 +36,8 @@ public abstract class TSComplexTypeMember extends TSElement implements IAnnotate
     public TSType getType() {
         return type;
     }
+
+    public void setType(TSType type) {
+        this.type = type;
+    }
 }
