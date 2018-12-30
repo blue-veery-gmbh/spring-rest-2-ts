@@ -37,7 +37,7 @@ public class TypeMapper {
         if(void.class == javaType){
             return tsVoid;
         }
-        if(String.class == javaType || char.class ==javaType || Character.class == javaType){
+        if(String.class == javaType || char.class == javaType || Character.class == javaType){
             return tsString;
         }
         if(boolean.class == javaType || Boolean.class == javaType){
