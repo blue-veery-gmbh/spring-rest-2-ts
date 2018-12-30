@@ -7,12 +7,15 @@ import com.fasterxml.jackson.annotation.*;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class JacksonObjectMapper implements ObjectMapper {
     JsonAutoDetect.Visibility fieldsVisibility = JsonAutoDetect.Visibility.NONE;
     JsonAutoDetect.Visibility gettersVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY;
     JsonAutoDetect.Visibility isGetterVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY;
+    private final Map<Class, List<JsonIgnoreProperties>> jsonIgnorePropertiesPerClass = new HashMap<>();
 
     public JacksonObjectMapper() {
     }
@@ -70,8 +73,60 @@ public class JacksonObjectMapper implements ObjectMapper {
         TSType fieldType = TypeMapper.map(fieldJavaType);
         TSField tsField = new TSField(field.getName(), tsComplexType, fieldType);
         applyJsonProperty(tsField, field.getDeclaredAnnotation(JsonProperty.class));
-        tsFieldList.add(tsField);
+        if(applyJsonIgnoreProperties(field.getDeclaringClass(), tsField)) {
+            tsFieldList.add(tsField);
+        }
         return tsFieldList;
+    }
+
+    private boolean applyJsonIgnoreProperties(Class<?> declaringClass, TSField tsField) {
+        List<JsonIgnoreProperties> jsonIgnorePropertiesList = discoverJsonIgnoreProperties(declaringClass);
+        for (JsonIgnoreProperties jsonIgnoreProperties : jsonIgnorePropertiesList) {
+            for (String propertyName : jsonIgnoreProperties.value()) {
+                if(propertyName.trim().equals(tsField.getName())){
+                    if (jsonIgnoreProperties.allowGetters()) {
+                        tsField.setReadOnly(true);
+                        return true;
+                    }
+                    if (jsonIgnoreProperties.allowSetters()) {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private List<JsonIgnoreProperties> discoverJsonIgnoreProperties(Class<?> declaringClass) {
+        if(!jsonIgnorePropertiesPerClass.containsKey(declaringClass)) {
+            List<JsonIgnoreProperties> jsonIgnorePropertiesList = new ArrayList<>();
+            JsonIgnoreProperties jsonIgnoreProperties = declaringClass.getAnnotation(JsonIgnoreProperties.class);
+            if (jsonIgnoreProperties != null) {
+                jsonIgnorePropertiesList.add(jsonIgnoreProperties);
+            }
+            for (Field field : declaringClass.getDeclaredFields()) {
+                jsonIgnoreProperties = field.getAnnotation(JsonIgnoreProperties.class);
+                if (jsonIgnoreProperties != null) {
+                    jsonIgnorePropertiesList.add(jsonIgnoreProperties);
+                }
+            }
+            for (Constructor<?> constructor : declaringClass.getDeclaredConstructors()) {
+                jsonIgnoreProperties = constructor.getAnnotation(JsonIgnoreProperties.class);
+                if (jsonIgnoreProperties != null) {
+                    jsonIgnorePropertiesList.add(jsonIgnoreProperties);
+                }
+            }
+            for (Method method : declaringClass.getDeclaredMethods()) {
+                jsonIgnoreProperties = method.getAnnotation(JsonIgnoreProperties.class);
+                if (jsonIgnoreProperties != null) {
+                    jsonIgnorePropertiesList.add(jsonIgnoreProperties);
+                }
+            }
+
+            jsonIgnorePropertiesPerClass.put(declaringClass, jsonIgnorePropertiesList);
+        }
+        return jsonIgnorePropertiesPerClass.get(declaringClass);
     }
 
     private Type applyJsonValue(Type fieldJavaType) {
