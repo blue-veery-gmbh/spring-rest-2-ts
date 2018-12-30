@@ -5,10 +5,7 @@ import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.fasterxml.jackson.annotation.*;
 
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,11 +65,26 @@ public class JacksonObjectMapper implements ObjectMapper {
     @Override
     public List<TSField> mapToField(Field field, TSComplexType tsComplexType) {
         List<TSField> tsFieldList = new ArrayList<>();
-        TSType fieldType = TypeMapper.map(field.getGenericType());
+        Type fieldJavaType = field.getGenericType();
+        fieldJavaType = applyJsonValue(fieldJavaType);
+        TSType fieldType = TypeMapper.map(fieldJavaType);
         TSField tsField = new TSField(field.getName(), tsComplexType, fieldType);
         applyJsonProperty(tsField, field.getDeclaredAnnotation(JsonProperty.class));
         tsFieldList.add(tsField);
         return tsFieldList;
+    }
+
+    private Type applyJsonValue(Type fieldJavaType) {
+        if(fieldJavaType instanceof Class){
+            Class fieldClass = (Class) fieldJavaType;
+            for (Method method : fieldClass.getMethods()) {
+                JsonValue jsonValue = method.getDeclaredAnnotation(JsonValue.class);
+                if(jsonValue != null && jsonValue.value()){
+                    return method.getReturnType();
+                }
+            }
+        }
+        return fieldJavaType;
     }
 
     private void applyJsonProperty(TSField tsField, JsonProperty jsonProperty) {
@@ -83,6 +95,7 @@ public class JacksonObjectMapper implements ObjectMapper {
             if(jsonProperty.access() == JsonProperty.Access.READ_ONLY){
                 tsField.setReadOnly(true);
             }
+            tsField.setOptional(!jsonProperty.required());
         }
     }
 
