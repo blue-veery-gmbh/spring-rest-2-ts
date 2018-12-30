@@ -60,25 +60,36 @@ public class JacksonObjectMapper implements ObjectMapper {
         return true;
     }
 
-    private boolean containsIgnoreTypeAnnotation(Class<?> type) {
-        JsonIgnoreType jsonIgnoreType = type.getDeclaredAnnotation(JsonIgnoreType.class);
-        return jsonIgnoreType != null && jsonIgnoreType.value();
-    }
-
 
     @Override
     public List<TSField> mapToField(Field field, TSComplexType tsComplexType) {
         List<TSField> tsFieldList = new ArrayList<>();
         Type fieldJavaType = field.getGenericType();
         fieldJavaType = applyJsonValue(fieldJavaType);
-        TSType fieldType = TypeMapper.map(fieldJavaType);
-        TSField tsField = new TSField(field.getName(), tsComplexType, fieldType);
-        applyJsonProperty(tsField, field.getDeclaredAnnotation(JsonProperty.class));
-        if(applyJsonIgnoreProperties(tsField, field.getDeclaringClass())) {
-            applyJsonFormat(tsField, field.getDeclaredAnnotation(JsonFormat.class));
-            tsFieldList.add(tsField);
+        if(!applyJsonUnwrapped(fieldJavaType, field.getDeclaredAnnotation(JsonUnwrapped.class), tsFieldList)) {
+            TSType fieldType = TypeMapper.map(fieldJavaType);
+            TSField tsField = new TSField(field.getName(), tsComplexType, fieldType);
+            applyJsonProperty(tsField, field.getDeclaredAnnotation(JsonProperty.class));
+            if (!applyJsonIgnoreProperties(tsField, field.getDeclaringClass())) {
+                applyJsonFormat(tsField, field.getDeclaredAnnotation(JsonFormat.class));
+                tsFieldList.add(tsField);
+            }
         }
         return tsFieldList;
+    }
+
+    private boolean containsIgnoreTypeAnnotation(Class<?> type) {
+        JsonIgnoreType jsonIgnoreType = type.getDeclaredAnnotation(JsonIgnoreType.class);
+        return jsonIgnoreType != null && jsonIgnoreType.value();
+    }
+
+    private boolean applyJsonUnwrapped(Type fieldJavaType, JsonUnwrapped declaredAnnotation, List<TSField> tsFieldList) {
+        if (declaredAnnotation != null) {
+
+
+            return true;
+        }
+        return false;
     }
 
     private void applyJsonFormat(TSField tsField, JsonFormat jsonFormat) {
@@ -113,16 +124,16 @@ public class JacksonObjectMapper implements ObjectMapper {
                 if(propertyName.trim().equals(tsField.getName())){
                     if (jsonIgnoreProperties.allowGetters()) {
                         tsField.setReadOnly(true);
-                        return true;
+                        return false;
                     }
                     if (jsonIgnoreProperties.allowSetters()) {
-                        return true;
+                        return false;
                     }
-                    return false;
+                    return true;
                 }
             }
         }
-        return true;
+        return false;
     }
 
     private List<JsonIgnoreProperties> discoverJsonIgnoreProperties(Class<?> declaringClass) {
