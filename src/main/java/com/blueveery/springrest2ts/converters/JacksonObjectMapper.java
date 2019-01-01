@@ -57,6 +57,11 @@ public class JacksonObjectMapper implements ObjectMapper {
             return false;
         }
 
+        JsonBackReference jsonBackReference = ((AccessibleObject) member).getDeclaredAnnotation(JsonBackReference.class);
+        if (jsonBackReference != null) {
+            return false;
+        }
+
         return true;
     }
 
@@ -81,7 +86,7 @@ public class JacksonObjectMapper implements ObjectMapper {
     }
 
     private void applyJsonRawValue(TSField tsField, JsonRawValue jsonRawValue){
-        if (jsonRawValue != null) {
+        if (jsonRawValue != null && jsonRawValue.value()) {
             tsField.setType(TypeMapper.tsAny);
         }
     }
