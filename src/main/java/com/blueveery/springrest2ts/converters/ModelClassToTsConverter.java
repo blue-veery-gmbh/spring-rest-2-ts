@@ -14,9 +14,11 @@ import java.util.Optional;
  */
 public class ModelClassToTsConverter extends ComplexTypeConverter {
     private ObjectMapper objectMapper;
+    private GenerationContext generationContext;
 
-    public ModelClassToTsConverter(ObjectMapper objectMapper) {
+    public ModelClassToTsConverter(ObjectMapper objectMapper, GenerationContext generationContext) {
         this.objectMapper = objectMapper;
+        this.generationContext = generationContext;
     }
 
     public void preConvert(ModuleConverter moduleConverter, Class javaClass){
@@ -29,38 +31,41 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
 
     }
     @Override
-    public void convert(ModuleConverter moduleConverter, GenerationContext generationContext, Class javaType) {
-        TSInterface tsInterface = (TSInterface) TypeMapper.map(javaType);
-        if(javaType.getSuperclass() != Object.class) {
-            TSType superClass = TypeMapper.map(javaType.getSuperclass());
-            if (superClass != TypeMapper.tsAny) {
-                tsInterface.addExtendsInterfaces((TSInterface) superClass);
-            }
-        }
-
-        objectMapper.addTypeLevelSpecificFields(javaType, tsInterface);
-
-
-        for(Field field:javaType.getDeclaredFields()){
-            if(!Modifier.isTransient(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())){
-                if(objectMapper.filter(field, tsInterface)) {
-                    List<TSField> tsFieldList = objectMapper.mapToField(field, tsInterface);
-                    if(tsFieldList.size() == 1){
-                        applyOptionalBaseOnType(field.getType(), tsFieldList.get(0));
-                    }
-                    tsFieldList.forEach(tsField -> tsInterface.addTsField(tsField));
+    public void convert(Class javaClass) {
+        TSInterface tsInterface = (TSInterface) TypeMapper.map(javaClass);
+        if (!tsInterface.isConverted()) {
+            tsInterface.setConverted(true);
+            if(javaClass.getSuperclass() != Object.class) {
+                TSType superClass = TypeMapper.map(javaClass.getSuperclass());
+                if (superClass != TypeMapper.tsAny) {
+                    tsInterface.addExtendsInterfaces((TSInterface) superClass);
                 }
             }
-        }
 
-        for(Method method:javaType.getDeclaredMethods()){
-            if(!Modifier.isStatic(method.getModifiers()) && isGetter(method)){
-                if(objectMapper.filter(method, tsInterface)) {
-                    List<TSField> tsFieldList = objectMapper.mapToField(method, tsInterface);
-                    if(tsFieldList.size() == 1){
-                        applyOptionalBaseOnType(method.getReturnType(), tsFieldList.get(0));
+            objectMapper.addTypeLevelSpecificFields(javaClass, tsInterface);
+
+
+            for(Field field: javaClass.getDeclaredFields()){
+                if(!Modifier.isTransient(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())){
+                    if(objectMapper.filter(field, tsInterface)) {
+                        List<TSField> tsFieldList = objectMapper.mapToField(field, tsInterface, this);
+                        if(tsFieldList.size() == 1){
+                            applyOptionalBaseOnType(field.getType(), tsFieldList.get(0));
+                        }
+                        tsFieldList.forEach(tsField -> tsInterface.addTsField(tsField));
                     }
-                    tsFieldList.forEach(tsField -> tsInterface.addTsField(tsField));
+                }
+            }
+
+            for(Method method: javaClass.getDeclaredMethods()){
+                if(!Modifier.isStatic(method.getModifiers()) && isGetter(method)){
+                    if(objectMapper.filter(method, tsInterface)) {
+                        List<TSField> tsFieldList = objectMapper.mapToField(method, tsInterface, this);
+                        if(tsFieldList.size() == 1){
+                            applyOptionalBaseOnType(method.getReturnType(), tsFieldList.get(0));
+                        }
+                        tsFieldList.forEach(tsField -> tsInterface.addTsField(tsField));
+                    }
                 }
             }
         }

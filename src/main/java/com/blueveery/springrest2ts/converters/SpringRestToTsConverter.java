@@ -14,6 +14,11 @@ import java.util.List;
 import java.util.Map;
 
 public class SpringRestToTsConverter extends ComplexTypeConverter{
+    private GenerationContext generationContext;
+
+    public SpringRestToTsConverter(GenerationContext generationContext) {
+        this.generationContext = generationContext;
+    }
 
     public void preConvert(ModuleConverter moduleConverter, Class javaClass){
         if(TypeMapper.map(javaClass) == TypeMapper.tsAny && !javaClass.isInterface()){
@@ -27,21 +32,21 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
     }
 
     @Override
-    public void convert(ModuleConverter moduleConverter, GenerationContext generationContext, Class javaType) {
-        TSClass tsClass = (TSClass) TypeMapper.map(javaType);
+    public void convert(Class javaClass) {
+        TSClass tsClass = (TSClass) TypeMapper.map(javaClass);
 
-        setSupperClass(javaType, tsClass);
-        tsClass.getAnnotationList().add(javaType.getAnnotation(RequestMapping.class));
+        setSupperClass(javaClass, tsClass);
+        tsClass.getAnnotationList().add(javaClass.getAnnotation(RequestMapping.class));
 
         Map<String, TSType> typeParametersMap = new HashMap<>();
-        typeParametersMap.putAll(createTypeParametersMap(javaType.getGenericInterfaces()));
-        typeParametersMap.putAll(createTypeParametersMap(javaType.getGenericSuperclass()));
+        typeParametersMap.putAll(createTypeParametersMap(javaClass.getGenericInterfaces()));
+        typeParametersMap.putAll(createTypeParametersMap(javaClass.getGenericSuperclass()));
 
         TSMethod tsConstructorMethod = new TSMethod("constructor", tsClass, null, false, true);
         tsClass.addTsMethod(tsConstructorMethod);
 
-        for (Method method:javaType.getMethods()) {
-            if(method.getDeclaringClass() == javaType || method.getDeclaringClass().isInterface()){
+        for (Method method: javaClass.getMethods()) {
+            if(method.getDeclaringClass() == javaClass || method.getDeclaringClass().isInterface()){
                 if(isRestMethod(method)){
                     TSType fallbackTSType = TypeMapper.tsAny;
                     if(typeParametersMap.get(method.getDeclaringClass().getName()) != null){

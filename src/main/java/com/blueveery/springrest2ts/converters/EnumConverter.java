@@ -20,7 +20,7 @@ public class EnumConverter extends ComplexTypeConverter {
     }
 
     @Override
-    public void convert(ModuleConverter moduleConverter, GenerationContext generationContext, Class javaClass) {
+    public void convert(Class javaClass) {
         TSEnum tsEnum = (TSEnum) TypeMapper.map(javaClass);
         for(Object enumConstant:javaClass.getEnumConstants()){
             tsEnum.getTsEnumConstantList().add(new TSEnumConstant(enumConstant.toString()));

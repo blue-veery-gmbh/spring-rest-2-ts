@@ -7,5 +7,5 @@ import com.blueveery.springrest2ts.GenerationContext;
  */
 public abstract class ComplexTypeConverter {
     public abstract void preConvert(ModuleConverter moduleConverter, Class javaClass);
-    public abstract void convert(ModuleConverter moduleConverter, GenerationContext generationContext, Class aClass);
+    public abstract void convert(Class javaClass);
 }

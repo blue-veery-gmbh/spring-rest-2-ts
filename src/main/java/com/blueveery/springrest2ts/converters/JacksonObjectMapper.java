@@ -62,11 +62,11 @@ public class JacksonObjectMapper implements ObjectMapper {
 
 
     @Override
-    public List<TSField> mapToField(Field field, TSComplexType tsComplexType) {
+    public List<TSField> mapToField(Field field, TSComplexType tsComplexType, ComplexTypeConverter complexTypeConverter) {
         List<TSField> tsFieldList = new ArrayList<>();
         Type fieldJavaType = field.getGenericType();
         fieldJavaType = applyJsonValue(fieldJavaType);
-        if(!applyJsonUnwrapped(fieldJavaType, field.getDeclaredAnnotation(JsonUnwrapped.class), tsFieldList)) {
+        if(!applyJsonUnwrapped((Class) fieldJavaType, field.getDeclaredAnnotation(JsonUnwrapped.class), tsComplexType, tsFieldList, complexTypeConverter)) {
             TSType fieldType = TypeMapper.map(fieldJavaType);
             TSField tsField = new TSField(field.getName(), tsComplexType, fieldType);
             applyJsonProperty(tsField, field.getDeclaredAnnotation(JsonProperty.class));
@@ -83,10 +83,19 @@ public class JacksonObjectMapper implements ObjectMapper {
         return jsonIgnoreType != null && jsonIgnoreType.value();
     }
 
-    private boolean applyJsonUnwrapped(Type fieldJavaType, JsonUnwrapped declaredAnnotation, List<TSField> tsFieldList) {
+    private boolean applyJsonUnwrapped(Class fieldJavaType, JsonUnwrapped declaredAnnotation, TSComplexType tsComplexType, List<TSField> tsFieldList, ComplexTypeConverter complexTypeConverter) {
         if (declaredAnnotation != null) {
-
-
+            TSType tsType = TypeMapper.map(fieldJavaType);
+            if(!(tsType instanceof TSComplexType)){
+                return false;
+            }
+            TSComplexType referredTsType = (TSComplexType) tsType;
+            if(!referredTsType.isConverted()){
+                complexTypeConverter.convert(fieldJavaType);
+            }
+            for (TSField nextTsField : referredTsType.getTsFields()) {
+                tsFieldList.add(new TSField(nextTsField.getName(), tsComplexType, nextTsField.getType()));
+            }
             return true;
         }
         return false;
@@ -193,7 +202,7 @@ public class JacksonObjectMapper implements ObjectMapper {
     }
 
     @Override
-    public List<TSField> mapToField(Method method, TSComplexType tsComplexType) {
+    public List<TSField> mapToField(Method method, TSComplexType tsComplexType, ComplexTypeConverter complexTypeConverter) {
         List<TSField> tsFieldList = new ArrayList<>();
         return tsFieldList;
     }

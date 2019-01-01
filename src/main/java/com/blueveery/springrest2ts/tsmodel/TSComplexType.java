@@ -21,6 +21,7 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
     private List<TSDecorator> tsDecoratorList = new ArrayList<>();
 
     private List<Annotation> annotationList = new ArrayList<>();
+    private boolean converted;
 
     public TSComplexType(String name, TSModule module) {
         super(name, module);
@@ -91,5 +92,13 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
                 writer.newLine();
             }
         }
+    }
+
+    public boolean isConverted() {
+        return converted;
+    }
+
+    public void setConverted(boolean converted) {
+        this.converted = converted;
     }
 }
