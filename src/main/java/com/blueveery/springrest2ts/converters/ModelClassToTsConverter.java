@@ -42,9 +42,6 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
                 }
             }
 
-            objectMapper.addTypeLevelSpecificFields(javaClass, tsInterface);
-
-
             for(Field field: javaClass.getDeclaredFields()){
                 if(!Modifier.isTransient(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())){
                     if(objectMapper.filter(field, tsInterface)) {
@@ -68,6 +65,8 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
                     }
                 }
             }
+
+            objectMapper.addTypeLevelSpecificFields(javaClass, tsInterface);
         }
 
     }

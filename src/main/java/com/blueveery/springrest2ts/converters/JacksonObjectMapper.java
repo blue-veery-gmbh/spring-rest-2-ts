@@ -231,13 +231,21 @@ public class JacksonObjectMapper implements ObjectMapper {
         JsonTypeInfo jsonTypeInfoAnnotation = (JsonTypeInfo) javaType.getAnnotation(JsonTypeInfo.class);
         if(jsonTypeInfoAnnotation!=null){
             switch(jsonTypeInfoAnnotation.include()){
-
                 case PROPERTY:
-                case WRAPPER_OBJECT:
-                case WRAPPER_ARRAY:
-                    TSField tsField = new TSField(jsonTypeInfoAnnotation.property(), tsComplexType, TypeMapper.map(String.class));
+                    String propertyName = jsonTypeInfoAnnotation.property();
+                    if("".equals(propertyName)){
+                        propertyName = jsonTypeInfoAnnotation.use().toString();
+                    }
+                    for (TSField tsField : tsComplexType.getTsFields()) {
+                        if (propertyName.equals(tsField.getName())) {
+                            return;
+                        }
+                    }
+                    TSField tsField = new TSField(propertyName, tsComplexType, TypeMapper.tsString);
                     tsComplexType.addTsField(tsField);
                     break;
+                case WRAPPER_OBJECT:
+                case WRAPPER_ARRAY:
                 case EXTERNAL_PROPERTY:
                 case EXISTING_PROPERTY:
                     break;
