@@ -69,13 +69,20 @@ public class JacksonObjectMapper implements ObjectMapper {
         if(!applyJsonUnwrapped((Class) fieldJavaType, field.getDeclaredAnnotation(JsonUnwrapped.class), tsComplexType, tsFieldList, complexTypeConverter)) {
             TSType fieldType = TypeMapper.map(fieldJavaType);
             TSField tsField = new TSField(field.getName(), tsComplexType, fieldType);
-            applyJsonProperty(tsField, field.getDeclaredAnnotation(JsonProperty.class));
             if (!applyJsonIgnoreProperties(tsField, field.getDeclaringClass())) {
+                applyJsonProperty(tsField, field.getDeclaredAnnotation(JsonProperty.class));
                 applyJsonFormat(tsField, field.getDeclaredAnnotation(JsonFormat.class));
+                applyJacksonInject(tsField, field.getDeclaredAnnotation(JacksonInject.class));
                 tsFieldList.add(tsField);
             }
         }
         return tsFieldList;
+    }
+
+    private void applyJacksonInject(TSField tsField, JacksonInject jacksonInject) {
+        if (jacksonInject != null) {
+            tsField.setReadOnly(true);
+        }
     }
 
     private boolean containsIgnoreTypeAnnotation(Class<?> type) {
