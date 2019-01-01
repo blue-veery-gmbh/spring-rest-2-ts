@@ -73,10 +73,17 @@ public class JacksonObjectMapper implements ObjectMapper {
                 applyJsonProperty(tsField, field.getDeclaredAnnotation(JsonProperty.class));
                 applyJsonFormat(tsField, field.getDeclaredAnnotation(JsonFormat.class));
                 applyJacksonInject(tsField, field.getDeclaredAnnotation(JacksonInject.class));
+                applyJsonRawValue(tsField, field.getDeclaredAnnotation(JsonRawValue.class));
                 tsFieldList.add(tsField);
             }
         }
         return tsFieldList;
+    }
+
+    private void applyJsonRawValue(TSField tsField, JsonRawValue jsonRawValue){
+        if (jsonRawValue != null) {
+            tsField.setType(TypeMapper.tsAny);
+        }
     }
 
     private void applyJacksonInject(TSField tsField, JacksonInject jacksonInject) {
