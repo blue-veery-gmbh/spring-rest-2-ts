@@ -71,7 +71,7 @@ public class JacksonObjectMapper implements ObjectMapper {
         List<TSField> tsFieldList = new ArrayList<>();
         Type fieldJavaType = field.getGenericType();
         fieldJavaType = applyJsonValue(fieldJavaType);
-        if(!applyJsonUnwrapped((Class) fieldJavaType, field.getDeclaredAnnotation(JsonUnwrapped.class), tsComplexType, tsFieldList, complexTypeConverter)) {
+        if(!applyJsonUnwrapped(fieldJavaType, field.getDeclaredAnnotation(JsonUnwrapped.class), tsComplexType, tsFieldList, complexTypeConverter)) {
             TSType fieldType = TypeMapper.map(fieldJavaType);
             TSField tsField = new TSField(field.getName(), tsComplexType, fieldType);
             if (!applyJsonIgnoreProperties(tsField, field.getDeclaringClass())) {
@@ -102,7 +102,7 @@ public class JacksonObjectMapper implements ObjectMapper {
         return jsonIgnoreType != null && jsonIgnoreType.value();
     }
 
-    private boolean applyJsonUnwrapped(Class fieldJavaType, JsonUnwrapped declaredAnnotation, TSComplexType tsComplexType, List<TSField> tsFieldList, ComplexTypeConverter complexTypeConverter) {
+    private boolean applyJsonUnwrapped(Type fieldJavaType, JsonUnwrapped declaredAnnotation, TSComplexType tsComplexType, List<TSField> tsFieldList, ComplexTypeConverter complexTypeConverter) {
         if (declaredAnnotation != null) {
             TSType tsType = TypeMapper.map(fieldJavaType);
             if(!(tsType instanceof TSComplexType)){
@@ -110,7 +110,7 @@ public class JacksonObjectMapper implements ObjectMapper {
             }
             TSComplexType referredTsType = (TSComplexType) tsType;
             if(!referredTsType.isConverted()){
-                complexTypeConverter.convert(fieldJavaType);
+                complexTypeConverter.convert((Class) fieldJavaType);
             }
             for (TSField nextTsField : referredTsType.getTsFields()) {
                 tsFieldList.add(new TSField(nextTsField.getName(), tsComplexType, nextTsField.getType()));

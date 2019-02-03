@@ -8,4 +8,5 @@ import java.util.List;
 public class OrderDTO extends BaseDTO {
     List<ProductDTO> productList = new ArrayList<>();
     Address deliveryAddress;
+    PersonDTO buyer;
 }

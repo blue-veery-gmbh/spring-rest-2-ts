@@ -117,14 +117,16 @@ public class SpringREST2tsGenerator {
 
         Set<Class<?>> packageClassesSet = reflections.getSubTypesOf(Object.class);
         for (Class packageClass : packageClassesSet) {
-            if (javaTypeFilter.filter(packageClass)) {
+            if (javaTypeFilter.filter(packageClass) && packagesNames.contains(packageClass.getPackage().getName())) {
                 classesSet.add(packageClass);
             }
         }
 
         Set<Class<? extends Enum>> packageEnumsSet = reflections.getSubTypesOf(Enum.class);
         for (Class packageEnumClass : packageEnumsSet) {
-            enumClasses.add(packageEnumClass);
+            if (packagesNames.contains(packageEnumClass.getPackage().getName())) {
+                enumClasses.add(packageEnumClass);
+            }
         }
     }
 }
