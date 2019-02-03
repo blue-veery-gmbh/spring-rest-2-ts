@@ -42,7 +42,7 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
 
     public void addTsMethod(TSMethod tsMethod) {
         addScopedTypeUsage(tsMethod.getType());
-        tsMethod.getParameterList().forEach(p -> addScopedTypeUsage(p.getTsType()));
+        tsMethod.getParameterList().forEach(p -> addScopedTypeUsage(p.getType()));
         tsMethods.add(tsMethod);
     }
 

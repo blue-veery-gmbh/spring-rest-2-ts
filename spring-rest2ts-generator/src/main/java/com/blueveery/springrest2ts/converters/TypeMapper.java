@@ -19,6 +19,8 @@ public class TypeMapper {
     public static TSType tsDate  = new TSSimpleType("Date");
     public static TSType tsObject  = new TSSimpleType("Object");
     public static TSType tsAny = new TSSimpleType("any");
+    public static TSType tsNull = new TSSimpleType("null");
+    public static TSType tsUndefined = new TSSimpleType("undefined");
 
     private static Map<Class, TSType> complexTypeMap = new HashMap<>();
 

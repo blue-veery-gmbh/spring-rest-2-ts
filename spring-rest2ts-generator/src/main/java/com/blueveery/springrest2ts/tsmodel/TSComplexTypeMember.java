@@ -1,5 +1,7 @@
 package com.blueveery.springrest2ts.tsmodel;
 
+import com.blueveery.springrest2ts.converters.TypeMapper;
+
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +9,7 @@ import java.util.List;
 /**
  * Created by tomaszw on 30.07.2017.
  */
-public abstract class TSComplexTypeMember extends TSElement implements IAnnotated, IDecorated{
+public abstract class TSComplexTypeMember extends TSElement implements INullableElement, IAnnotated, IDecorated{
     private TSComplexType owner;
     private TSType type;
     private List<TSDecorator> tsDecoratorList = new ArrayList<>();
@@ -33,10 +35,12 @@ public abstract class TSComplexTypeMember extends TSElement implements IAnnotate
         return owner;
     }
 
+    @Override
     public TSType getType() {
         return type;
     }
 
+    @Override
     public void setType(TSType type) {
         this.type = type;
     }
