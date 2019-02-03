@@ -59,6 +59,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
                         addRestAnnotations(parameter.getAnnotations(), tsParameter);
                         if (parameterIsMapped(tsParameter.getAnnotationList())) {
                             setOptional(tsParameter);
+                            setAsNullableType((Class) parameter.getParameterizedType(), parameter.getDeclaredAnnotations(), tsParameter);
                             tsMethod.getParameterList().add(tsParameter);
                         }
                     }

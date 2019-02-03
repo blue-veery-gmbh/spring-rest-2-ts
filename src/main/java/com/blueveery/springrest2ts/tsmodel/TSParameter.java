@@ -12,40 +12,42 @@ import java.util.List;
 /**
  * Created by tomaszw on 30.07.2017.
  */
-public class TSParameter extends TSElement implements IAnnotated, IDecorated {
-    private TSType tsType;
+public class TSParameter extends TSElement implements INullableElement, IAnnotated, IDecorated {
+    private TSType type;
     private String defaultValue; // mock default value
     private boolean optional;
     private List<TSDecorator> tsDecoratorList = new ArrayList<>();
     private List<Annotation> annotationList = new ArrayList<>();
 
-    public TSParameter(String name, TSType tsType) {
+    public TSParameter(String name, TSType type) {
         super(name);
-        this.tsType = tsType;
+        this.type = type;
         this.optional = false;
         this.defaultValue = null;
     }
 
-    public TSParameter(String name, TSType tsType, String defaultValue) {
+    public TSParameter(String name, TSType type, String defaultValue) {
         super(name);
-        this.tsType = tsType;
+        this.type = type;
         this.optional = true;
         this.defaultValue = defaultValue;
     }
 
-    public TSParameter(String name, TSType tsType, boolean optional, String defaultValue) {
+    public TSParameter(String name, TSType type, boolean optional, String defaultValue) {
         super(name);
-        this.tsType = tsType;
+        this.type = type;
         this.optional = optional;
         this.defaultValue = defaultValue;
     }
 
-    public TSType getTsType() {
-        return tsType;
+    @Override
+    public TSType getType() {
+        return type;
     }
 
-    public void setTsType(TSType tsType) {
-        this.tsType = tsType;
+    @Override
+    public void setType(TSType type) {
+        this.type = type;
     }
 
     public boolean isOptional() {
@@ -72,14 +74,14 @@ public class TSParameter extends TSElement implements IAnnotated, IDecorated {
             writer.write("?");
         }
         writer.write(": ");
-        if (tsType instanceof TSArrowFuncType) {
-            tsType.write(generationContext, writer);
+        if (type instanceof TSArrowFuncType) {
+            type.write(generationContext, writer);
         } else {
-            writer.write(tsType.getName());
+            writer.write(type.getName());
         }
         if (defaultValue != null) {
             writer.write(" = ");
-            boolean isStringType = TypeMapper.tsString.equals(tsType);
+            boolean isStringType = TypeMapper.tsString.equals(type);
             if(isStringType){
                 writer.write("\"");
             }

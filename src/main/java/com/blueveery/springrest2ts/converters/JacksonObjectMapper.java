@@ -216,7 +216,7 @@ public class JacksonObjectMapper implements ObjectMapper {
             if(jsonProperty.access() == JsonProperty.Access.READ_ONLY){
                 tsField.setReadOnly(true);
             }
-            tsField.setOptional(!jsonProperty.required());
+            tsField.setNullable(!jsonProperty.required());
         }
     }
 

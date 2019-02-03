@@ -3,6 +3,8 @@ package com.blueveery.springrest2ts.converters;
 import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.tsmodel.*;
 
+import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -47,7 +49,7 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
                     if(objectMapper.filter(field, tsInterface)) {
                         List<TSField> tsFieldList = objectMapper.mapToField(field, tsInterface, this);
                         if(tsFieldList.size() == 1){
-                            applyOptionalBaseOnType(field.getType(), tsFieldList.get(0));
+                            setAsNullableType(field.getType(), field.getDeclaredAnnotations(), tsFieldList.get(0));
                         }
                         tsFieldList.forEach(tsField -> tsInterface.addTsField(tsField));
                     }
@@ -59,7 +61,7 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
                     if(objectMapper.filter(method, tsInterface)) {
                         List<TSField> tsFieldList = objectMapper.mapToField(method, tsInterface, this);
                         if(tsFieldList.size() == 1){
-                            applyOptionalBaseOnType(method.getReturnType(), tsFieldList.get(0));
+                            setAsNullableType(method.getReturnType(), method.getDeclaredAnnotations(), tsFieldList.get(0));
                         }
                         tsFieldList.forEach(tsField -> tsInterface.addTsField(tsField));
                     }
@@ -82,24 +84,5 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
             return false;
         }
         return true;
-    }
-
-    private void applyOptionalBaseOnType(Class propertyType, TSField tsField) {
-        if(!tsField.isOptional()){
-            if(Optional.class == propertyType){
-                tsField.setOptional(true);
-                return;
-            }
-
-            if(Number.class.isAssignableFrom(propertyType)){
-                tsField.setOptional(true);
-                return;
-            }
-
-            if(Boolean.class == propertyType){
-                tsField.setOptional(true);
-                return;
-            }
-        }
     }
 }

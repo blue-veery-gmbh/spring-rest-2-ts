@@ -74,8 +74,6 @@ public class TSMethod extends TSComplexTypeMember {
         }else{
             writer.write(";");
         }
-
-
     }
 
     private int writeParameters(List<TSParameter> totalTsParametersList, GenerationContext generationContext, BufferedWriter writer, boolean writeOptional, int counter) throws IOException {
