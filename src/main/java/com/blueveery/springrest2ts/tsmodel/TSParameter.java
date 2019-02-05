@@ -70,7 +70,7 @@ public class TSParameter extends TSElement implements INullableElement, IAnnotat
     public void write(GenerationContext generationContext, BufferedWriter writer) throws IOException {
         writeDecorators(generationContext, writer, tsDecoratorList);
         writer.write(getName());
-        if (optional) {
+        if (optional && defaultValue == null) {
             writer.write("?");
         }
         writer.write(": ");

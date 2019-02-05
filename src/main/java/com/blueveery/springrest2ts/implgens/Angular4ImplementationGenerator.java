@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class Angular4ImplementationGenerator implements ImplementationGenerator {
@@ -36,12 +35,13 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
     private final String FIELD_NAME_ERROR_HANDLER_SERVICE = "errorHandlerService";
     private final String FIELD_NAME_SUBJECT = "subject";
 
-    public Angular4ImplementationGenerator() {
+    public Angular4ImplementationGenerator(Path errorHandlingPath, Path commonsPath, Path sharedPath) {
         TSModule angularCoreModule = new TSModule("@angular/core", null,true);
         injectableDecorator = new TSDecorator("", new TSFunction("Injectable", angularCoreModule));
 
-        TSModule rxjsObservableModule = new TSModule("rxjs/Observable", null,true);
-        observableClass = new TSClass("Observable", rxjsObservableModule);
+        TSModule rxjsModule = new TSModule("rxjs", null,true);
+        observableClass = new TSClass("Observable", rxjsModule);
+        subjectClass = new TSClass("Subject", rxjsModule);
 
         TSModule angularHttpModule = new TSModule("@angular/http", null,true);
         httpClass = new TSClass("Http", angularHttpModule);
@@ -49,24 +49,20 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         requestOptionsClass = new TSClass("RequestOptionsArgs", angularHttpModule);
         headersClass = new TSClass("Headers", angularHttpModule);
 
-        TSModule urlServiceModule = new TSModule("url.service", Paths.get("shared"), false);
+        TSModule urlServiceModule = new TSModule("url.service", sharedPath, false);
         urlServiceClass = new TSClass("UrlService", urlServiceModule);
 
-        TSModule errorHandlerServiceModule = new TSModule("default-error-handler.service", Paths.get("error-handling"), false);
+        TSModule errorHandlerServiceModule = new TSModule("default-error-handler.service", errorHandlingPath, false);
         errorHandlerServiceClass = new TSClass("DefaultErrorHandlerService", errorHandlerServiceModule);
 
-        TSModule subjectModule = new TSModule("rxjs/Subject", null,true);
-        subjectClass = new TSClass("Subject", subjectModule);
-
-        Path commonsPath = Paths.get("commons");
         TSModule jsonScopeModule = new TSModule("jsonScope", commonsPath, true);
         jsonScope = new TSClass("JsonScope", jsonScopeModule);
 
         TSModule jsonScopedSerializerModule = new TSModule("jsonScopedSerializer", commonsPath, true);
         jsonScopedSerializer = new TSClass("JsonScopedSerializer", jsonScopedSerializerModule);
 
-        TSModule bvJsonParserModule = new TSModule("jsonParser", commonsPath, true);
-        jsonParser = new TSClass("BvJsonParser", bvJsonParserModule);
+        TSModule jsonParserModule = new TSModule("jsonParser", commonsPath, true);
+        jsonParser = new TSClass("JsonParser", jsonParserModule);
 
     }
 
@@ -219,7 +215,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             return ".next(res.text() ? res.text() : null),";
         }
 
-        return ".next(res.text() ? new BvJsonParser().parse(res.text()) : null),";
+        return ".next(res.text() ? new JsonParser().parse(res.text()) : null),";
     }
 
     @Override

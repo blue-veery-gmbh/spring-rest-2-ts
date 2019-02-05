@@ -1,7 +1,7 @@
 package com.blueveery.springrest2ts.tsmodel;
 
 public enum ModuleExtensionType {
-    typing("t.ds"), implementation("ts");
+    typing("d.ts"), implementation("ts");
 
     private String extension;
 
