@@ -5,12 +5,9 @@ import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.SpringREST2tsGenerator;
 import com.blueveery.springrest2ts.converters.ModulePerJavaPackageConverter;
 import com.blueveery.springrest2ts.converters.TypeMapper;
-import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
-import com.blueveery.springrest2ts.examples.model.orders.OrderDTO;
 import com.blueveery.springrest2ts.filters.BaseClassJavaTypeFilter;
 import com.blueveery.springrest2ts.filters.HasAnnotationJavaTypeFilter;
 import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
-import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +21,7 @@ public class BluehrSetup {
         SpringREST2tsGenerator springREST2tsGenerator = new SpringREST2tsGenerator();
         springREST2tsGenerator.setModelClassesCondition(new BaseClassJavaTypeFilter(BaseEntity.class));
         springREST2tsGenerator.setRestClassesCondition(new HasAnnotationJavaTypeFilter(Component.class));
-        springREST2tsGenerator.setGenerationContext(new GenerationContext(new Angular4ImplementationGenerator()));
+        springREST2tsGenerator.setGenerationContext(new GenerationContext(new Angular4ImplementationGenerator(Paths.get("error-handling"), Paths.get("commons"), Paths.get("shared"))));
 
         HashMap<String, TSModule> packagesMap = new HashMap<>();
         packagesMap.put("com.blueveery.core.model", new TSModule("core", Paths.get("bluehr"), false));
