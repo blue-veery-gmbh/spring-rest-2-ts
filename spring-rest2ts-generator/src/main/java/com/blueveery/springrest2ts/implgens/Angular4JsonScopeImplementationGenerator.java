@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class Angular4ImplementationGenerator implements ImplementationGenerator {
+public class Angular4JsonScopeImplementationGenerator implements ImplementationGenerator {
     private TSDecorator injectableDecorator;
     private TSClass observableClass;
     private TSClass httpClass;
@@ -41,6 +41,9 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
     private TSClass urlServiceClass;
     private TSClass errorHandlerServiceClass;
     private TSClass subjectClass;
+    private TSClass jsonScope;
+    private TSClass jsonScopedSerializer;
+    private TSClass jsonParser;
 
     private Set<TSField> implementationSpecificFieldsSet;
 
@@ -49,15 +52,15 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
     private final String FIELD_NAME_ERROR_HANDLER_SERVICE = "errorHandlerService";
     private final String FIELD_NAME_SUBJECT = "subject";
 
-    public Angular4ImplementationGenerator(Path errorHandlingPath, Path commonsPath, Path sharedPath) {
-        TSModule angularCoreModule = new TSModule("@angular/core", null, true);
+    public Angular4JsonScopeImplementationGenerator(Path errorHandlingPath, Path commonsPath, Path sharedPath) {
+        TSModule angularCoreModule = new TSModule("@angular/core", null,true);
         injectableDecorator = new TSDecorator("", new TSFunction("Injectable", angularCoreModule));
 
-        TSModule rxjsModule = new TSModule("rxjs", null, true);
+        TSModule rxjsModule = new TSModule("rxjs", null,true);
         observableClass = new TSClass("Observable", rxjsModule);
         subjectClass = new TSClass("Subject", rxjsModule);
 
-        TSModule angularHttpModule = new TSModule("@angular/http", null, true);
+        TSModule angularHttpModule = new TSModule("@angular/http", null,true);
         httpClass = new TSClass("Http", angularHttpModule);
         responseClass = new TSClass("Response", angularHttpModule);
         requestOptionsClass = new TSClass("RequestOptionsArgs", angularHttpModule);
@@ -68,6 +71,15 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
         TSModule errorHandlerServiceModule = new TSModule("default-error-handler.service", errorHandlingPath, false);
         errorHandlerServiceClass = new TSClass("DefaultErrorHandlerService", errorHandlerServiceModule);
+
+        TSModule jsonScopeModule = new TSModule("jsonScope", commonsPath, true);
+        jsonScope = new TSClass("JsonScope", jsonScopeModule);
+
+        TSModule jsonScopedSerializerModule = new TSModule("jsonScopedSerializer", commonsPath, true);
+        jsonScopedSerializer = new TSClass("JsonScopedSerializer", jsonScopedSerializerModule);
+
+        TSModule jsonParserModule = new TSModule("jsonParser", commonsPath, true);
+        jsonParser = new TSClass("JsonParser", jsonParserModule);
 
     }
 
@@ -148,7 +160,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
             writer.write("const " + requestOptionsVar + ": RequestOptionsArgs = { method: '"
                     + methodString + "'"
-                    + (isUpdateOperation ? ", body: JSON.stringify( " + bodyString + " )" : "")
+                    + (isUpdateOperation ? ", body: JsonScopedSerializer.stringify( " + bodyString + ", jsonScope )" : "")
                     + getHeaderFromRequestMapping(methodRequestMapping) + "};");
             writer.newLine();
 
@@ -220,7 +232,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             return ".next(res.text() ? res.text() : null),";
         }
 
-        return ".next(res.text() ?  JSON.parse(res.text()) : null),";
+        return ".next(res.text() ? new JsonParser().parse(res.text()) : null),";
     }
 
     @Override
@@ -257,6 +269,8 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             String methodString = methodRequestMapping.method()[0].toString();
             if ("PUT".equals(methodString) || "POST".equals(methodString)) {
                 List<TSParameter> tsParameters = new ArrayList<>();
+                TSParameter jsonScopeParameter = new TSParameter("jsonScope", jsonScope, "new JsonScope(false, [])");
+                tsParameters.add(jsonScopeParameter);
                 return tsParameters;
             }
         }
@@ -287,8 +301,11 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             tsClass.addScopedTypeUsage(headersClass);
             tsClass.addScopedTypeUsage(urlServiceClass);
             tsClass.addScopedTypeUsage(errorHandlerServiceClass);
+            tsClass.addScopedTypeUsage(jsonScope);
+            tsClass.addScopedTypeUsage(jsonScopedSerializer);
             tsClass.addScopedTypeUsage(subjectClass);
             tsClass.addScopedTypeUsage(injectableDecorator.getTsFunction());
+            tsClass.addScopedTypeUsage(jsonParser);
         }
     }
 
@@ -306,7 +323,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         createErrorHandlerService(generationContext, moduleConverter);
     }
 
-    private void createUrlService(GenerationContext generationContext, ModuleConverter moduleConverter) {
+    private void createUrlService(GenerationContext generationContext, ModuleConverter moduleConverter){
         urlServiceClass.addTsMethod(
                 new TSMethod("getBackendUrl",
                         urlServiceClass,
@@ -329,7 +346,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         moduleConverter.getTsModules().add(module);
     }
 
-    private void createErrorHandlerService(GenerationContext generationContext, ModuleConverter moduleConverter) {
+    private void createErrorHandlerService(GenerationContext generationContext, ModuleConverter moduleConverter){
 
         TSModule httpModule = new TSModule("@angular/http", null, true);
         TSClass responseClass = new TSClass("Response", httpModule);
