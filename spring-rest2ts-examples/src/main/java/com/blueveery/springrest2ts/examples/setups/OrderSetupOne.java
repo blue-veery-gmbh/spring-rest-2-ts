@@ -4,7 +4,7 @@ import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.SpringREST2tsGenerator;
 import com.blueveery.springrest2ts.converters.ModulePerJavaPackageConverter;
 import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
-import com.blueveery.springrest2ts.examples.model.orders.OrderDTO;
+import com.blueveery.springrest2ts.examples.model.OrderDTO;
 import com.blueveery.springrest2ts.filters.BaseClassJavaTypeFilter;
 import com.blueveery.springrest2ts.filters.HasAnnotationJavaTypeFilter;
 import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
