@@ -53,7 +53,7 @@ public class OrderCtrl {
 
     @RequestMapping(path = "/count", method = {RequestMethod.GET})
     @ResponseBody
-    public long countOrdersForCustomer(@PathVariable("customer-id") UUID customerId) {
-        return 10;
+    public long countOrdersForCustomer(@RequestParam("customer-id") UUID customerId) {
+        return 0;
     }
 }
