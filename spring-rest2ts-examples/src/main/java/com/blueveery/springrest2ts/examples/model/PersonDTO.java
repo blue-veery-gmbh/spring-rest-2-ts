@@ -7,5 +7,5 @@ import java.time.LocalDate;
 public class PersonDTO extends BaseDTO {
     private String firstName;
     private String lastName;
-    private LocalDate birthDay;
+    private LocalDate birthday;
 }

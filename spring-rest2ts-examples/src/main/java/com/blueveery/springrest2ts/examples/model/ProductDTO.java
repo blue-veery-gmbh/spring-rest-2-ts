@@ -8,5 +8,5 @@ import java.time.LocalDateTime;
 public class ProductDTO extends BaseDTO {
     private String name;
     private BigDecimal price;
-    private LocalDateTime expiryDate;
+    private LocalDateTime expirationDate;
 }

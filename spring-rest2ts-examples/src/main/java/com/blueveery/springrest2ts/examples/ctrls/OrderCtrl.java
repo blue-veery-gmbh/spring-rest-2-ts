@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.examples.ctrls;
 
+import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrl;
 import com.blueveery.springrest2ts.examples.model.OrderDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -12,7 +13,7 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping("api/order")
-public class OrderCtrl {
+public class OrderCtrl implements BaseCtrl<OrderDTO> {
 
 
     @RequestMapping(method = RequestMethod.POST, consumes = {"application/json"}, produces = {"application/json"})
@@ -41,9 +42,9 @@ public class OrderCtrl {
 
     }
 
-    @RequestMapping(method = {RequestMethod.GET}, produces = {"application/json"})
+    @RequestMapping(method = RequestMethod.GET, produces = {"application/json"})
     @ResponseBody
-    public List<OrderDTO> getOrdersForCustomer(@RequestParam("customer-id") UUID customerId,
+    public List<OrderDTO> getOrdersForCustomer(@RequestParam(value = "customer-id") UUID customerId,
                                                @RequestParam(value = "sortBy", required = false) String sortBy,
                                                @RequestParam(value = "ascending", required = false) Boolean ascending,
                                                @RequestParam(value = "pageNumber") int pageNumber,
@@ -51,7 +52,7 @@ public class OrderCtrl {
         return Collections.emptyList();
     }
 
-    @RequestMapping(path = "/count", method = {RequestMethod.GET})
+    @RequestMapping(path = "/count", method = RequestMethod.GET, produces = {"application/json"})
     @ResponseBody
     public long countOrdersForCustomer(@RequestParam("customer-id") UUID customerId) {
         return 0;
