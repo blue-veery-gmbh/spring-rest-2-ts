@@ -15,7 +15,6 @@ import java.util.UUID;
 @RequestMapping("api/order")
 public class OrderCtrl implements BaseCtrl<OrderDTO> {
 
-
     @RequestMapping(method = RequestMethod.POST, consumes = {"application/json"}, produces = {"application/json"})
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)

@@ -21,7 +21,6 @@ public class ProductCtrl implements GetObjectCtrl<ProductDTO> {
     }
 
     @GetMapping(produces = {"application/json"})
-    @ResponseBody
     public List<ProductDTO> getProducts(@RequestParam(value = "price") BigDecimal price,
                                         @RequestParam(value = "pageNumber") int pageNumber,
                                         @RequestParam(value = "pageSize") int pageSize) {

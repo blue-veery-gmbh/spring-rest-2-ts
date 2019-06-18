@@ -8,11 +8,8 @@ import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrl;
 import com.blueveery.springrest2ts.examples.model.OrderDTO;
 import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
 import com.blueveery.springrest2ts.filters.BaseClassJavaTypeFilter;
-import com.blueveery.springrest2ts.filters.HasAnnotationJavaTypeFilter;
 import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
-import com.blueveery.springrest2ts.implgens.Angular4JsonScopeImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
-import org.springframework.stereotype.Controller;
 
 import java.io.IOException;
 import java.nio.file.Paths;
