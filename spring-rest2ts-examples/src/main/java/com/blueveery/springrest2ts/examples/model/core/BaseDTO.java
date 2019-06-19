@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class BaseDTO {
     private int id;
+    private Date updateTimeStamp;
 
     public int getId() {
         return id;
@@ -13,5 +14,11 @@ public class BaseDTO {
         this.id = id;
     }
 
-    Date updateTimeStamp;
+    public Date getUpdateTimeStamp() {
+        return updateTimeStamp;
+    }
+
+    public void setUpdateTimeStamp(Date updateTimeStamp) {
+        this.updateTimeStamp = updateTimeStamp;
+    }
 }

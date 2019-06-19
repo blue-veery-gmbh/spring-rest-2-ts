@@ -34,7 +34,7 @@ import java.util.UUID;
 
 public class OrderSetupTest {
 
-    private static final Path OUTPUT_DIR_PATH = Paths.get("./target/ts");
+    private static final Path OUTPUT_DIR_PATH = Paths.get("../../../test-webapp/generator-test/src/");
 
     private static SpringREST2tsGenerator tsGenerator;
     private static ModulePerJavaPackageConverter moduleConverter;
@@ -78,6 +78,5 @@ public class OrderSetupTest {
         tsGenerator.getCustomTypeMapping().put(LocalDate.class, TypeMapper.tsDate);
         tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
     }
-
 
 }
