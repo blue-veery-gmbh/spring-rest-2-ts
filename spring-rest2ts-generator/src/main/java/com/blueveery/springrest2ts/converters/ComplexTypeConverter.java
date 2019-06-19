@@ -10,7 +10,7 @@ import java.util.Optional;
  * Created by tomaszw on 31.07.2017.
  */
 public abstract class ComplexTypeConverter {
-    public abstract void preConvert(ModuleConverter moduleConverter, Class javaClass);
+    public abstract boolean preConverted(ModuleConverter moduleConverter, Class javaClass);
     public abstract void convert(Class javaClass);
 
     protected final void setAsNullableType(Class elementType, Annotation[] declaredAnnotations, INullableElement tsElement) {

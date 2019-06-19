@@ -2,7 +2,8 @@ package com.blueveery.springrest2ts;
 
 import com.blueveery.springrest2ts.converters.*;
 import com.blueveery.springrest2ts.filters.JavaTypeFilter;
-import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.tsmodel.TSModule;
+import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
@@ -94,11 +95,14 @@ public class SpringREST2tsGenerator {
     }
 
     private void convertTypes(Set<Class> javaTypes, ModuleConverter tsModuleSortedMap, ComplexTypeConverter complexTypeConverter) {
+        Set<Class> preConvertedTypes = new HashSet<>();
         for (Class javaType : javaTypes) {
-            complexTypeConverter.preConvert(tsModuleSortedMap, javaType);
+            if (complexTypeConverter.preConverted(tsModuleSortedMap, javaType)) {
+                preConvertedTypes.add(javaType);
+            }
         }
 
-        for (Class javaType : javaTypes) {
+        for (Class javaType : preConvertedTypes) {
             complexTypeConverter.convert(javaType);
         }
 

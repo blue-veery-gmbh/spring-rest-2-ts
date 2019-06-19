@@ -13,6 +13,9 @@ public interface ObjectMapper {
 
     boolean filter(Member member, TSComplexType tsComplexType);
 
+    boolean filterClass(Class clazz);
+
     List<TSField> mapToField(Field field, TSComplexType tsComplexType, ComplexTypeConverter complexTypeConverter);
+
     List<TSField> mapToField(Method method, TSComplexType tsComplexType, ComplexTypeConverter complexTypeConverter);
 }

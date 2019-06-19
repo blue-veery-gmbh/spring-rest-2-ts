@@ -90,6 +90,11 @@ public class JacksonObjectMapper implements ObjectMapper {
     }
 
     @Override
+    public boolean filterClass(Class clazz) {
+        return !containsIgnoreTypeAnnotation(clazz);
+    }
+
+    @Override
     public List<TSField> mapToField(Field field, TSComplexType tsComplexType, ComplexTypeConverter complexTypeConverter) {
         List<TSField> tsFieldList = new ArrayList<>();
         Type fieldJavaType = field.getGenericType();

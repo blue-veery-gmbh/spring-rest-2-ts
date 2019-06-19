@@ -20,15 +20,16 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
         this.generationContext = generationContext;
     }
 
-    public void preConvert(ModuleConverter moduleConverter, Class javaClass){
+    public boolean preConverted(ModuleConverter moduleConverter, Class javaClass){
         if(TypeMapper.map(javaClass) == TypeMapper.tsAny && !javaClass.isInterface()){
             TSModule tsModule = moduleConverter.getTsModule(javaClass);
             String simpleName = javaClass.getSimpleName().replace("Ctrl", "Service");
             TSClass tsClass = new TSClass(simpleName, tsModule);
             tsModule.addScopedType(tsClass);
             TypeMapper.registerTsType(javaClass, tsClass);
+            return true;
         }
-
+        return false;
     }
 
     @Override
