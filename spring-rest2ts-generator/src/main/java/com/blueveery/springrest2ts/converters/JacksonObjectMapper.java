@@ -33,11 +33,20 @@ public class JacksonObjectMapper implements ObjectMapper {
         JsonAutoDetect.Visibility currentGettersVisibility = gettersVisibility;
         JsonAutoDetect.Visibility currentIsGetterVisibility = isGetterVisibility;
 
-        JsonAutoDetect jsonAutoDetect = getJsonAutoDetect(member);
+        JsonAutoDetect jsonAutoDetect = member.getDeclaringClass().getDeclaredAnnotation(JsonAutoDetect.class);
         if (jsonAutoDetect != null) {
-            currentFieldsVisibility = jsonAutoDetect.fieldVisibility();
-            currentGettersVisibility = jsonAutoDetect.getterVisibility();
-            currentIsGetterVisibility = jsonAutoDetect.isGetterVisibility();
+            JsonAutoDetect.Visibility fieldVisibility = jsonAutoDetect.fieldVisibility();
+            if (!isDefaultVisibility(fieldVisibility)) {
+                currentFieldsVisibility = fieldVisibility;
+            }
+            JsonAutoDetect.Visibility getterVisibility = jsonAutoDetect.getterVisibility();
+            if (!isDefaultVisibility(getterVisibility)) {
+                currentGettersVisibility = getterVisibility;
+            }
+            JsonAutoDetect.Visibility isGetterVisibility = jsonAutoDetect.isGetterVisibility();
+            if (!isDefaultVisibility(isGetterVisibility)) {
+                currentIsGetterVisibility = isGetterVisibility;
+            }
         }
 
         if (member instanceof Field) {
@@ -76,8 +85,8 @@ public class JacksonObjectMapper implements ObjectMapper {
         return true;
     }
 
-    private JsonAutoDetect getJsonAutoDetect(Member member) {
-        return member.getDeclaringClass().getDeclaredAnnotation(JsonAutoDetect.class);
+    private boolean isDefaultVisibility(JsonAutoDetect.Visibility visibility) {
+        return visibility.equals(JsonAutoDetect.Visibility.DEFAULT);
     }
 
     @Override

@@ -9,5 +9,4 @@ public class ProductDTO extends BaseDTO {
     private String name;
     private BigInteger price;
     private LocalDateTime expirationDate;
-    private AddressDTO homeAddress;
 }
