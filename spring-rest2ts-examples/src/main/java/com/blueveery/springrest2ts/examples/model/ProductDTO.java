@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @JsonIgnoreProperties(value = {"barcode"}, allowGetters = true)
 public class ProductDTO extends BaseDTO {
@@ -13,5 +14,6 @@ public class ProductDTO extends BaseDTO {
     public String barcode;
     public LocalDateTime expirationDate;
     public ManufacturerDTO manufacturer;
+    public Map<String, String> tags;
 }
 

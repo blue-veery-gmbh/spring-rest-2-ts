@@ -1,6 +1,7 @@
 package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.tsmodel.TSArray;
+import com.blueveery.springrest2ts.tsmodel.TSMap;
 import com.blueveery.springrest2ts.tsmodel.TSSimpleType;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 
@@ -66,6 +67,10 @@ public class TypeMapper {
             ParameterizedType javaParameterizedType = (ParameterizedType) javaType;
             if(Collection.class.isAssignableFrom((Class<?>) javaParameterizedType.getRawType())){
                 return new TSArray(TypeMapper.map(javaParameterizedType.getActualTypeArguments()[0], fallbackType));
+            }
+
+            if(Map.class.isAssignableFrom((Class<?>) javaParameterizedType.getRawType())){
+                return new TSMap(TypeMapper.map(javaParameterizedType.getActualTypeArguments()[1], fallbackType));
             }
         }
 
