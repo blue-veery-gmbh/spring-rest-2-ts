@@ -20,7 +20,12 @@ public class TSMap extends TSType {
     }
 
     @Override
+    public String getName() {
+        return "{[key: " + keyType.getName() + "] :" + valueType.getName() +"}";
+    }
+
+    @Override
     public void write(GenerationContext generationContext, BufferedWriter writer) throws IOException {
-        writer.write(": {[key: " + keyType.getName() + "] :" + valueType.getName() +"}");
+        writer.write(": " + getName());
     }
 }
