@@ -4,6 +4,7 @@ import com.blueveery.springrest2ts.tsmodel.INullableElement;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.Optional;
 
 /**
@@ -13,7 +14,7 @@ public abstract class ComplexTypeConverter {
     public abstract boolean preConverted(ModuleConverter moduleConverter, Class javaClass);
     public abstract void convert(Class javaClass);
 
-    protected final void setAsNullableType(Class elementType, Annotation[] declaredAnnotations, INullableElement tsElement) {
+    protected final void setAsNullableType(Type elementType, Annotation[] declaredAnnotations, INullableElement tsElement) {
         if(!tsElement.isNullable()){
             if(Optional.class == elementType){
                 tsElement.setNullable(true);
@@ -27,9 +28,12 @@ public abstract class ComplexTypeConverter {
                 }
             }
 
-            if(Number.class.isAssignableFrom(elementType)){
-                tsElement.setNullable(true);
-                return;
+            if(elementType instanceof Class) {
+                Class elementClass = (Class) elementType;
+                if (Number.class.isAssignableFrom(elementClass)) {
+                    tsElement.setNullable(true);
+                    return;
+                }
             }
 
             if(Boolean.class == elementType){
