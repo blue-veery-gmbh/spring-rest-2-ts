@@ -9,6 +9,7 @@ import com.blueveery.springrest2ts.examples.ctrls.OrderCtrl;
 import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrl;
 import com.blueveery.springrest2ts.examples.model.OrderDTO;
 import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
+import com.blueveery.springrest2ts.examples.model.enums.CategoryDTO;
 import com.blueveery.springrest2ts.examples.model.enums.OrderPaymentStatus;
 import com.blueveery.springrest2ts.filters.AndFilterOperator;
 import com.blueveery.springrest2ts.filters.BaseClassJavaTypeFilter;
@@ -16,6 +17,7 @@ import com.blueveery.springrest2ts.filters.HasAnnotationJavaTypeFilter;
 import com.blueveery.springrest2ts.filters.OrFilterOperator;
 import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.stereotype.Controller;
@@ -77,6 +79,14 @@ public class OrderSetupTest {
         tsGenerator.getCustomTypeMapping().put(LocalDateTime.class, TypeMapper.tsDate);
         tsGenerator.getCustomTypeMapping().put(LocalDate.class, TypeMapper.tsDate);
         tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+    }
+
+    @Test
+    public void jacksonSetterGetters() throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        CategoryDTO category = new CategoryDTO("Phones");
+        System.out.println(objectMapper.writeValueAsString(category));
     }
 
 }
