@@ -15,5 +15,6 @@ public class ProductDTO extends BaseDTO {
     public LocalDateTime expirationDate;
     public ManufacturerDTO manufacturer;
     public Map<String, String> tags;
+    public CategoryDTO categoryDTO;
 }
 
