@@ -21,7 +21,7 @@ public class BluehrSetup {
         SpringREST2tsGenerator springREST2tsGenerator = new SpringREST2tsGenerator();
         springREST2tsGenerator.setModelClassesCondition(new BaseClassJavaTypeFilter(BaseEntity.class));
         springREST2tsGenerator.setRestClassesCondition(new HasAnnotationJavaTypeFilter(Component.class));
-        springREST2tsGenerator.setGenerationContext(new GenerationContext(new Angular4ImplementationGenerator(Paths.get("error-handling"), Paths.get("commons"), Paths.get("shared"))));
+        springREST2tsGenerator.setGenerationContext(new GenerationContext(new Angular4ImplementationGenerator(Paths.get("commons"), Paths.get("shared"))));
 
         HashMap<String, TSModule> packagesMap = new HashMap<>();
         packagesMap.put("com.blueveery.core.model", new TSModule("core", Paths.get("bluehr"), false));

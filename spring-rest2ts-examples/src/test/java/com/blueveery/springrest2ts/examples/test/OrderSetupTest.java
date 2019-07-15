@@ -48,7 +48,7 @@ public class OrderSetupTest {
         tsGenerator = new SpringREST2tsGenerator();
         tsGenerator.setModelClassesCondition(new BaseClassJavaTypeFilter(BaseDTO.class));
         tsGenerator.setRestClassesCondition(new BaseClassJavaTypeFilter(BaseCtrl.class));
-        tsGenerator.setGenerationContext(new GenerationContext(new Angular4ImplementationGenerator(Paths.get("app/sdk/error-handling"), Paths.get("app/sdk/commons"), Paths.get("app/sdk/shared"))));
+        tsGenerator.setGenerationContext(new GenerationContext(new Angular4ImplementationGenerator(Paths.get("app/sdk/commons"), Paths.get("app/sdk/shared"))));
 
         HashMap<String, TSModule> packagesMap = new HashMap<>();
         packagesMap.put(BaseDTO.class.getPackage().getName(), new TSModule("core", Paths.get("app/sdk/model"), false));
