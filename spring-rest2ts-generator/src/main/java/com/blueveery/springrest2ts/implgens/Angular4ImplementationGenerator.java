@@ -131,7 +131,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 writer.newLine();
             }
 
-
             String consumeHeader = getConsumeHeaderFromRequestMapping(methodRequestMapping);
             boolean isRequestHeaderDefined = !consumeHeader.isEmpty();
             if (isRequestHeaderDefined) {
@@ -143,7 +142,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             if (httpMethod.compareTo("PUT") == 0) {
                 for (TSParameter tsParameter : method.getParameterList()) {
                     if (tsParameter.findAnnotation(RequestBody.class) != null) {
-                        tsPath = tsPath.replace("{id}", "' + entity.id + '"); //TODO: ugly workaround
+                        tsPath = tsPath.replace("{id}", "' + " + tsParameter.getName() + ".id + '"); //TODO: ugly workaround
                     } else if (tsParameter.findAnnotation(PathVariable.class) != null) {
                         PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
                         if ("id".equals(pathVariable.value())) {
@@ -158,28 +157,9 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             writer.write("const " + FIELD_NAME_SUBJECT + " = new " + subjectAnyType.getName() + "();");
             writer.newLine();
 
-            boolean produceApplicationJson = Arrays.asList(methodRequestMapping.produces()).contains("application/json");
             String requestOptions = "";
-            if (isRequestHeaderDefined || isRequestParamDefined || isRequestBodyDefined || !produceApplicationJson) {
-                List<String> requestOptionsList = new ArrayList<>();
-                if (isRequestHeaderDefined) {
-                    requestOptionsList.add(requestHeadersVar);
-                }
-                if (isRequestParamDefined) {
-                    requestOptionsList.add(requestParamsVar);
-                }
-                if (isRequestBodyDefined) {
-                    requestOptionsList.add(requestBodyVar);
-                }
-                if (!produceApplicationJson) {
-                    requestOptionsList.add("responseType: 'text'");
-                }
-
-                requestOptions += ", {";
-                requestOptions += String.join(", ", requestOptionsList);
-                requestOptions += "}";
-
-            }
+            boolean isMethodProduceApplicationJson = Arrays.asList(methodRequestMapping.produces()).contains("application/json");
+            requestOptions = composeRequestOptions(requestBodyVar, requestHeadersVar, requestParamsVar, isRequestBodyDefined, isRequestParamDefined, isRequestHeaderDefined, requestOptions, isMethodProduceApplicationJson);
 
             writer.write(
                     "this." + FIELD_NAME_HTTP_SERVICE + ".request("
@@ -198,6 +178,29 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
         }
 
+    }
+
+    private String composeRequestOptions(String requestBodyVar, String requestHeadersVar, String requestParamsVar, boolean isRequestBodyDefined, boolean isRequestParamDefined, boolean isRequestHeaderDefined, String requestOptions, boolean methodProduceApplicationJson) {
+        if (isRequestHeaderDefined || isRequestParamDefined || isRequestBodyDefined || !methodProduceApplicationJson) {
+            List<String> requestOptionsList = new ArrayList<>();
+            if (isRequestHeaderDefined) {
+                requestOptionsList.add(requestHeadersVar);
+            }
+            if (isRequestParamDefined) {
+                requestOptionsList.add(requestParamsVar);
+            }
+            if (isRequestBodyDefined) {
+                requestOptionsList.add(requestBodyVar);
+            }
+            if (!methodProduceApplicationJson) {
+                requestOptionsList.add("responseType: 'text'");
+            }
+
+            requestOptions += ", {";
+            requestOptions += String.join(", ", requestOptionsList);
+            requestOptions += "}";
+        }
+        return requestOptions;
     }
 
     private String getPathFromRequestMapping(RequestMapping requestMapping) {
