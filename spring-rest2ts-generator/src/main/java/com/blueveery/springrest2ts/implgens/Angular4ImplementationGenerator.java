@@ -72,8 +72,8 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             String requestParamsVar = "params";
 
             String requestBody = "";
-            String requestParams = "";
 
+            StringBuilder requestParamsBuilder = null;
             for (TSParameter tsParameter : method.getParameterList()) {
 
                 writer.newLine();
@@ -107,15 +107,16 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 if (tsParameter.findAnnotation(RequestParam.class) != null) {
                     RequestParam requestParam = tsParameter.findAnnotation(RequestParam.class);
                     writer.write(String.format("// parameter %s is sent as request param %s ", tsParameterName, requestParam.value()));
-                    if (requestParams.equals("")) {
-                        requestParams = "const " + requestParamsVar + " = new HttpParams();";
+                    if (requestParamsBuilder == null) {
+                        requestParamsBuilder = new StringBuilder("const " + requestParamsVar + " = new HttpParams();");
                     }
                     if (!tsParameter.getType().equals(TypeMapper.tsString)) {
                         tsParameterName = tsParameterName + ".toString()";
                     }
-                    requestParams += "\n" + requestParamsVar + ".set('" + requestParam.value() + "'," + tsParameterName + ");";
+                    requestParamsBuilder.append("\n").append(requestParamsVar).append(".set('").append(requestParam.value()).append("',").append(tsParameterName).append(");");
                 }
             }
+            String requestParams = requestParamsBuilder != null ? requestParamsBuilder.toString() : "";
             writer.newLine();
 
             boolean isRequestBodyDefined = !requestBody.isEmpty();
