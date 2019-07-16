@@ -18,9 +18,8 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
     private TSDecorator injectableDecorator;
     private TSClass observableClass;
     private TSClass httpClass;
-    private TSClass responseClass;
-    private TSClass requestOptionsClass;
-    private TSClass headersClass;
+    private TSClass httpParamsClass;
+    private TSClass httpHeadersClass;
     private TSClass urlServiceClass;
     private TSClass subjectClass;
 
@@ -38,11 +37,10 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         observableClass = new TSClass("Observable", rxjsModule);
         subjectClass = new TSClass("Subject", rxjsModule);
 
-        TSModule angularHttpModule = new TSModule("@angular/http", null, true);
-        httpClass = new TSClass("Http", angularHttpModule);
-        responseClass = new TSClass("Response", angularHttpModule);
-        requestOptionsClass = new TSClass("RequestOptionsArgs", angularHttpModule);
-        headersClass = new TSClass("Headers", angularHttpModule);
+        TSModule angularHttpModule = new TSModule("@angular/common/http", null, true);
+        httpClass = new TSClass("HttpClient", angularHttpModule);
+        httpParamsClass = new TSClass("HttpParams", angularHttpModule);
+        httpHeadersClass = new TSClass("HttpHeaders", angularHttpModule);
 
         TSModule urlServiceModule = new TSModule("url.service", sharedPath, false);
         urlServiceClass = new TSClass("UrlService", urlServiceModule);
@@ -51,7 +49,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
     @Override
     public void write(BufferedWriter writer, TSMethod method) throws IOException {
         if (method.isConstructor()) {
-            TSComplexType methodClass = method.getOwner();
             for (TSField field : implementationSpecificFieldsSet) {
                 writer.write("this." + field.getName() + " = " + field.getName() + ";");
                 writer.newLine();
@@ -60,99 +57,136 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             RequestMapping methodRequestMapping = method.findAnnotation(RequestMapping.class);
             RequestMapping classRequestMapping = method.getOwner().findAnnotation(RequestMapping.class);
 
-            String tsPath = "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" + getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "?'";
-            String methodString = methodRequestMapping.method()[0].toString();
+            String tsPath = "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" + getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "'";
+            String httpMethod = methodRequestMapping.method()[0].toString();
 
             writer.write("// path = " + tsPath);
             writer.newLine();
-            writer.write("// HTTP method = " + methodString);
+            writer.write("// HTTP method = " + httpMethod);
             writer.newLine();
 
             StringBuilder pathStringBuilder = new StringBuilder(tsPath);
 
-            String bodyString = "{}";
+            String requestBodyVar = "body";
+            String requestHeadersVar = "headers";
+            String requestParamsVar = "params";
+
+            String requestBody = "";
+            String requestParams = "";
 
             for (TSParameter tsParameter : method.getParameterList()) {
 
                 writer.newLine();
 
+                String tsParameterName = tsParameter.getName();
                 if (tsParameter.findAnnotation(RequestBody.class) != null) {
-                    RequestBody requestBody = tsParameter.findAnnotation(RequestBody.class);
-                    writer.write(String.format("// parameter %s is sent in request body ", tsParameter.getName()));
-
-                    bodyString = tsParameter.getName();
-
+                    writer.write(String.format("// parameter %s is sent in request body ", tsParameterName));
+                    requestBody = tsParameterName;
                     continue;
                 }
                 if (tsParameter.findAnnotation(PathVariable.class) != null) {
                     PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
-                    writer.write(String.format("// parameter %s is sent in path variable %s ", tsParameter.getName(), pathVariable.value()));
+                    writer.write(String.format("// parameter %s is sent in path variable %s ", tsParameterName, pathVariable.value()));
 
                     String targetToReplace = "{" + pathVariable.value() + "}";
                     int start = pathStringBuilder.lastIndexOf(targetToReplace);
                     int end = start + targetToReplace.length();
 
                     if ("id".equals(pathVariable.value())) {
-                        if (methodString.startsWith("PUT")) {
-                            tsPath = tsPath.replace("{id}", "' + entity.id.split('/')[1] + '");
+                        if (httpMethod.startsWith("PUT")) {
+                            tsPath = tsPath.replace("{id}", "' + entity.id + '");
                         } else {
-                            pathStringBuilder.replace(start, end, "' + " + tsParameter.getName() + ".split('/')[1] + '");
+                            pathStringBuilder.replace(start, end, "' + " + tsParameterName + " + '");
                         }
                     } else {
-                        pathStringBuilder.replace(start, end, "' + " + tsParameter.getName() + " + '");
+                        pathStringBuilder.replace(start, end, "' + " + tsParameterName + " + '");
                     }
 
                     continue;
                 }
                 if (tsParameter.findAnnotation(RequestParam.class) != null) {
                     RequestParam requestParam = tsParameter.findAnnotation(RequestParam.class);
-                    writer.write(String.format("// parameter %s is sent as request param %s ", tsParameter.getName(), requestParam.value()));
-
-                    pathStringBuilder.append(" + '");
-                    pathStringBuilder.append(requestParam.value());
-                    pathStringBuilder.append("=' + ");
-                    pathStringBuilder.append(tsParameter.getName());
-                    pathStringBuilder.append(" + '&'");
-
+                    writer.write(String.format("// parameter %s is sent as request param %s ", tsParameterName, requestParam.value()));
+                    if (requestParams.equals("")) {
+                        requestParams = "const " + requestParamsVar + " = new HttpParams();";
+                    }
+                    if (!tsParameter.getType().equals(TypeMapper.tsString)) {
+                        tsParameterName = tsParameterName + ".toString()";
+                    }
+                    requestParams += "\n" + requestParamsVar + ".set('" + requestParam.value() + "'," + tsParameterName + ");";
                 }
             }
-
             writer.newLine();
 
-            String requestOptionsVar = "requestOptions";
+            boolean isRequestBodyDefined = !requestBody.isEmpty();
+            if (isRequestBodyDefined) {
+                writer.write("const " + requestBodyVar + " = " + requestBody + ";");
+                writer.newLine();
+            }
 
-            boolean isUpdateOperation = "PUT".equals(methodString) || "POST".equals(methodString);
+            boolean isRequestParamDefined = !requestParams.isEmpty();
+            if (isRequestParamDefined) {
+                writer.write(requestParams);
+                writer.newLine();
+            }
 
-            writer.write("const " + requestOptionsVar + ": RequestOptionsArgs = { method: '"
-                    + methodString + "'"
-                    + (isUpdateOperation ? ", body: JSON.stringify( " + bodyString + " )" : "")
-                    + getHeaderFromRequestMapping(methodRequestMapping) + "};");
-            writer.newLine();
+
+            String consumeHeader = getConsumeHeaderFromRequestMapping(methodRequestMapping);
+            boolean isRequestHeaderDefined = !consumeHeader.isEmpty();
+            if (isRequestHeaderDefined) {
+                writer.write("const " + requestHeadersVar + " = " + consumeHeader + ";");
+                writer.newLine();
+            }
 
             tsPath = pathStringBuilder.toString();
-
-            if (methodString.compareTo("PUT") == 0) {
+            if (httpMethod.compareTo("PUT") == 0) {
                 for (TSParameter tsParameter : method.getParameterList()) {
                     if (tsParameter.findAnnotation(RequestBody.class) != null) {
-                        tsPath = tsPath.replace("{id}", "' + entity.id.split('/')[1] + '"); //TODO: ugly workaround
+                        tsPath = tsPath.replace("{id}", "' + entity.id + '"); //TODO: ugly workaround
                     } else if (tsParameter.findAnnotation(PathVariable.class) != null) {
                         PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
                         if ("id".equals(pathVariable.value())) {
-                            tsPath = tsPath.replace("{id}", "' +" + tsParameter.getName() + ".split('/')[1] + '"); //TODO: ugly workaround
+                            tsPath = tsPath.replace("{id}", "' +" + tsParameter.getName() + " + '"); //TODO: ugly workaround
                         }
                     }
                 }
             }
 
+
             TSParameterisedType subjectAnyType = new TSParameterisedType("", subjectClass, TypeMapper.tsAny);
             writer.write("const " + FIELD_NAME_SUBJECT + " = new " + subjectAnyType.getName() + "();");
             writer.newLine();
+
+            boolean produceApplicationJson = Arrays.asList(methodRequestMapping.produces()).contains("application/json");
+            String requestOptions = "";
+            if (isRequestHeaderDefined || isRequestParamDefined || isRequestBodyDefined || !produceApplicationJson) {
+                List<String> requestOptionsList = new ArrayList<>();
+                if (isRequestHeaderDefined) {
+                    requestOptionsList.add(requestHeadersVar);
+                }
+                if (isRequestParamDefined) {
+                    requestOptionsList.add(requestParamsVar);
+                }
+                if (isRequestBodyDefined) {
+                    requestOptionsList.add(requestBodyVar);
+                }
+                if (!produceApplicationJson) {
+                    requestOptionsList.add("responseType: 'text'");
+                }
+
+                requestOptions += ", {";
+                requestOptions += String.join(", ", requestOptionsList);
+                requestOptions += "}";
+
+            }
+
             writer.write(
                     "this." + FIELD_NAME_HTTP_SERVICE + ".request("
-                            + tsPath
-                            + ", " + requestOptionsVar + ")"
-                            + ".subscribe("
-                            + "res => " + FIELD_NAME_SUBJECT + getResponseTypeFromRequestMapping(methodRequestMapping, method.getType())
+                            + "'" + httpMethod + "'"
+                            + ", " + tsPath
+                            + requestOptions
+                            + ").subscribe("
+                            + "res => " + FIELD_NAME_SUBJECT + getResponseFromRequestMapping(method.getType())
                             + "(err) => {"
                             + FIELD_NAME_SUBJECT + ".error(err ? err : {});});"
             );
@@ -177,26 +211,22 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         return "";
     }
 
-    private String getHeaderFromRequestMapping(RequestMapping requestMapping) {
+    private String getConsumeHeaderFromRequestMapping(RequestMapping requestMapping) {
         if (requestMapping.consumes().length > 0) {
-            return ",  headers: new Headers({'Content-type': " + "'" + requestMapping.consumes()[0] + "'})";
+            return " new HttpHeaders().set('Content-type'," + " '" + requestMapping.consumes()[0] + "')";
         }
         return "";
     }
 
-    private String getResponseTypeFromRequestMapping(RequestMapping requestMapping, TSType methodType) {
-
+    private String getResponseFromRequestMapping(TSType methodType) {
         if (methodType == TypeMapper.tsNumber) {
-            return ".next(res.text() ? Number(res.text()) : null),";
+            return ".next(res ? Number(res) : null),";
         }
         if (methodType == TypeMapper.tsBoolean) {
-            return ".next(res.text() ? res.text().toLowerCase() === 'true' : false),";
-        }
-        if (methodType == TypeMapper.tsString) {
-            return ".next(res.text() ? res.text() : null),";
+            return ".next(res ? res.toLowerCase() === 'true' : false),";
         }
 
-        return ".next(res.text() ?  JSON.parse(res.text()) : null),";
+        return ".next(res ?  res : null),";
     }
 
     @Override
@@ -258,9 +288,8 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         if (isRestClass(tsClass)) {
             tsClass.addScopedTypeUsage(observableClass);
             tsClass.addScopedTypeUsage(httpClass);
-            tsClass.addScopedTypeUsage(responseClass);
-            tsClass.addScopedTypeUsage(requestOptionsClass);
-            tsClass.addScopedTypeUsage(headersClass);
+            tsClass.addScopedTypeUsage(httpParamsClass);
+            tsClass.addScopedTypeUsage(httpHeadersClass);
             tsClass.addScopedTypeUsage(urlServiceClass);
             tsClass.addScopedTypeUsage(subjectClass);
             tsClass.addScopedTypeUsage(injectableDecorator.getTsFunction());

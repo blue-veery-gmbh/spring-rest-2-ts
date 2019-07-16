@@ -28,4 +28,10 @@ public class ProductCtrl implements GetObjectCtrl<ProductDTO> {
                                         @RequestParam(value = "pageSize") int pageSize) {
         return Collections.emptyList();
     }
+
+    @RequestMapping(path = "/count", method = RequestMethod.GET, produces = {"text/plain"})
+    @ResponseBody
+    public long countProducts() {
+        return 0;
+    }
 }

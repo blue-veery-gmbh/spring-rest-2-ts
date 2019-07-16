@@ -36,7 +36,7 @@ import java.util.UUID;
 
 public class OrderSetupTest {
 
-    private static final Path OUTPUT_DIR_PATH = Paths.get("../../../test-webapp/generator-test/src/");
+    private static final Path OUTPUT_DIR_PATH = Paths.get("../../../test-webapp/src/");
 
     private static SpringREST2tsGenerator tsGenerator;
     private static ModulePerJavaPackageConverter moduleConverter;
