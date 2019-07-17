@@ -75,19 +75,15 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
             StringBuilder requestParamsBuilder = null;
             for (TSParameter tsParameter : method.getParameterList()) {
-
                 writer.newLine();
-
                 String tsParameterName = tsParameter.getName();
+
                 if (tsParameter.findAnnotation(RequestBody.class) != null) {
                     writer.write(String.format("// parameter %s is sent in request body ", tsParameterName));
                     requestBody = tsParameterName;
 
                     if (httpMethod.equals("PUT")) {
-                        String targetToReplace = "{id}";
-                        int start = pathStringBuilder.lastIndexOf(targetToReplace);
-                        int end = start + targetToReplace.length() + 1;
-                        pathStringBuilder.replace(start, end, "' + " + tsParameter.getName() + ".id ");
+                        replaceInStringBuilder(pathStringBuilder, "{id}'", "' + " + tsParameter.getName() + ".id ");
                     }
                     continue;
                 }
@@ -95,14 +91,11 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 if (pathVariable != null) {
                     writer.write(String.format("// parameter %s is sent in path variable %s ", tsParameterName, pathVariable.value()));
 
-                    String targetToReplace = "{" + pathVariable.value() + "}";
-                    int start = pathStringBuilder.lastIndexOf(targetToReplace);
-                    int end = start + targetToReplace.length() + 1;
-
-                    if ("id".equals(pathVariable.value()) && httpMethod.startsWith("PUT")) {
-                        pathStringBuilder.replace(start, end, "' + " + tsParameterName + ".id");
+                    String targetToReplace = "{" + pathVariable.value() + "}'";
+                    if ("id".equals(pathVariable.value()) && httpMethod.equals("PUT")) {
+                        replaceInStringBuilder(pathStringBuilder, targetToReplace, "' + " + tsParameterName + ".id");
                     } else {
-                        pathStringBuilder.replace(start, end, "' + " + tsParameterName);
+                        replaceInStringBuilder(pathStringBuilder, targetToReplace, "' + " + tsParameterName);
                     }
 
                     continue;
@@ -158,6 +151,12 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
         }
 
+    }
+
+    private void replaceInStringBuilder(StringBuilder pathStringBuilder, String targetToReplace, String replacement) {
+        int start = pathStringBuilder.lastIndexOf(targetToReplace);
+        int end = start + targetToReplace.length();
+        pathStringBuilder.replace(start, end, replacement);
     }
 
     private void writeRequestOption(BufferedWriter writer, String requestOption, String requestOptionValue, boolean isOptionDefined) throws IOException {
