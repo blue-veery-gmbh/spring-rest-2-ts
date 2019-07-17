@@ -15,6 +15,10 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class Angular4ImplementationGenerator implements ImplementationGenerator {
+    private static final String FIELD_NAME_HTTP_SERVICE = "httpService";
+    private static final String FIELD_NAME_URL_SERVICE = "urlService";
+    private static final String FIELD_NAME_SUBJECT = "subject";
+
     private TSDecorator injectableDecorator;
     private TSClass observableClass;
     private TSClass httpClass;
@@ -22,14 +26,15 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
     private TSClass httpHeadersClass;
     private TSClass urlServiceClass;
     private TSClass subjectClass;
-
     private Set<TSField> implementationSpecificFieldsSet;
 
-    private final String FIELD_NAME_HTTP_SERVICE = "httpService";
-    private final String FIELD_NAME_URL_SERVICE = "urlService";
-    private final String FIELD_NAME_SUBJECT = "subject";
+    private boolean useUrlService;
 
-    public Angular4ImplementationGenerator(Path commonsPath, Path sharedPath) {
+    public Angular4ImplementationGenerator() {
+        this(null);
+    }
+
+    public Angular4ImplementationGenerator(Path urlServicePath) {
         TSModule angularCoreModule = new TSModule("@angular/core", null, true);
         injectableDecorator = new TSDecorator("", new TSFunction("Injectable", angularCoreModule));
 
@@ -42,8 +47,11 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         httpParamsClass = new TSClass("HttpParams", angularHttpModule);
         httpHeadersClass = new TSClass("HttpHeaders", angularHttpModule);
 
-        TSModule urlServiceModule = new TSModule("url.service", sharedPath, false);
-        urlServiceClass = new TSClass("UrlService", urlServiceModule);
+        useUrlService = urlServicePath != null;
+        if (useUrlService) {
+            TSModule urlServiceModule = new TSModule("url.service", urlServicePath, false);
+            urlServiceClass = new TSClass("UrlService", urlServiceModule);
+        }
     }
 
     @Override
@@ -57,7 +65,8 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             RequestMapping methodRequestMapping = method.findAnnotation(RequestMapping.class);
             RequestMapping classRequestMapping = method.getOwner().findAnnotation(RequestMapping.class);
 
-            String tsPath = "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" + getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "'";
+            String tsPath = useUrlService ? "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" : "'";
+            tsPath += getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "'";
             String httpMethod = methodRequestMapping.method()[0].toString();
 
             writer.write("// path = " + tsPath);
@@ -286,9 +295,11 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             tsClass.addScopedTypeUsage(httpClass);
             tsClass.addScopedTypeUsage(httpParamsClass);
             tsClass.addScopedTypeUsage(httpHeadersClass);
-            tsClass.addScopedTypeUsage(urlServiceClass);
             tsClass.addScopedTypeUsage(subjectClass);
             tsClass.addScopedTypeUsage(injectableDecorator.getTsFunction());
+            if (useUrlService) {
+                tsClass.addScopedTypeUsage(urlServiceClass);
+            }
         }
     }
 
@@ -296,34 +307,14 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
     public void addImplementationSpecificFields(TSComplexType tsComplexType) {
         implementationSpecificFieldsSet = new HashSet<>();
         implementationSpecificFieldsSet.add(new TSField(FIELD_NAME_HTTP_SERVICE, tsComplexType, httpClass));
-        implementationSpecificFieldsSet.add(new TSField(FIELD_NAME_URL_SERVICE, tsComplexType, urlServiceClass));
+        if (useUrlService) {
+            implementationSpecificFieldsSet.add(new TSField(FIELD_NAME_URL_SERVICE, tsComplexType, urlServiceClass));
+        }
     }
 
     @Override
     public void generateImplementationSpecificUtilTypes(GenerationContext generationContext, ModuleConverter moduleConverter) {
-        createUrlService(generationContext, moduleConverter);
+
     }
 
-    private void createUrlService(GenerationContext generationContext, ModuleConverter moduleConverter) {
-        urlServiceClass.addTsMethod(
-                new TSMethod("getBackendUrl",
-                        urlServiceClass,
-                        TypeMapper.tsString,
-                        false,
-                        false)
-        );
-        urlServiceClass.addTsMethod(
-                new TSMethod("constructor",
-                        urlServiceClass,
-                        null,
-                        false,
-                        true)
-        );
-
-        addComplexTypeUsage(urlServiceClass);
-        TSModule module = urlServiceClass.getModule();
-        module.addScopedType(urlServiceClass);
-        generationContext.addImplementationGenerator(urlServiceClass, new UrlServiceImplementationGenerator());
-        moduleConverter.getTsModules().add(module);
-    }
 }
