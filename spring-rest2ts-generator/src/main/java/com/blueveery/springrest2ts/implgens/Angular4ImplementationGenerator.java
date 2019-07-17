@@ -108,35 +108,26 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                     RequestParam requestParam = tsParameter.findAnnotation(RequestParam.class);
                     writer.write(String.format("// parameter %s is sent as request param %s ", tsParameterName, requestParam.value()));
                     if (requestParamsBuilder == null) {
-                        requestParamsBuilder = new StringBuilder("const " + requestParamsVar + " = new HttpParams();");
+                        requestParamsBuilder = new StringBuilder(" new HttpParams();");
                     }
                     if (!tsParameter.getType().equals(TypeMapper.tsString)) {
                         tsParameterName = tsParameterName + ".toString()";
                     }
-                    requestParamsBuilder.append("\n").append(requestParamsVar).append(".set('").append(requestParam.value()).append("',").append(tsParameterName).append(");");
+                    requestParamsBuilder.append("\n").append(requestParamsVar).append(".set('").append(requestParam.value()).append("',").append(tsParameterName).append(")");
                 }
             }
             String requestParams = requestParamsBuilder != null ? requestParamsBuilder.toString() : "";
             writer.newLine();
 
             boolean isRequestBodyDefined = !requestBody.isEmpty();
-            if (isRequestBodyDefined) {
-                writer.write("const " + requestBodyVar + " = " + requestBody + ";");
-                writer.newLine();
-            }
+            writeRequestOption(writer, requestBodyVar, requestBody, isRequestBodyDefined);
 
             boolean isRequestParamDefined = !requestParams.isEmpty();
-            if (isRequestParamDefined) {
-                writer.write(requestParams);
-                writer.newLine();
-            }
+            writeRequestOption(writer, requestParamsVar, requestParams, isRequestParamDefined);
 
             String consumeHeader = getConsumeHeaderFromRequestMapping(methodRequestMapping);
             boolean isRequestHeaderDefined = !consumeHeader.isEmpty();
-            if (isRequestHeaderDefined) {
-                writer.write("const " + requestHeadersVar + " = " + consumeHeader + ";");
-                writer.newLine();
-            }
+            writeRequestOption(writer, requestHeadersVar, consumeHeader, isRequestHeaderDefined);
 
             tsPath = pathStringBuilder.toString();
             if (httpMethod.compareTo("PUT") == 0) {
@@ -178,6 +169,13 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
         }
 
+    }
+
+    private void writeRequestOption(BufferedWriter writer, String requestOption, String requestOptionValue, boolean isOptionDefined) throws IOException {
+        if (isOptionDefined) {
+            writer.write("const " + requestOption + " = " + requestOptionValue + ";");
+            writer.newLine();
+        }
     }
 
     private String composeRequestOptions(String requestBodyVar, String requestHeadersVar, String requestParamsVar, boolean isRequestBodyDefined, boolean isRequestParamDefined, boolean isRequestHeaderDefined, String requestOptions, boolean methodProduceApplicationJson) {
