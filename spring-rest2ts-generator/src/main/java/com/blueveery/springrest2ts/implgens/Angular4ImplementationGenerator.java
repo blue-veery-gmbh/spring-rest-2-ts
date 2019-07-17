@@ -65,61 +65,22 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             writer.write("// HTTP method = " + httpMethod);
             writer.newLine();
 
-            StringBuilder pathStringBuilder = new StringBuilder(tsPath);
-
             String requestBodyVar = "body";
             String requestHeadersVar = "headers";
             String requestParamsVar = "params";
 
-            String requestBody = "";
+            StringBuilder pathStringBuilder = new StringBuilder(tsPath);
+            StringBuilder requestBodyBuilder = new StringBuilder();
+            StringBuilder requestParamsBuilder = new StringBuilder();
 
-            StringBuilder requestParamsBuilder = null;
-            for (TSParameter tsParameter : method.getParameterList()) {
-                writer.newLine();
-                String tsParameterName = tsParameter.getName();
-
-                if (tsParameter.findAnnotation(RequestBody.class) != null) {
-                    writer.write(String.format("// parameter %s is sent in request body ", tsParameterName));
-                    requestBody = tsParameterName;
-
-                    if (httpMethod.equals("PUT")) {
-                        replaceInStringBuilder(pathStringBuilder, "{id}'", "' + " + tsParameter.getName() + ".id ");
-                    }
-                    continue;
-                }
-                PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
-                if (pathVariable != null) {
-                    writer.write(String.format("// parameter %s is sent in path variable %s ", tsParameterName, pathVariable.value()));
-
-                    String targetToReplace = "{" + pathVariable.value() + "}'";
-                    if ("id".equals(pathVariable.value()) && httpMethod.equals("PUT")) {
-                        replaceInStringBuilder(pathStringBuilder, targetToReplace, "' + " + tsParameterName + ".id");
-                    } else {
-                        replaceInStringBuilder(pathStringBuilder, targetToReplace, "' + " + tsParameterName);
-                    }
-
-                    continue;
-                }
-                RequestParam requestParam = tsParameter.findAnnotation(RequestParam.class);
-                if (requestParam != null) {
-                    writer.write(String.format("// parameter %s is sent as request param %s ", tsParameterName, requestParam.value()));
-                    if (requestParamsBuilder == null) {
-                        requestParamsBuilder = new StringBuilder(" new HttpParams();");
-                    }
-                    if (!tsParameter.getType().equals(TypeMapper.tsString)) {
-                        tsParameterName = tsParameterName + ".toString()";
-                    }
-                    requestParamsBuilder.append("\n").append(requestParamsVar).append(".set('").append(requestParam.value()).append("',").append(tsParameterName).append(")");
-                }
-            }
-            String requestParams = requestParamsBuilder != null ? requestParamsBuilder.toString() : "";
+            readMethodParameters(writer, method, httpMethod, requestParamsVar, pathStringBuilder, requestBodyBuilder, requestParamsBuilder);
             writer.newLine();
 
-            boolean isRequestBodyDefined = !requestBody.isEmpty();
-            writeRequestOption(writer, requestBodyVar, requestBody, isRequestBodyDefined);
+            boolean isRequestBodyDefined = !isStringBuilderEmpty(requestBodyBuilder);
+            writeRequestOption(writer, requestBodyVar, requestBodyBuilder.toString(), isRequestBodyDefined);
 
-            boolean isRequestParamDefined = !requestParams.isEmpty();
-            writeRequestOption(writer, requestParamsVar, requestParams, isRequestParamDefined);
+            boolean isRequestParamDefined = !isStringBuilderEmpty(requestParamsBuilder);
+            writeRequestOption(writer, requestParamsVar, requestParamsBuilder.toString(), isRequestParamDefined);
 
             String consumeHeader = getConsumeContentTypeFromRequestMapping(methodRequestMapping);
             boolean isRequestHeaderDefined = !consumeHeader.isEmpty();
@@ -151,6 +112,51 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
         }
 
+    }
+
+    private void readMethodParameters(BufferedWriter writer, TSMethod method, String httpMethod, String requestParamsVar, StringBuilder pathStringBuilder, StringBuilder requestBodyBuilder, StringBuilder requestParamsBuilder) throws IOException {
+        for (TSParameter tsParameter : method.getParameterList()) {
+            writer.newLine();
+            String tsParameterName = tsParameter.getName();
+
+            if (tsParameter.findAnnotation(RequestBody.class) != null) {
+                writer.write(String.format("// parameter %s is sent in request body ", tsParameterName));
+                requestBodyBuilder.append(tsParameterName);
+
+                if (httpMethod.equals("PUT")) {
+                    replaceInStringBuilder(pathStringBuilder, "{id}'", "' + " + tsParameter.getName() + ".id ");
+                }
+                continue;
+            }
+            PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
+            if (pathVariable != null) {
+                writer.write(String.format("// parameter %s is sent in path variable %s ", tsParameterName, pathVariable.value()));
+
+                String targetToReplace = "{" + pathVariable.value() + "}'";
+                if ("id".equals(pathVariable.value()) && httpMethod.equals("PUT")) {
+                    replaceInStringBuilder(pathStringBuilder, targetToReplace, "' + " + tsParameterName + ".id");
+                } else {
+                    replaceInStringBuilder(pathStringBuilder, targetToReplace, "' + " + tsParameterName);
+                }
+
+                continue;
+            }
+            RequestParam requestParam = tsParameter.findAnnotation(RequestParam.class);
+            if (requestParam != null) {
+                writer.write(String.format("// parameter %s is sent as request param %s ", tsParameterName, requestParam.value()));
+                if (isStringBuilderEmpty(requestParamsBuilder)) {
+                    requestParamsBuilder.append(" new HttpParams();");
+                }
+                if (!tsParameter.getType().equals(TypeMapper.tsString)) {
+                    tsParameterName = tsParameterName + ".toString()";
+                }
+                requestParamsBuilder.append("\n").append(requestParamsVar).append(".set('").append(requestParam.value()).append("',").append(tsParameterName).append(")");
+            }
+        }
+    }
+
+    private boolean isStringBuilderEmpty(StringBuilder requestParamsBuilder) {
+        return requestParamsBuilder.length() == 0;
     }
 
     private void replaceInStringBuilder(StringBuilder pathStringBuilder, String targetToReplace, String replacement) {
