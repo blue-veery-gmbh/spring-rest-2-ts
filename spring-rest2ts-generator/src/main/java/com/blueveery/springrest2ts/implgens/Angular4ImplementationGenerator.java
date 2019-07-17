@@ -82,30 +82,33 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 if (tsParameter.findAnnotation(RequestBody.class) != null) {
                     writer.write(String.format("// parameter %s is sent in request body ", tsParameterName));
                     requestBody = tsParameterName;
+
+                    if (httpMethod.equals("PUT")) {
+                        String targetToReplace = "{id}";
+                        int start = pathStringBuilder.lastIndexOf(targetToReplace);
+                        int end = start + targetToReplace.length() + 1;
+                        pathStringBuilder.replace(start, end, "' + " + tsParameter.getName() + ".id ");
+                    }
                     continue;
                 }
-                if (tsParameter.findAnnotation(PathVariable.class) != null) {
-                    PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
+                PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
+                if (pathVariable != null) {
                     writer.write(String.format("// parameter %s is sent in path variable %s ", tsParameterName, pathVariable.value()));
 
                     String targetToReplace = "{" + pathVariable.value() + "}";
                     int start = pathStringBuilder.lastIndexOf(targetToReplace);
-                    int end = start + targetToReplace.length();
+                    int end = start + targetToReplace.length() + 1;
 
-                    if ("id".equals(pathVariable.value())) {
-                        if (httpMethod.startsWith("PUT")) {
-                            tsPath = tsPath.replace("{id}", "' + entity.id + '");
-                        } else {
-                            pathStringBuilder.replace(start, end, "' + " + tsParameterName + " + '");
-                        }
+                    if ("id".equals(pathVariable.value()) && httpMethod.startsWith("PUT")) {
+                        pathStringBuilder.replace(start, end, "' + " + tsParameterName + ".id");
                     } else {
-                        pathStringBuilder.replace(start, end, "' + " + tsParameterName + " + '");
+                        pathStringBuilder.replace(start, end, "' + " + tsParameterName);
                     }
 
                     continue;
                 }
-                if (tsParameter.findAnnotation(RequestParam.class) != null) {
-                    RequestParam requestParam = tsParameter.findAnnotation(RequestParam.class);
+                RequestParam requestParam = tsParameter.findAnnotation(RequestParam.class);
+                if (requestParam != null) {
                     writer.write(String.format("// parameter %s is sent as request param %s ", tsParameterName, requestParam.value()));
                     if (requestParamsBuilder == null) {
                         requestParamsBuilder = new StringBuilder(" new HttpParams();");
@@ -125,24 +128,9 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             boolean isRequestParamDefined = !requestParams.isEmpty();
             writeRequestOption(writer, requestParamsVar, requestParams, isRequestParamDefined);
 
-            String consumeHeader = getConsumeHeaderFromRequestMapping(methodRequestMapping);
+            String consumeHeader = getConsumeContentTypeFromRequestMapping(methodRequestMapping);
             boolean isRequestHeaderDefined = !consumeHeader.isEmpty();
             writeRequestOption(writer, requestHeadersVar, consumeHeader, isRequestHeaderDefined);
-
-            tsPath = pathStringBuilder.toString();
-            if (httpMethod.compareTo("PUT") == 0) {
-                for (TSParameter tsParameter : method.getParameterList()) {
-                    if (tsParameter.findAnnotation(RequestBody.class) != null) {
-                        tsPath = tsPath.replace("{id}", "' + " + tsParameter.getName() + ".id + '"); //TODO: ugly workaround
-                    } else if (tsParameter.findAnnotation(PathVariable.class) != null) {
-                        PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
-                        if ("id".equals(pathVariable.value())) {
-                            tsPath = tsPath.replace("{id}", "' +" + tsParameter.getName() + " + '"); //TODO: ugly workaround
-                        }
-                    }
-                }
-            }
-
 
             TSParameterisedType subjectAnyType = new TSParameterisedType("", subjectClass, TypeMapper.tsAny);
             writer.write("const " + FIELD_NAME_SUBJECT + " = new " + subjectAnyType.getName() + "();");
@@ -152,6 +140,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             boolean isMethodProduceApplicationJson = Arrays.asList(methodRequestMapping.produces()).contains("application/json");
             requestOptions = composeRequestOptions(requestBodyVar, requestHeadersVar, requestParamsVar, isRequestBodyDefined, isRequestParamDefined, isRequestHeaderDefined, requestOptions, isMethodProduceApplicationJson);
 
+            tsPath = pathStringBuilder.toString();
             writer.write(
                     "this." + FIELD_NAME_HTTP_SERVICE + ".request("
                             + "'" + httpMethod + "'"
@@ -213,7 +202,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         return "";
     }
 
-    private String getConsumeHeaderFromRequestMapping(RequestMapping requestMapping) {
+    private String getConsumeContentTypeFromRequestMapping(RequestMapping requestMapping) {
         if (requestMapping.consumes().length > 0) {
             return " new HttpHeaders().set('Content-type'," + " '" + requestMapping.consumes()[0] + "')";
         }
