@@ -158,7 +158,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 }
                 boolean isNullableType = tsParameter.getType() instanceof TsUnion && ((TsUnion) tsParameter.getType()).getJoinedTypeList().contains(TypeMapper.tsNull);
                 if (tsParameter.isOptional() || isNullableType) {
-                    requestParamsBuilder.append("\n").append("if (").append(tsParameterName).append(") {");
+                    requestParamsBuilder.append("\n").append("if (").append(tsParameterName).append(" !== undefined && ").append(tsParameterName).append(" !== null) {");
                     addRequestParameter(requestParamsBuilder, requestParamsVar, tsParameter, requestParam);
                     requestParamsBuilder.append("}");
                 } else {
@@ -174,7 +174,15 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         if (!tsParameter.getType().equals(TypeMapper.tsString)) {
             tsParameterName += ".toString()";
         }
-        requestParamsBuilder.append("\n").append(requestParamsVar).append(".set('").append(requestParam.value()).append("',").append(tsParameterName).append(");");
+        requestParamsBuilder
+                .append("\n")
+                .append(requestParamsVar)
+                .append(" = ")
+                .append(requestParamsVar)
+                .append(".set('").
+                append(requestParam.value())
+                .append("',").append(tsParameterName)
+                .append(");");
     }
 
     private boolean isStringBuilderEmpty(StringBuilder requestParamsBuilder) {
@@ -189,7 +197,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
     private void writeRequestOption(BufferedWriter writer, String requestOption, String requestOptionValue, boolean isOptionDefined) throws IOException {
         if (isOptionDefined) {
-            writer.write("const " + requestOption + " = " + requestOptionValue);
+            writer.write("let " + requestOption + " = " + requestOptionValue);
             writer.newLine();
         }
     }
