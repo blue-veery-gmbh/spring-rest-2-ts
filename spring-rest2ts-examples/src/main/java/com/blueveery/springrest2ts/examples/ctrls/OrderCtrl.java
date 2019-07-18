@@ -45,7 +45,7 @@ public class OrderCtrl implements BaseCtrl<OrderDTO> {
     @ResponseBody
     public List<OrderDTO> getOrdersForCustomer(@RequestParam(value = "customer-id") UUID customerId,
                                                @RequestParam(value = "sortBy", required = false) String sortBy,
-                                               @RequestParam(value = "ascending", required = false) Boolean ascending,
+                                               @RequestParam(value = "ascending") Boolean ascending,
                                                @RequestParam(value = "pageNumber") int pageNumber,
                                                @RequestParam(value = "pageSize") int pageSize) {
         return Collections.emptyList();

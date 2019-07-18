@@ -130,7 +130,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
             if (tsParameter.findAnnotation(RequestBody.class) != null) {
                 writer.write(String.format("// parameter %s is sent in request body ", tsParameterName));
-                requestBodyBuilder.append(tsParameterName);
+                requestBodyBuilder.append(tsParameterName).append(";");
 
                 if (httpMethod.equals("PUT")) {
                     replaceInStringBuilder(pathStringBuilder, "{id}'", "' + " + tsParameter.getName() + ".id ");
@@ -156,12 +156,25 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 if (isStringBuilderEmpty(requestParamsBuilder)) {
                     requestParamsBuilder.append(" new HttpParams();");
                 }
-                if (!tsParameter.getType().equals(TypeMapper.tsString)) {
-                    tsParameterName = tsParameterName + ".toString()";
+                boolean isNullableType = tsParameter.getType() instanceof TsUnion && ((TsUnion) tsParameter.getType()).getJoinedTypeList().contains(TypeMapper.tsNull);
+                if (tsParameter.isOptional() || isNullableType) {
+                    requestParamsBuilder.append("\n").append("if (").append(tsParameterName).append(") {");
+                    addRequestParameter(requestParamsBuilder, requestParamsVar, tsParameter, requestParam);
+                    requestParamsBuilder.append("}");
+                } else {
+                    addRequestParameter(requestParamsBuilder, requestParamsVar, tsParameter, requestParam);
                 }
-                requestParamsBuilder.append("\n").append(requestParamsVar).append(".set('").append(requestParam.value()).append("',").append(tsParameterName).append(")");
             }
+
         }
+    }
+
+    private void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, TSParameter tsParameter, RequestParam requestParam) {
+        String tsParameterName = tsParameter.getName();
+        if (!tsParameter.getType().equals(TypeMapper.tsString)) {
+            tsParameterName += ".toString()";
+        }
+        requestParamsBuilder.append("\n").append(requestParamsVar).append(".set('").append(requestParam.value()).append("',").append(tsParameterName).append(");");
     }
 
     private boolean isStringBuilderEmpty(StringBuilder requestParamsBuilder) {
@@ -176,7 +189,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
     private void writeRequestOption(BufferedWriter writer, String requestOption, String requestOptionValue, boolean isOptionDefined) throws IOException {
         if (isOptionDefined) {
-            writer.write("const " + requestOption + " = " + requestOptionValue + ";");
+            writer.write("const " + requestOption + " = " + requestOptionValue);
             writer.newLine();
         }
     }
@@ -218,7 +231,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
     private String getConsumeContentTypeFromRequestMapping(RequestMapping requestMapping) {
         if (requestMapping.consumes().length > 0) {
-            return " new HttpHeaders().set('Content-type'," + " '" + requestMapping.consumes()[0] + "')";
+            return " new HttpHeaders().set('Content-type'," + " '" + requestMapping.consumes()[0] + "');";
         }
         return "";
     }
