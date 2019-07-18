@@ -158,7 +158,13 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 }
                 boolean isNullableType = tsParameter.getType() instanceof TsUnion && ((TsUnion) tsParameter.getType()).getJoinedTypeList().contains(TypeMapper.tsNull);
                 if (tsParameter.isOptional() || isNullableType) {
-                    requestParamsBuilder.append("\n").append("if (").append(tsParameterName).append(" !== undefined && ").append(tsParameterName).append(" !== null) {");
+                    requestParamsBuilder
+                            .append("\n")
+                            .append("if (")
+                            .append(tsParameterName)
+                            .append(" !== undefined && ")
+                            .append(tsParameterName)
+                            .append(" !== null) {");
                     addRequestParameter(requestParamsBuilder, requestParamsVar, tsParameter, requestParam);
                     requestParamsBuilder.append("}");
                 } else {
@@ -179,8 +185,8 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 .append(requestParamsVar)
                 .append(" = ")
                 .append(requestParamsVar)
-                .append(".set('").
-                append(requestParam.value())
+                .append(".set('")
+                .append(requestParam.value())
                 .append("',").append(tsParameterName)
                 .append(");");
     }
