@@ -11,6 +11,11 @@ public interface IAnnotated {
             if(annotation.annotationType() == aClass){
                 return (T) annotation;
             }
+            for (Annotation baseAnnotation : annotation.annotationType().getAnnotations()) {
+                if (baseAnnotation.annotationType() == aClass) {
+                    return (T) baseAnnotation;
+                }
+            }
         }
         return null;
     }

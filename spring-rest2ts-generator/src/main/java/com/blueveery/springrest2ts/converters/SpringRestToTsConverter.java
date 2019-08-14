@@ -131,7 +131,15 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
     }
 
     private boolean isRestMethod(Method method) {
-        return method.isAnnotationPresent(RequestMapping.class);
+        if (method.isAnnotationPresent(RequestMapping.class)) {
+            return true;
+        }
+        for (Annotation annotation : method.getAnnotations()) {
+            if (annotation.annotationType().isAnnotationPresent(RequestMapping.class)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void setSupperClass(Class javaType, TSClass tsClass) {
