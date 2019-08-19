@@ -121,13 +121,17 @@ public class Angular4JsonScopeImplementationGenerator implements ImplementationG
                 }
                 if (tsParameter.findAnnotation(PathVariable.class) != null) {
                     PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
-                    writer.write(String.format("// parameter %s is sent in path variable %s ", tsParameter.getName(), pathVariable.value()));
+                    String variableName = pathVariable.value();
+                    if("".equals(variableName)){
+                        variableName = tsParameter.getName();
+                    }
+                    writer.write(String.format("// parameter %s is sent in path variable %s ", tsParameter.getName(), variableName));
 
-                    String targetToReplace = "{" + pathVariable.value() + "}";
+                    String targetToReplace = "{" + variableName + "}";
                     int start = pathStringBuilder.lastIndexOf(targetToReplace);
                     int end = start + targetToReplace.length();
 
-                    if ("id".equals(pathVariable.value())) {
+                    if ("id".equals(variableName)) {
                         if (methodString.startsWith("PUT")) {
                             tsPath = tsPath.replace("{id}", "' + entity.id.split('/')[1] + '");
                         } else {
@@ -139,12 +143,16 @@ public class Angular4JsonScopeImplementationGenerator implements ImplementationG
 
                     continue;
                 }
-                if (tsParameter.findAnnotation(RequestParam.class) != null) {
-                    RequestParam requestParam = tsParameter.findAnnotation(RequestParam.class);
-                    writer.write(String.format("// parameter %s is sent as request param %s ", tsParameter.getName(), requestParam.value()));
+                RequestParam requestParamAnnotation = tsParameter.findAnnotation(RequestParam.class);
+                if (requestParamAnnotation != null) {
+                    String requestParamName = requestParamAnnotation.value();
+                    if ("".equals(requestParamName)) {
+                        requestParamName = tsParameter.getName();
+                    }
+                    writer.write(String.format("// parameter %s is sent as request param %s ", tsParameter.getName(), requestParamName));
 
                     pathStringBuilder.append(" + '");
-                    pathStringBuilder.append(requestParam.value());
+                    pathStringBuilder.append(requestParamName);
                     pathStringBuilder.append("=' + ");
                     pathStringBuilder.append(tsParameter.getName());
                     pathStringBuilder.append(" + '&'");
@@ -172,7 +180,11 @@ public class Angular4JsonScopeImplementationGenerator implements ImplementationG
                         tsPath = tsPath.replace("{id}", "' + entity.id.split('/')[1] + '"); //TODO: ugly workaround
                     } else if (tsParameter.findAnnotation(PathVariable.class) != null) {
                         PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
-                        if ("id".equals(pathVariable.value())) {
+                        String variableName = pathVariable.value();
+                        if("".equals(variableName)){
+                            variableName = tsParameter.getName();
+                        }
+                        if ("id".equals(variableName)) {
                             tsPath = tsPath.replace("{id}", "' +" + tsParameter.getName() + ".split('/')[1] + '"); //TODO: ugly workaround
                         }
                     }

@@ -24,7 +24,7 @@ public class OrderCtrl implements BaseCtrl<OrderDTO> {
 
     @RequestMapping(path = "/{id}", method = RequestMethod.GET, produces = {"application/json"})
     @ResponseBody
-    public OrderDTO getOrder(@PathVariable("id") UUID id) {
+    public OrderDTO getOrder(@PathVariable UUID id) {
         return new OrderDTO();
     }
 

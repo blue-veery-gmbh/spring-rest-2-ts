@@ -139,10 +139,14 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             }
             PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
             if (pathVariable != null) {
-                writer.write(String.format("// parameter %s is sent in path variable %s ", tsParameterName, pathVariable.value()));
+                String variableName = pathVariable.value();
+                if("".equals(variableName)){
+                    variableName = tsParameterName;
+                }
+                writer.write(String.format("// parameter %s is sent in path variable %s ", tsParameterName, variableName));
 
-                String targetToReplace = "{" + pathVariable.value() + "}'";
-                if ("id".equals(pathVariable.value()) && httpMethod.equals("PUT")) {
+                String targetToReplace = "{" + variableName + "}'";
+                if ("id".equals(variableName) && httpMethod.equals("PUT")) {
                     replaceInStringBuilder(pathStringBuilder, targetToReplace, "' + " + tsParameterName + ".id");
                 } else {
                     replaceInStringBuilder(pathStringBuilder, targetToReplace, "' + " + tsParameterName);
@@ -152,11 +156,15 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             }
             RequestParam requestParam = tsParameter.findAnnotation(RequestParam.class);
             if (requestParam != null) {
-                writer.write(String.format("// parameter %s is sent as request param %s ", tsParameterName, requestParam.value()));
+                String requestParamName = requestParam.value();
+                if ("".equals(requestParamName)) {
+                    requestParamName = tsParameter.getName();
+                }
+                writer.write(String.format("// parameter %s is sent as request param %s ", tsParameterName, requestParamName));
                 if (isStringBuilderEmpty(requestParamsBuilder)) {
                     requestParamsBuilder.append(" new HttpParams();");
                 }
-                boolean isNullableType = tsParameter.getType() instanceof TsUnion && ((TsUnion) tsParameter.getType()).getJoinedTypeList().contains(TypeMapper.tsNull);
+                boolean isNullableType = tsParameter.isNullable();
                 if (tsParameter.isOptional() || isNullableType) {
                     requestParamsBuilder
                             .append("\n")
@@ -165,17 +173,17 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                             .append(" !== undefined && ")
                             .append(tsParameterName)
                             .append(" !== null) {");
-                    addRequestParameter(requestParamsBuilder, requestParamsVar, tsParameter, requestParam);
+                    addRequestParameter(requestParamsBuilder, requestParamsVar, tsParameter, requestParamName);
                     requestParamsBuilder.append("}");
                 } else {
-                    addRequestParameter(requestParamsBuilder, requestParamsVar, tsParameter, requestParam);
+                    addRequestParameter(requestParamsBuilder, requestParamsVar, tsParameter, requestParamName);
                 }
             }
 
         }
     }
 
-    private void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, TSParameter tsParameter, RequestParam requestParam) {
+    private void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, TSParameter tsParameter, String requestParamName) {
         String tsParameterName = tsParameter.getName();
         if (!tsParameter.getType().equals(TypeMapper.tsString)) {
             tsParameterName += ".toString()";
@@ -186,7 +194,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 .append(" = ")
                 .append(requestParamsVar)
                 .append(".set('")
-                .append(requestParam.value())
+                .append(requestParamName)
                 .append("',").append(tsParameterName)
                 .append(");");
     }
