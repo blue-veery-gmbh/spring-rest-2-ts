@@ -3,10 +3,11 @@ package com.blueveery.springrest2ts.examples.ctrls;
 import com.blueveery.springrest2ts.examples.ctrls.core.GetObjectCtrl;
 import com.blueveery.springrest2ts.examples.model.ProductDTO;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,12 +23,12 @@ public class ProductCtrl implements GetObjectCtrl<ProductDTO> {
     }
 
     @GetMapping(produces = {"application/json"})
-    public List<ProductDTO> getProducts(@RequestParam(value = "price") BigInteger price,
-                                        @RequestParam(value = "sortBy", required = false, defaultValue = "id") String sortBy,
-                                        @RequestParam(value = "ascending", required = false, defaultValue = "true") Boolean ascending,
-                                        @RequestParam(value = "pageNumber") int pageNumber,
-                                        @RequestParam Optional<Integer> pageSize) {
-        return Collections.emptyList();
+    public ResponseEntity<List<ProductDTO>> getProducts(@RequestParam(value = "price") BigInteger price,
+                                                        @RequestParam(value = "sortBy", required = false, defaultValue = "id") String sortBy,
+                                                        @RequestParam(value = "ascending", required = false, defaultValue = "true") Boolean ascending,
+                                                        @RequestParam(value = "pageNumber") int pageNumber,
+                                                        @RequestParam Optional<Integer> pageSize) {
+        return new ResponseEntity<>(new ArrayList<>(), HttpStatus.ACCEPTED);
     }
 
     @RequestMapping(path = "/count", method = RequestMethod.GET, produces = {"text/plain"})

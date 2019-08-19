@@ -2,6 +2,7 @@ package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.tsmodel.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.annotation.Annotation;
@@ -54,7 +55,14 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
                         fallbackTSType = typeParametersMap.get(method.getDeclaringClass().getName());
                     }
 
-                    TSMethod tsMethod = new TSMethod(method.getName(), tsClass, TypeMapper.map(method.getGenericReturnType(), fallbackTSType), false, false);
+                    Type genericReturnType = method.getGenericReturnType();
+                    if (genericReturnType instanceof ParameterizedType) {
+                        ParameterizedType parameterizedType = (ParameterizedType) genericReturnType;
+                        if (parameterizedType.getRawType() == ResponseEntity.class) {
+                            genericReturnType = parameterizedType.getActualTypeArguments()[0];
+                        }
+                    }
+                    TSMethod tsMethod = new TSMethod(method.getName(), tsClass, TypeMapper.map(genericReturnType, fallbackTSType), false, false);
                     for (Parameter parameter :method.getParameters()) {
                         TSParameter tsParameter = new TSParameter(parameter.getName(), TypeMapper.map(parameter.getParameterizedType(), fallbackTSType));
                         addRestAnnotations(parameter.getAnnotations(), tsParameter);
