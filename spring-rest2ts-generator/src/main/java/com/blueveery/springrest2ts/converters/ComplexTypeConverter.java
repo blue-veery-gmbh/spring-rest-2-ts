@@ -4,6 +4,7 @@ import com.blueveery.springrest2ts.tsmodel.INullableElement;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Optional;
 
@@ -16,9 +17,12 @@ public abstract class ComplexTypeConverter {
 
     protected final void setAsNullableType(Type elementType, Annotation[] declaredAnnotations, INullableElement tsElement) {
         if(!tsElement.isNullable()){
-            if(Optional.class == elementType){
-                tsElement.setNullable(true);
-                return;
+            if (elementType instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) elementType;
+                if(Optional.class == parameterizedType.getRawType()){
+                    tsElement.setNullable(true);
+                    return;
+                }
             }
 
             for (Annotation annotation : declaredAnnotations) {

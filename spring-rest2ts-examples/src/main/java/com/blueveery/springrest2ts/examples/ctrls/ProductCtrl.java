@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 
 @RestController
@@ -25,7 +26,7 @@ public class ProductCtrl implements GetObjectCtrl<ProductDTO> {
                                         @RequestParam(value = "sortBy", required = false, defaultValue = "id") String sortBy,
                                         @RequestParam(value = "ascending", required = false, defaultValue = "true") Boolean ascending,
                                         @RequestParam(value = "pageNumber") int pageNumber,
-                                        @RequestParam(value = "pageSize") int pageSize) {
+                                        @RequestParam(value = "pageSize") Optional<Integer> pageSize) {
         return Collections.emptyList();
     }
 
