@@ -92,8 +92,8 @@ public class Angular4JsonScopeImplementationGenerator implements ImplementationG
                 writer.newLine();
             }
         } else {
-            RequestMapping methodRequestMapping = method.findAnnotation(RequestMapping.class);
-            RequestMapping classRequestMapping = method.getOwner().findAnnotation(RequestMapping.class);
+            RequestMapping methodRequestMapping = method.getRequestMapping();
+            RequestMapping classRequestMapping = method.getOwner().getRequestMapping();
 
             String tsPath = "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" + getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "?'";
             String methodString = methodRequestMapping.method()[0].toString();
@@ -264,7 +264,7 @@ public class Angular4JsonScopeImplementationGenerator implements ImplementationG
             }
             return tsParameters;
         }
-        RequestMapping methodRequestMapping = method.findAnnotation(RequestMapping.class);
+        RequestMapping methodRequestMapping = method.getRequestMapping();
         if (methodRequestMapping != null) {
             String methodString = methodRequestMapping.method()[0].toString();
             if ("PUT".equals(methodString) || "POST".equals(methodString)) {

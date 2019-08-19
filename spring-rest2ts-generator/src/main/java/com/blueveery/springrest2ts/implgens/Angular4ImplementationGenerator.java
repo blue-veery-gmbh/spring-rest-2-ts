@@ -62,8 +62,8 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 writer.newLine();
             }
         } else {
-            RequestMapping methodRequestMapping = method.findAnnotation(RequestMapping.class);
-            RequestMapping classRequestMapping = method.getOwner().findAnnotation(RequestMapping.class);
+            RequestMapping methodRequestMapping = method.getRequestMapping();
+            RequestMapping classRequestMapping = method.getOwner().getRequestMapping();
 
             String tsPath = useUrlService ? "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" : "'";
             tsPath += getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "'";
@@ -290,7 +290,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             }
             return tsParameters;
         }
-        RequestMapping methodRequestMapping = method.findAnnotation(RequestMapping.class);
+        RequestMapping methodRequestMapping = method.getRequestMapping();
         if (methodRequestMapping != null) {
             String methodString = methodRequestMapping.method()[0].toString();
             if ("PUT".equals(methodString) || "POST".equals(methodString)) {
