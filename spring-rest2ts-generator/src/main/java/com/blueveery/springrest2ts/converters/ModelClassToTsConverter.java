@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.ClassNameMapper;
 import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.blueveery.springrest2ts.tsmodel.TSInterface;
@@ -23,11 +24,11 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
         this.generationContext = generationContext;
     }
 
-    public boolean preConverted(ModuleConverter moduleConverter, Class javaClass) {
+    public boolean preConverted(ModuleConverter moduleConverter, Class javaClass, ClassNameMapper classNameMapper) {
         if (TypeMapper.map(javaClass) == TypeMapper.tsAny) {
             if (objectMapper.filterClass(javaClass)) {
                 TSModule tsModule = moduleConverter.getTsModule(javaClass);
-                TSInterface tsInterface = new TSInterface(javaClass.getSimpleName(), tsModule);
+                TSInterface tsInterface = new TSInterface(classNameMapper.mapJavaClassNameToTs(javaClass.getSimpleName()), tsModule);
                 tsModule.addScopedType(tsInterface);
                 TypeMapper.registerTsType(javaClass, tsInterface);
                 return true;

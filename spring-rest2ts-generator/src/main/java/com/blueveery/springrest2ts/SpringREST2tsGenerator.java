@@ -23,6 +23,9 @@ public class SpringREST2tsGenerator {
     static Logger logger = LoggerFactory.getLogger("gen-logger");
     private JavaTypeFilter modelClassesCondition;
     private JavaTypeFilter restClassesCondition;
+    private ClassNameMapper enumClassesNameMapper = new NoChangeClassNameMapper();
+    private ClassNameMapper modelClassesNameMapper = new NoChangeClassNameMapper();
+    private ClassNameMapper restClassesNameMapper = new NoChangeClassNameMapper();
     private Set<String> packagesNames = new HashSet<>();
     private Map<Class, TSType> customTypeMapping = new HashMap<>();
     private GenerationContext generationContext;
@@ -33,6 +36,18 @@ public class SpringREST2tsGenerator {
 
     public void setRestClassesCondition(JavaTypeFilter restClassesCondition) {
         this.restClassesCondition = restClassesCondition;
+    }
+
+    public void setEnumClassesNameMapper(ClassNameMapper enumClassesNameMapper) {
+        this.enumClassesNameMapper = enumClassesNameMapper;
+    }
+
+    public void setModelClassesNameMapper(ClassNameMapper modelClassesNameMapper) {
+        this.modelClassesNameMapper = modelClassesNameMapper;
+    }
+
+    public void setRestClassesNameMapper(ClassNameMapper restClassesNameMapper) {
+        this.restClassesNameMapper = restClassesNameMapper;
     }
 
     public Set<String> getPackagesNames() {
@@ -70,10 +85,10 @@ public class SpringREST2tsGenerator {
         convertModules(modelClasses, moduleConverter);
         convertModules(restClasses, moduleConverter);
 
-        convertTypes(enumClasses, moduleConverter, new EnumConverter());
+        convertTypes(enumClasses, moduleConverter, new EnumConverter(), enumClassesNameMapper);
         JacksonObjectMapper objectMapper = new JacksonObjectMapper(JsonAutoDetect.Visibility.ANY, JsonAutoDetect.Visibility.NONE, JsonAutoDetect.Visibility.NONE);
-        convertTypes(modelClasses, moduleConverter, new ModelClassToTsConverter(objectMapper, generationContext));
-        convertTypes(restClasses, moduleConverter, new SpringRestToTsConverter(generationContext));
+        convertTypes(modelClasses, moduleConverter, new ModelClassToTsConverter(objectMapper, generationContext), modelClassesNameMapper);
+        convertTypes(restClasses, moduleConverter, new SpringRestToTsConverter(generationContext), restClassesNameMapper);
 
 
         writeTypeScriptTypes(moduleConverter.getTsModules(), generationContext, outputDir, logger);
@@ -100,10 +115,10 @@ public class SpringREST2tsGenerator {
         }
     }
 
-    private void convertTypes(Set<Class> javaTypes, ModuleConverter tsModuleSortedMap, ComplexTypeConverter complexTypeConverter) {
+    private void convertTypes(Set<Class> javaTypes, ModuleConverter tsModuleSortedMap, ComplexTypeConverter complexTypeConverter, ClassNameMapper classNameMapper) {
         Set<Class> preConvertedTypes = new HashSet<>();
         for (Class javaType : javaTypes) {
-            if (complexTypeConverter.preConverted(tsModuleSortedMap, javaType)) {
+            if (complexTypeConverter.preConverted(tsModuleSortedMap, javaType, classNameMapper)) {
                 preConvertedTypes.add(javaType);
             }
         }

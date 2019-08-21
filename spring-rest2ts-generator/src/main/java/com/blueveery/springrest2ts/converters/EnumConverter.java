@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.ClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.TSEnum;
 import com.blueveery.springrest2ts.tsmodel.TSEnumConstant;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
@@ -10,10 +11,10 @@ import com.blueveery.springrest2ts.tsmodel.TSModule;
 public class EnumConverter extends ComplexTypeConverter {
     @Override
 
-    public boolean preConverted(ModuleConverter moduleConverter, Class javaClass) {
+    public boolean preConverted(ModuleConverter moduleConverter, Class javaClass, ClassNameMapper classNameMapper) {
         if (TypeMapper.map(javaClass) == TypeMapper.tsAny) {
             TSModule tsModule = moduleConverter.getTsModule(javaClass);
-            TSEnum tsEnum = new TSEnum(javaClass.getSimpleName(), tsModule);
+            TSEnum tsEnum = new TSEnum(classNameMapper.mapJavaClassNameToTs(javaClass.getSimpleName()), tsModule);
             tsModule.addScopedType(tsEnum);
             TypeMapper.registerTsType(javaClass, tsEnum);
             return true;

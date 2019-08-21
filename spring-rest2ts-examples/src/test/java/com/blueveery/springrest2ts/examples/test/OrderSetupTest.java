@@ -3,6 +3,7 @@ package com.blueveery.springrest2ts.examples.test;
 
 import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.SpringREST2tsGenerator;
+import com.blueveery.springrest2ts.SubstringClassNameMapper;
 import com.blueveery.springrest2ts.converters.ModulePerJavaPackageConverter;
 import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.examples.ctrls.OrderCtrl;
@@ -63,11 +64,19 @@ public class OrderSetupTest {
     }
 
     @Test
+    public void classNameMappingTest() throws IOException {
+        tsGenerator.setModelClassesNameMapper(new SubstringClassNameMapper("DTO", ""));
+        tsGenerator.setRestClassesNameMapper(new SubstringClassNameMapper("Ctrl", "Service"));
+        tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+    }
+
+    @Test
     public void containsSubStringClassCondition() throws IOException {
         tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("DTO"));
         tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
         tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
     }
+
     @Test
     public void regexClassCondition() throws IOException {
         tsGenerator.setModelClassesCondition(new RegexpJavaTypeFilter("\\w*DTO\\b"));

@@ -1,9 +1,9 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.ClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 

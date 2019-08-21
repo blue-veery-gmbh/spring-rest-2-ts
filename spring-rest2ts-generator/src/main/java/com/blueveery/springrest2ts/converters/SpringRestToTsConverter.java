@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.ClassNameMapper;
 import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.tsmodel.*;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +22,10 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
         this.generationContext = generationContext;
     }
 
-    public boolean preConverted(ModuleConverter moduleConverter, Class javaClass){
+    public boolean preConverted(ModuleConverter moduleConverter, Class javaClass, ClassNameMapper classNameMapper){
         if(TypeMapper.map(javaClass) == TypeMapper.tsAny && !javaClass.isInterface()){
             TSModule tsModule = moduleConverter.getTsModule(javaClass);
-            String simpleName = javaClass.getSimpleName().replace("Ctrl", "Service");
+            String simpleName = classNameMapper.mapJavaClassNameToTs(javaClass.getSimpleName());
             TSClass tsClass = new TSClass(simpleName, tsModule);
             tsModule.addScopedType(tsClass);
             TypeMapper.registerTsType(javaClass, tsClass);
