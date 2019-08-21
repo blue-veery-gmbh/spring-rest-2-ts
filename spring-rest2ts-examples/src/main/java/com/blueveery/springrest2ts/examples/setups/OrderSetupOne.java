@@ -7,7 +7,7 @@ import com.blueveery.springrest2ts.examples.ctrls.OrderCtrl;
 import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrl;
 import com.blueveery.springrest2ts.examples.model.OrderDTO;
 import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
-import com.blueveery.springrest2ts.filters.BaseClassJavaTypeFilter;
+import com.blueveery.springrest2ts.filters.ExtendsJavaTypeFilter;
 import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 
@@ -18,8 +18,8 @@ import java.util.HashMap;
 public class OrderSetupOne {
     public static void main(String[] args) throws IOException {
         SpringREST2tsGenerator springREST2tsGenerator = new SpringREST2tsGenerator();
-        springREST2tsGenerator.setModelClassesCondition(new BaseClassJavaTypeFilter(BaseDTO.class));
-        springREST2tsGenerator.setRestClassesCondition(new BaseClassJavaTypeFilter(BaseCtrl.class));
+        springREST2tsGenerator.setModelClassesCondition(new ExtendsJavaTypeFilter(BaseDTO.class));
+        springREST2tsGenerator.setRestClassesCondition(new ExtendsJavaTypeFilter(BaseCtrl.class));
         springREST2tsGenerator.setGenerationContext(new GenerationContext(new Angular4ImplementationGenerator(Paths.get("shared"))));
 
         HashMap<String, TSModule> packagesMap = new HashMap<>();

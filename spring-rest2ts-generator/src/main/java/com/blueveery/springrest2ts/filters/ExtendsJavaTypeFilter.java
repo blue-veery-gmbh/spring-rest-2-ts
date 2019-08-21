@@ -2,10 +2,10 @@ package com.blueveery.springrest2ts.filters;
 
 import org.slf4j.Logger;
 
-public class BaseClassJavaTypeFilter implements JavaTypeFilter {
+public class ExtendsJavaTypeFilter implements JavaTypeFilter {
     private Class baseType;
 
-    public BaseClassJavaTypeFilter(Class baseType) {
+    public ExtendsJavaTypeFilter(Class baseType) {
         if (baseType.isAnnotation()) {
             throw new IllegalStateException("Annotation could not be a base Type");
         }

@@ -5,7 +5,7 @@ import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.SpringREST2tsGenerator;
 import com.blueveery.springrest2ts.converters.ModulePerJavaPackageConverter;
 import com.blueveery.springrest2ts.converters.TypeMapper;
-import com.blueveery.springrest2ts.filters.BaseClassJavaTypeFilter;
+import com.blueveery.springrest2ts.filters.ExtendsJavaTypeFilter;
 import com.blueveery.springrest2ts.filters.HasAnnotationJavaTypeFilter;
 import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
@@ -19,7 +19,7 @@ import java.util.UUID;
 public class BluehrSetup {
     public static void main(String[] args) throws IOException {
         SpringREST2tsGenerator springREST2tsGenerator = new SpringREST2tsGenerator();
-        springREST2tsGenerator.setModelClassesCondition(new BaseClassJavaTypeFilter(BaseEntity.class));
+        springREST2tsGenerator.setModelClassesCondition(new ExtendsJavaTypeFilter(BaseEntity.class));
         springREST2tsGenerator.setRestClassesCondition(new HasAnnotationJavaTypeFilter(Component.class));
         springREST2tsGenerator.setGenerationContext(new GenerationContext(new Angular4ImplementationGenerator(Paths.get("shared"))));
 

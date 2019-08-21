@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SpringREST2tsGenerator {
 
-    static Logger logger = LoggerFactory.getLogger("main-logger");
+    static Logger logger = LoggerFactory.getLogger("gen-logger");
     private JavaTypeFilter modelClassesCondition;
     private JavaTypeFilter restClassesCondition;
     private Set<String> packagesNames = new HashSet<>();

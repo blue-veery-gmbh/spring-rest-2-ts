@@ -11,10 +11,7 @@ import com.blueveery.springrest2ts.examples.model.CategoryDTO;
 import com.blueveery.springrest2ts.examples.model.OrderDTO;
 import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
 import com.blueveery.springrest2ts.examples.model.enums.OrderPaymentStatus;
-import com.blueveery.springrest2ts.filters.AndFilterOperator;
-import com.blueveery.springrest2ts.filters.BaseClassJavaTypeFilter;
-import com.blueveery.springrest2ts.filters.HasAnnotationJavaTypeFilter;
-import com.blueveery.springrest2ts.filters.OrFilterOperator;
+import com.blueveery.springrest2ts.filters.*;
 import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,8 +43,8 @@ public class OrderSetupTest {
         FileSystemUtils.deleteRecursively(OUTPUT_DIR_PATH.resolve("app/sdk").toFile());
 
         tsGenerator = new SpringREST2tsGenerator();
-        tsGenerator.setModelClassesCondition(new BaseClassJavaTypeFilter(BaseDTO.class));
-        tsGenerator.setRestClassesCondition(new BaseClassJavaTypeFilter(BaseCtrl.class));
+        tsGenerator.setModelClassesCondition(new ExtendsJavaTypeFilter(BaseDTO.class));
+        tsGenerator.setRestClassesCondition(new ExtendsJavaTypeFilter(BaseCtrl.class));
         tsGenerator.setGenerationContext(new GenerationContext(new Angular4ImplementationGenerator()));
 
         HashMap<String, TSModule> packagesMap = new HashMap<>();
@@ -66,9 +63,23 @@ public class OrderSetupTest {
     }
 
     @Test
+    public void containsSubStringClassCondition() throws IOException {
+        tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("DTO"));
+        tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
+        tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+    }
+    @Test
+    public void regexClassCondition() throws IOException {
+        tsGenerator.setModelClassesCondition(new RegexpJavaTypeFilter("\\w*DTO\\b"));
+        tsGenerator.setRestClassesCondition(new RegexpJavaTypeFilter("\\w*Ctrl\\b"));
+        tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+    }
+
+
+    @Test
     public void complexRestClassCondition() throws IOException {
         OrFilterOperator annotationConditions = new OrFilterOperator(Arrays.asList(new HasAnnotationJavaTypeFilter(Controller.class), new HasAnnotationJavaTypeFilter(RestController.class)));
-        tsGenerator.setRestClassesCondition(new AndFilterOperator(Arrays.asList(new BaseClassJavaTypeFilter(BaseCtrl.class), annotationConditions)));
+        tsGenerator.setRestClassesCondition(new AndFilterOperator(Arrays.asList(new ExtendsJavaTypeFilter(BaseCtrl.class), annotationConditions)));
         tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
     }
 
