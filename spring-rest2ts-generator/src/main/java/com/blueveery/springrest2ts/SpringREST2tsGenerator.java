@@ -12,12 +12,15 @@ import org.reflections.util.ConfigurationBuilder;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by tomaszw on 30.07.2017.
  */
 public class SpringREST2tsGenerator {
 
+    static Logger logger = LoggerFactory.getLogger("main-logger");
     private JavaTypeFilter modelClassesCondition;
     private JavaTypeFilter restClassesCondition;
     private Set<String> packagesNames = new HashSet<>();
@@ -49,8 +52,10 @@ public class SpringREST2tsGenerator {
         Set<Class> restClasses = new HashSet<>();
         Set<Class> enumClasses = new HashSet<>();
 
-        scanPackages(packagesNames, modelClassesCondition, modelClasses, enumClasses);
-        scanPackages(packagesNames, restClassesCondition, restClasses, enumClasses);
+        logger.info("Scanning model classes");
+        scanPackages(packagesNames, modelClassesCondition, modelClasses, enumClasses, logger);
+        logger.info("Scanning rest controllers classes");
+        scanPackages(packagesNames, restClassesCondition, restClasses, enumClasses, logger);
 
 
         registerCustomTypesMapping(customTypeMapping);
@@ -70,7 +75,8 @@ public class SpringREST2tsGenerator {
         convertTypes(modelClasses, moduleConverter, new ModelClassToTsConverter(objectMapper, generationContext));
         convertTypes(restClasses, moduleConverter, new SpringRestToTsConverter(generationContext));
 
-        writeTypeScriptTypes(moduleConverter.getTsModules(), generationContext, outputDir);
+
+        writeTypeScriptTypes(moduleConverter.getTsModules(), generationContext, outputDir, logger);
 
         return moduleConverter.getTsModules();
     }
@@ -82,9 +88,9 @@ public class SpringREST2tsGenerator {
         }
     }
 
-    private void writeTypeScriptTypes(SortedSet<TSModule> tsModuleSortedSet, GenerationContext context, Path outputDir) throws IOException {
+    private void writeTypeScriptTypes(SortedSet<TSModule> tsModuleSortedSet, GenerationContext context, Path outputDir, Logger logger) throws IOException {
         for (TSModule tsModule : tsModuleSortedSet) {
-            tsModule.writeModule(context, outputDir);
+            tsModule.writeModule(context, outputDir, logger);
         }
     }
 
@@ -116,19 +122,24 @@ public class SpringREST2tsGenerator {
 
     }
 
-    private void scanPackages(Set<String> packagesNames, JavaTypeFilter javaTypeFilter, Set<Class> classesSet, Set<Class> enumClasses) {
+    private void scanPackages(Set<String> packagesNames, JavaTypeFilter javaTypeFilter, Set<Class> classesSet, Set<Class> enumClasses, Logger logger) {
         Reflections reflections = new Reflections(new ConfigurationBuilder().setScanners(new SubTypesScanner(false)).forPackages(packagesNames.toArray(new String[0])));
 
         Set<Class<?>> packageClassesSet = reflections.getSubTypesOf(Object.class);
         for (Class packageClass : packageClassesSet) {
+            logger.info(String.format("Found class : %s", packageClass.getName()));
             if (javaTypeFilter.filter(packageClass) && packagesNames.contains(packageClass.getPackage().getName())) {
                 classesSet.add(packageClass);
+            }else{
+                logger.warn(String.format("Class filtered out : %s", packageClass.getSimpleName()));
             }
+            javaTypeFilter.explain(packageClass, logger, "");
         }
 
         Set<Class<? extends Enum>> packageEnumsSet = reflections.getSubTypesOf(Enum.class);
         for (Class packageEnumClass : packageEnumsSet) {
             if (packagesNames.contains(packageEnumClass.getPackage().getName())) {
+                logger.info(String.format("Found enum class : %s", packageEnumClass.getName()));
                 enumClasses.add(packageEnumClass);
             }
         }

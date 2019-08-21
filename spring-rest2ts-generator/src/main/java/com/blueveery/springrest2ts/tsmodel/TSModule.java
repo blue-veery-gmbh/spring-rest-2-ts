@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import org.slf4j.Logger;
 
 import static com.blueveery.springrest2ts.tsmodel.ModuleExtensionType.implementation;
 import static com.blueveery.springrest2ts.tsmodel.ModuleExtensionType.typing;
@@ -39,10 +40,11 @@ public class TSModule extends TSElement {
         return isExternal;
     }
 
-    public void writeModule(GenerationContext context, Path outputDir) throws IOException {
+    public void writeModule(GenerationContext context, Path outputDir, Logger logger) throws IOException {
         Path tsModuleDir = outputDir.resolve(moduleRelativePath);
         Files.createDirectories(tsModuleDir);
         Path tsModuleFile = tsModuleDir.resolve(getName() + "." + moduleExtensionType);
+        logger.info(String.format("Generating module into %s", tsModuleFile.toAbsolutePath().normalize().toUri()));
         BufferedWriter writer = Files.newBufferedWriter(tsModuleFile);
         write(context, writer);
         writer.close();
