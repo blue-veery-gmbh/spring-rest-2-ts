@@ -38,9 +38,10 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         TSModule angularCoreModule = new TSModule("@angular/core", null, true);
         injectableDecorator = new TSDecorator("", new TSFunction("Injectable", angularCoreModule));
 
-        TSModule rxjsModule = new TSModule("rxjs", null, true);
-        observableClass = new TSClass("Observable", rxjsModule);
-        subjectClass = new TSClass("Subject", rxjsModule);
+        TSModule subjectModule = new TSModule("rxjs/Subject", null, true);
+        TSModule observableModule = new TSModule("rxjs/Observable", null, true);
+        observableClass = new TSClass("Observable", observableModule);
+        subjectClass = new TSClass("Subject", subjectModule);
 
         TSModule angularHttpModule = new TSModule("@angular/common/http", null, true);
         httpClass = new TSClass("HttpClient", angularHttpModule);
@@ -100,8 +101,8 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             writer.newLine();
 
             String requestOptions = "";
-            boolean isMethodProduceApplicationJson = Arrays.asList(methodRequestMapping.produces()).contains("application/json");
-            requestOptions = composeRequestOptions(requestBodyVar, requestHeadersVar, requestParamsVar, isRequestBodyDefined, isRequestParamDefined, isRequestHeaderDefined, requestOptions, isMethodProduceApplicationJson);
+            boolean isMethodProduceTextContent = Arrays.asList(methodRequestMapping.produces()).contains("text/plain");
+            requestOptions = composeRequestOptions(requestBodyVar, requestHeadersVar, requestParamsVar, isRequestBodyDefined, isRequestParamDefined, isRequestHeaderDefined, requestOptions, isMethodProduceTextContent);
 
             tsPath = pathStringBuilder.toString();
             writer.write(
@@ -131,10 +132,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             if (tsParameter.findAnnotation(RequestBody.class) != null) {
                 writer.write(String.format("// parameter %s is sent in request body ", tsParameterName));
                 requestBodyBuilder.append(tsParameterName).append(";");
-
-                if (httpMethod.equals("PUT")) {
-                    replaceInStringBuilder(pathStringBuilder, "{id}'", "' + " + tsParameter.getName() + ".id ");
-                }
                 continue;
             }
             PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
@@ -145,11 +142,11 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 }
                 writer.write(String.format("// parameter %s is sent in path variable %s ", tsParameterName, variableName));
 
-                String targetToReplace = "{" + variableName + "}'";
+                String targetToReplace = "{" + variableName + "}";
                 if ("id".equals(variableName) && httpMethod.equals("PUT")) {
                     replaceInStringBuilder(pathStringBuilder, targetToReplace, "' + " + tsParameterName + ".id");
                 } else {
-                    replaceInStringBuilder(pathStringBuilder, targetToReplace, "' + " + tsParameterName);
+                    replaceInStringBuilder(pathStringBuilder, targetToReplace, "' + " + tsParameterName + " + '");
                 }
 
                 continue;
@@ -216,8 +213,8 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         }
     }
 
-    private String composeRequestOptions(String requestBodyVar, String requestHeadersVar, String requestParamsVar, boolean isRequestBodyDefined, boolean isRequestParamDefined, boolean isRequestHeaderDefined, String requestOptions, boolean methodProduceApplicationJson) {
-        if (isRequestHeaderDefined || isRequestParamDefined || isRequestBodyDefined || !methodProduceApplicationJson) {
+    private String composeRequestOptions(String requestBodyVar, String requestHeadersVar, String requestParamsVar, boolean isRequestBodyDefined, boolean isRequestParamDefined, boolean isRequestHeaderDefined, String requestOptions, boolean isMethodProduceTextContent) {
+        if (isRequestHeaderDefined || isRequestParamDefined || isRequestBodyDefined || isMethodProduceTextContent) {
             List<String> requestOptionsList = new ArrayList<>();
             if (isRequestHeaderDefined) {
                 requestOptionsList.add(requestHeadersVar);
@@ -228,7 +225,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             if (isRequestBodyDefined) {
                 requestOptionsList.add(requestBodyVar);
             }
-            if (!methodProduceApplicationJson) {
+            if (isMethodProduceTextContent) {
                 requestOptionsList.add("responseType: 'text'");
             }
 
