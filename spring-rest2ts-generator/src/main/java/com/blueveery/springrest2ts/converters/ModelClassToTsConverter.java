@@ -10,7 +10,9 @@ import com.blueveery.springrest2ts.tsmodel.TSType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by tomaszw on 03.08.2017.
@@ -49,45 +51,72 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
                 }
             }
 
-            for (Field field : javaClass.getDeclaredFields()) {
-                if (!Modifier.isTransient(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())) {
-                    if (objectMapper.filter(field, tsInterface)) {
-                        List<TSField> tsFieldList = objectMapper.mapToField(field, tsInterface, this);
-                        if (tsFieldList.size() == 1) {
-                            setAsNullableType(field.getType(), field.getDeclaredAnnotations(), tsFieldList.get(0));
-                        }
-                        tsFieldList.forEach(tsField -> tsInterface.addTsField(tsField));
-                    }
+            Map<String, Property> propertyMap = getClassProperties(javaClass);
+
+            for (Property property : propertyMap.values()) {
+                List<TSField> tsFieldList = objectMapper.mapToField(property, tsInterface, this);
+                if (tsFieldList.size() == 1) {
+                    setAsNullableType(property, tsFieldList.get(0));
                 }
+                tsFieldList.forEach(tsField -> tsInterface.addTsField(tsField));
             }
 
-            for (Method method : javaClass.getDeclaredMethods()) {
-                if (!Modifier.isStatic(method.getModifiers()) && isGetter(method)) {
-                    if (objectMapper.filter(method, tsInterface)) {
-                        List<TSField> tsFieldList = objectMapper.mapToField(method, tsInterface, this);
-                        if (tsFieldList.size() == 1) {
-                            setAsNullableType(method.getReturnType(), method.getDeclaredAnnotations(), tsFieldList.get(0));
-                        }
-                        tsFieldList.forEach(tsField -> tsInterface.addTsField(tsField));
-                    }
-                }
-            }
 
             objectMapper.addTypeLevelSpecificFields(javaClass, tsInterface);
         }
 
     }
 
-    private boolean isGetter(Method method) {
-        if (method.getGenericParameterTypes().length != 0) {
-            return false;
+    private void setAsNullableType(Property property, TSField tsField) {
+        if (property.getField() != null) {
+            setAsNullableType(property.getField().getType(), property.getField().getDeclaredAnnotations(), tsField);
+            return;
         }
-        if (method.getReturnType() == Void.class) {
-            return false;
+
+        if (property.getGetter() != null) {
+            setAsNullableType(property.getGetter().getReturnType(), property.getField().getDeclaredAnnotations(), tsField);
         }
-        if (!method.getName().startsWith("get") && !method.getName().startsWith("is")) {
-            return false;
-        }
-        return true;
+
     }
+
+    private Map<String, Property> getClassProperties(Class javaClass) {
+        Map<String, Property> propertyMap = new HashMap<>();
+
+        for (Field field : javaClass.getDeclaredFields()) {
+            if (!Modifier.isTransient(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())) {
+                if(objectMapper.filter(field)) {
+                    Property property = new Property(objectMapper.getPropertyName(field), field);
+                    propertyMap.put(property.getName(), property);
+                }
+            }
+        }
+
+        for (Method method : javaClass.getDeclaredMethods()) {
+            if (!Modifier.isStatic(method.getModifiers())) {
+                if(couldBeGetter(method) && objectMapper.filter(method, true)){
+                    String propertyName = objectMapper.getPropertyName(method, true);
+                    Property property = propertyMap.computeIfAbsent(propertyName, (key) -> new Property(key));
+                    property.setGetter(method);
+                }
+
+                if(couldBeSetter(method) && objectMapper.filter(method, false)){
+                    String propertyName = objectMapper.getPropertyName(method, false);
+                    Property property = propertyMap.computeIfAbsent(propertyName, (key) -> new Property(key));
+                    property.setSetter(method);
+                }
+
+            }
+        }
+
+        return propertyMap;
+    }
+
+    public boolean couldBeGetter(Method method) {
+        return method.getParameterCount() == 0 && method.getReturnType() != Void.class;
+    }
+
+    public boolean couldBeSetter(Method method) {
+        return method.getParameterCount() == 1 && method.getReturnType() == Void.class;
+    }
+
 }

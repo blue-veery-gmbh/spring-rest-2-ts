@@ -11,11 +11,15 @@ import java.util.List;
 public interface ObjectMapper {
     void addTypeLevelSpecificFields(Class javaType, TSComplexType tsComplexType);
 
-    boolean filter(Member member, TSComplexType tsComplexType);
-
     boolean filterClass(Class clazz);
 
-    List<TSField> mapToField(Field field, TSComplexType tsComplexType, ComplexTypeConverter complexTypeConverter);
+    boolean filter(Field field);
+    boolean filter(Method method, boolean isGetter);
 
-    List<TSField> mapToField(Method method, TSComplexType tsComplexType, ComplexTypeConverter complexTypeConverter);
+    List<TSField> mapToField(Property field, TSComplexType tsComplexType, ComplexTypeConverter complexTypeConverter);
+
+
+    String getPropertyName(Field field);
+
+    String getPropertyName(Method method, boolean isGetter);
 }

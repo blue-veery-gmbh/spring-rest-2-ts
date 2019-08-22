@@ -1,0 +1,22 @@
+package com.blueveery.springrest2ts.examples.test;
+
+import com.blueveery.springrest2ts.examples.model.ProductDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Test;
+
+import java.io.IOException;
+
+public class JacksonFunctionalityTest {
+
+    @Test
+    public void serializeProductDTO() throws IOException {
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.name("blat");
+        ObjectMapper mapper = new ObjectMapper();
+
+        String productAsString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(productDTO);
+        System.out.println(productAsString);
+
+        ProductDTO newProductDTO = mapper.readValue(productAsString, ProductDTO.class);
+    }
+}

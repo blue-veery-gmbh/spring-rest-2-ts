@@ -6,6 +6,7 @@ import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.fasterxml.jackson.annotation.*;
 
+import java.beans.Introspector;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,52 +29,89 @@ public class JacksonObjectMapper implements ObjectMapper {
     }
 
     @Override
-    public boolean filter(Member member, TSComplexType tsComplexType) {
-        JsonAutoDetect.Visibility currentFieldsVisibility = fieldsVisibility;
-        JsonAutoDetect.Visibility currentGettersVisibility = gettersVisibility;
-        JsonAutoDetect.Visibility currentIsGetterVisibility = isGetterVisibility;
-
-        JsonAutoDetect jsonAutoDetect = member.getDeclaringClass().getDeclaredAnnotation(JsonAutoDetect.class);
-        if (jsonAutoDetect != null) {
-            currentFieldsVisibility = setUpVisibility(jsonAutoDetect.fieldVisibility());
-            currentGettersVisibility = setUpVisibility(jsonAutoDetect.getterVisibility());
-            currentIsGetterVisibility = setUpVisibility(jsonAutoDetect.isGetterVisibility());
-        }
-
-        if (member instanceof Field) {
-            Field field = (Field) member;
-            if (!currentFieldsVisibility.isVisible(field)) {
-                return false;
-            }
-            if (containsIgnoreTypeAnnotation(field.getType())) {
-                return false;
-            }
-
-        }
-        if (member instanceof Method) {
-            Method method = (Method) member;
-            if (!(member.getName().startsWith("get") && currentGettersVisibility.isVisible(method))) {
-                return false;
-            }
-            if (!(member.getName().startsWith("is") && currentIsGetterVisibility.isVisible(method))) {
-                return false;
-            }
-            if (containsIgnoreTypeAnnotation(method.getReturnType())) {
-                return false;
-            }
-        }
-
-        JsonIgnore jsonIgnore = ((AccessibleObject) member).getDeclaredAnnotation(JsonIgnore.class);
-        if (jsonIgnore != null && jsonIgnore.value()) {
+    public boolean filter(Field field) {
+        if (commonFilter(field)) {
             return false;
         }
+        JsonAutoDetect.Visibility currentFieldsVisibility = fieldsVisibility;
+        JsonAutoDetect jsonAutoDetect = field.getDeclaringClass().getDeclaredAnnotation(JsonAutoDetect.class);
+        if (jsonAutoDetect != null) {
+            currentFieldsVisibility = setUpVisibility(jsonAutoDetect.fieldVisibility());
+        }
 
-        JsonBackReference jsonBackReference = ((AccessibleObject) member).getDeclaredAnnotation(JsonBackReference.class);
-        if (jsonBackReference != null) {
+        if (!currentFieldsVisibility.isVisible(field)) {
+            return false;
+        }
+        if (containsIgnoreTypeAnnotation(field.getType())) {
             return false;
         }
 
         return true;
+    }
+
+    @Override
+    public boolean filter(Method method, boolean isGetter) {
+        if (commonFilter(method)) {
+            return false;
+        }
+        JsonAutoDetect.Visibility currentGettersVisibility = gettersVisibility;
+        JsonAutoDetect.Visibility currentSettersVisibility = gettersVisibility; //todo
+        JsonAutoDetect.Visibility currentIsGetterVisibility = isGetterVisibility;
+        JsonAutoDetect jsonAutoDetect = method.getDeclaringClass().getDeclaredAnnotation(JsonAutoDetect.class);
+        if (jsonAutoDetect != null) {
+            currentGettersVisibility = setUpVisibility(jsonAutoDetect.getterVisibility());
+            currentIsGetterVisibility = setUpVisibility(jsonAutoDetect.isGetterVisibility());
+            currentSettersVisibility = setUpVisibility(jsonAutoDetect.setterVisibility());
+
+        }
+
+
+        if (isGetter) {
+            if (containsIgnoreTypeAnnotation(method.getReturnType())) {
+                return false;
+            }
+
+            if (method.getName().startsWith("is") && !currentIsGetterVisibility.isVisible(method)) {
+                return false;
+            }
+            if (!currentGettersVisibility.isVisible(method)) {
+                return false;
+            }
+
+        }else{
+            if (!currentSettersVisibility.isVisible(method)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean commonFilter(AccessibleObject member) {
+        JsonBackReference jsonBackReference = member.getDeclaredAnnotation(JsonBackReference.class);
+        if (jsonBackReference != null) {
+            return true;
+        }
+
+        if (isJsonIgnoreActive(member)){
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isJsonIgnoreActive(AccessibleObject member) {
+        JsonIgnore jsonIgnore = member.getDeclaredAnnotation(JsonIgnore.class);
+        if (jsonIgnore != null && jsonIgnore.value()) {
+            return true;
+        }
+        return false;
+    }
+
+    private String cutPrefix(String methodName, String prefix) {
+        if (methodName.startsWith(prefix)) {
+            return Introspector.decapitalize(methodName.replaceFirst(prefix, ""));
+        }
+        return null;
     }
 
     private JsonAutoDetect.Visibility setUpVisibility(JsonAutoDetect.Visibility visibility) {
@@ -90,22 +128,27 @@ public class JacksonObjectMapper implements ObjectMapper {
     }
 
     @Override
-    public List<TSField> mapToField(Field field, TSComplexType tsComplexType, ComplexTypeConverter complexTypeConverter) {
+    public List<TSField> mapToField(Property property, TSComplexType tsComplexType, ComplexTypeConverter complexTypeConverter) {
         List<TSField> tsFieldList = new ArrayList<>();
-        Type fieldJavaType = field.getGenericType();
+        Type fieldJavaType = property.getGenericType();
         fieldJavaType = applyJsonValue(fieldJavaType);
-        if (!applyJsonUnwrapped(fieldJavaType, field.getDeclaredAnnotation(JsonUnwrapped.class), tsComplexType, tsFieldList, complexTypeConverter)) {
+        if (!applyJsonUnwrapped(fieldJavaType, property.getDeclaredAnnotation(JsonUnwrapped.class), tsComplexType, tsFieldList, complexTypeConverter)) {
             TSType fieldType = TypeMapper.map(fieldJavaType);
-            TSField tsField = new TSField(field.getName(), tsComplexType, fieldType);
-            if (!applyJsonIgnoreProperties(tsField, field.getDeclaringClass())) {
-                applyJsonProperty(tsField, field.getDeclaredAnnotation(JsonProperty.class));
-                applyJsonFormat(tsField, field.getDeclaredAnnotation(JsonFormat.class));
-                applyJacksonInject(tsField, field.getDeclaredAnnotation(JacksonInject.class));
-                applyJsonRawValue(tsField, field.getDeclaredAnnotation(JsonRawValue.class));
+            TSField tsField = new TSField(property.getName(), tsComplexType, fieldType);
+            if (!applyJsonIgnoreProperties(tsField, property.getDeclaringClass())) {
+                applyReadOnly(tsField, property);
+                applyIsNullable(tsField, property);
+                applyJsonFormat(tsField, property.getDeclaredAnnotation(JsonFormat.class));
+                applyJacksonInject(tsField, property.getDeclaredAnnotation(JacksonInject.class));
+                applyJsonRawValue(tsField, property.getDeclaredAnnotation(JsonRawValue.class));
                 tsFieldList.add(tsField);
             }
         }
         return tsFieldList;
+    }
+
+    private void applyIsNullable(TSField tsField, Property property) {
+        throw new UnsupportedOperationException();
     }
 
     private void applyJsonRawValue(TSField tsField, JsonRawValue jsonRawValue) {
@@ -240,22 +283,17 @@ public class JacksonObjectMapper implements ObjectMapper {
         return fieldJavaType;
     }
 
-    private void applyJsonProperty(TSField tsField, JsonProperty jsonProperty) {
+    private void applyReadOnly(TSField tsField, Property property) {
+        if(property.isReadOnly()){
+            tsField.setReadOnly(true);
+            return;
+        }
+        JsonProperty jsonProperty = property.
         if (jsonProperty != null) {
-            if (!JsonProperty.USE_DEFAULT_NAME.equals(jsonProperty.value())) {
-                tsField.setName(jsonProperty.value());
-            }
             if (jsonProperty.access() == JsonProperty.Access.READ_ONLY) {
                 tsField.setReadOnly(true);
             }
-            tsField.setNullable(!jsonProperty.required());
         }
-    }
-
-    @Override
-    public List<TSField> mapToField(Method method, TSComplexType tsComplexType, ComplexTypeConverter complexTypeConverter) {
-        List<TSField> tsFieldList = new ArrayList<>();
-        return tsFieldList;
     }
 
     @Override
