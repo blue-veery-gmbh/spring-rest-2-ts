@@ -74,7 +74,7 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
         }
 
         if (property.getGetter() != null) {
-            setAsNullableType(property.getGetter().getReturnType(), property.getField().getDeclaredAnnotations(), tsField);
+            setAsNullableType(property.getGetter().getReturnType(), property.getGetter().getDeclaredAnnotations(), tsField);
         }
 
     }
@@ -112,11 +112,11 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
     }
 
     public boolean couldBeGetter(Method method) {
-        return method.getParameterCount() == 0 && method.getReturnType() != Void.class;
+        return method.getParameterCount() == 0 && method.getReturnType() != void.class;
     }
 
     public boolean couldBeSetter(Method method) {
-        return method.getParameterCount() == 1 && method.getReturnType() == Void.class;
+        return method.getParameterCount() == 1 && method.getReturnType() == void.class;
     }
 
 }

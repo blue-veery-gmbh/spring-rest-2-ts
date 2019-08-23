@@ -34,7 +34,7 @@ import java.util.UUID;
 
 public class OrderSetupTest {
 
-    private static final Path OUTPUT_DIR_PATH = Paths.get("../../../test-webapp/src/");
+    private static final Path OUTPUT_DIR_PATH = Paths.get("target/test-webapp/src/");
 
     private static SpringREST2tsGenerator tsGenerator;
     private static ModulePerJavaPackageConverter moduleConverter;
@@ -62,6 +62,14 @@ public class OrderSetupTest {
     public void defaultSetup() throws IOException {
         tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
     }
+
+    @Test
+    public void jacksonAnnotationTests() throws IOException {
+        tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("ProductDTO"));
+        tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
+        tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+    }
+
 
     @Test
     public void classNameMappingTest() throws IOException {

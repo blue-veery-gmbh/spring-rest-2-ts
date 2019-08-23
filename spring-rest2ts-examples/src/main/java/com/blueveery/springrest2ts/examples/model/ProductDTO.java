@@ -10,19 +10,25 @@ import java.util.UUID;
 
 @JsonIgnoreProperties(value = {"barcode"}, allowGetters = true)
 public class ProductDTO extends BaseDTO {
-    private String name = "p";
 
+    private String name = "p";
     private BigInteger price;
     private String barcode;
     private LocalDateTime expirationDate;
     private ManufacturerDTO manufacturer;
     private Map<String, String> tags;
 
-//    @JsonManagedReference
+//    private String blabla;
+
+    @JsonManagedReference
     public CategoryDTO categoryDTO;
 
     @JsonRawValue
     public Map<UUID, String> translationsMap;
+
+    public String getBarcode() {
+        return barcode;
+    }
 
     @JsonProperty("blabla")
     public String getName() {
@@ -30,6 +36,7 @@ public class ProductDTO extends BaseDTO {
     }
 
 
+    @JsonIgnore
     @JsonSetter(value = "blabla")
     public void name(String name) {
         this.name = name;
