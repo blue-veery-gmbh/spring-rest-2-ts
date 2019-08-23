@@ -86,7 +86,7 @@ public class SpringREST2tsGenerator {
         convertModules(restClasses, moduleConverter);
 
         convertTypes(enumClasses, moduleConverter, new EnumConverter(), enumClassesNameMapper);
-        JacksonObjectMapper objectMapper = new JacksonObjectMapper(JsonAutoDetect.Visibility.ANY, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY);
+        JacksonObjectMapper objectMapper = new JacksonObjectMapper(JsonAutoDetect.Visibility.NONE, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY);
         convertTypes(modelClasses, moduleConverter, new ModelClassToTsConverter(objectMapper, generationContext), modelClassesNameMapper);
         convertTypes(restClasses, moduleConverter, new SpringRestToTsConverter(generationContext), restClassesNameMapper);
 

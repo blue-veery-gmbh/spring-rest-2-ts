@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Map;
 
 public class JacksonObjectMapper implements ObjectMapper {
+    private final Map<Class, List<JsonIgnoreProperties>> jsonIgnorePropertiesPerClass = new HashMap<>();
     JsonAutoDetect.Visibility fieldsVisibility = JsonAutoDetect.Visibility.NONE;
     JsonAutoDetect.Visibility gettersVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY;
     JsonAutoDetect.Visibility isGetterVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY;
     JsonAutoDetect.Visibility settersVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY;
-    private final Map<Class, List<JsonIgnoreProperties>> jsonIgnorePropertiesPerClass = new HashMap<>();
 
     public JacksonObjectMapper() {
     }
@@ -29,6 +29,38 @@ public class JacksonObjectMapper implements ObjectMapper {
         this.gettersVisibility = gettersVisibility;
         this.isGetterVisibility = isGetterVisibility;
         this.settersVisibility = settersVisibility;
+    }
+
+    @Override
+    public void addTypeLevelSpecificFields(Class javaType, TSComplexType tsComplexType) {
+        JsonTypeInfo jsonTypeInfoAnnotation = (JsonTypeInfo) javaType.getAnnotation(JsonTypeInfo.class);
+        if (jsonTypeInfoAnnotation != null) {
+            switch (jsonTypeInfoAnnotation.include()) {
+                case PROPERTY:
+                    String propertyName = jsonTypeInfoAnnotation.property();
+                    if ("".equals(propertyName)) {
+                        propertyName = jsonTypeInfoAnnotation.use().toString();
+                    }
+                    for (TSField tsField : tsComplexType.getTsFields()) {
+                        if (propertyName.equals(tsField.getName())) {
+                            return;
+                        }
+                    }
+                    TSField tsField = new TSField(propertyName, tsComplexType, TypeMapper.tsString);
+                    tsComplexType.addTsField(tsField);
+                    break;
+                case WRAPPER_OBJECT:
+                case WRAPPER_ARRAY:
+                case EXTERNAL_PROPERTY:
+                case EXISTING_PROPERTY:
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public boolean filterClass(Class clazz) {
+        return !containsIgnoreTypeAnnotation(clazz);
     }
 
     @Override
@@ -58,7 +90,7 @@ public class JacksonObjectMapper implements ObjectMapper {
             return false;
         }
         JsonAutoDetect.Visibility currentGettersVisibility = gettersVisibility;
-        JsonAutoDetect.Visibility currentSettersVisibility = gettersVisibility; //todo
+        JsonAutoDetect.Visibility currentSettersVisibility = settersVisibility;
         JsonAutoDetect.Visibility currentIsGetterVisibility = isGetterVisibility;
         JsonAutoDetect jsonAutoDetect = method.getDeclaringClass().getDeclaredAnnotation(JsonAutoDetect.class);
         if (jsonAutoDetect != null) {
@@ -132,46 +164,6 @@ public class JacksonObjectMapper implements ObjectMapper {
         return null;
     }
 
-    private boolean commonFilter(AccessibleObject member) {
-        JsonBackReference jsonBackReference = member.getDeclaredAnnotation(JsonBackReference.class);
-        if (jsonBackReference != null) {
-            return true;
-        }
-
-        if (isJsonIgnoreActive(member)){
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isJsonIgnoreActive(AccessibleObject member) {
-        JsonIgnore jsonIgnore = member.getDeclaredAnnotation(JsonIgnore.class);
-        if (jsonIgnore != null && jsonIgnore.value()) {
-            return true;
-        }
-        return false;
-    }
-
-    private String cutPrefix(String methodName, String prefix) {
-        if (methodName.startsWith(prefix)) {
-            return Introspector.decapitalize(methodName.replaceFirst(prefix, ""));
-        }
-        return null;
-    }
-
-    private JsonAutoDetect.Visibility setUpVisibility(JsonAutoDetect.Visibility visibility) {
-        return !isDefaultVisibility(visibility) ? visibility : JsonAutoDetect.Visibility.PUBLIC_ONLY;
-    }
-
-    private boolean isDefaultVisibility(JsonAutoDetect.Visibility visibility) {
-        return visibility.equals(JsonAutoDetect.Visibility.DEFAULT);
-    }
-
-    @Override
-    public boolean filterClass(Class clazz) {
-        return !containsIgnoreTypeAnnotation(clazz);
-    }
-
     @Override
     public List<TSField> mapToField(Property property, TSComplexType tsComplexType, ComplexTypeConverter complexTypeConverter) {
         List<TSField> tsFieldList = new ArrayList<>();
@@ -220,21 +212,24 @@ public class JacksonObjectMapper implements ObjectMapper {
         return name;
     }
 
-    private void applyJsonRawValue(TSField tsField, JsonRawValue jsonRawValue) {
-        if (jsonRawValue != null && jsonRawValue.value()) {
-            tsField.setType(TypeMapper.tsAny);
+    private String cutPrefix(String methodName, String prefix) {
+        if (methodName.startsWith(prefix)) {
+            return Introspector.decapitalize(methodName.replaceFirst(prefix, ""));
         }
+        return null;
     }
 
-    private void applyJacksonInject(TSField tsField, JacksonInject jacksonInject) {
-        if (jacksonInject != null) {
-            tsField.setReadOnly(true);
+    private Type applyJsonValue(Type fieldJavaType) {
+        if (fieldJavaType instanceof Class) {
+            Class fieldClass = (Class) fieldJavaType;
+            for (Method method : fieldClass.getMethods()) {
+                JsonValue jsonValue = method.getDeclaredAnnotation(JsonValue.class);
+                if (jsonValue != null && jsonValue.value()) {
+                    return method.getReturnType();
+                }
+            }
         }
-    }
-
-    private boolean containsIgnoreTypeAnnotation(Class<?> type) {
-        JsonIgnoreType jsonIgnoreType = type.getDeclaredAnnotation(JsonIgnoreType.class);
-        return jsonIgnoreType != null && jsonIgnoreType.value();
+        return fieldJavaType;
     }
 
     private boolean applyJsonUnwrapped(Type fieldJavaType, JsonUnwrapped declaredAnnotation, TSComplexType tsComplexType, List<TSField> tsFieldList, ComplexTypeConverter complexTypeConverter) {
@@ -253,6 +248,40 @@ public class JacksonObjectMapper implements ObjectMapper {
             return true;
         }
         return false;
+    }
+
+    private boolean applyJsonIgnoreProperties(Property property, TSField tsField) {
+        List<JsonIgnoreProperties> jsonIgnorePropertiesList = discoverJsonIgnoreProperties(property.getDeclaringClass());
+        for (JsonIgnoreProperties jsonIgnoreProperties : jsonIgnorePropertiesList) {
+            for (String propertyName : jsonIgnoreProperties.value()) {
+                if (propertyName.trim().equals(property.getName())) {
+                    if (jsonIgnoreProperties.allowGetters() && property.getGetter() != null) {
+                        if (!jsonIgnoreProperties.allowSetters() || property.getSetter() == null) {
+                            tsField.setReadOnly(true);
+                        }
+                        return false;
+                    }
+                    if (jsonIgnoreProperties.allowSetters() && property.getSetter() != null) {
+                        return false;
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void applyReadOnly(TSField tsField, Property property) {
+        if(property.isReadOnly()){
+            tsField.setReadOnly(true);
+            return;
+        }
+        JsonProperty jsonProperty = property.getDeclaredAnnotation(JsonProperty.class);
+        if (jsonProperty != null) {
+            if (jsonProperty.access() == JsonProperty.Access.READ_ONLY) {
+                tsField.setReadOnly(true);
+            }
+        }
     }
 
     private void applyJsonFormat(TSField tsField, JsonFormat jsonFormat) {
@@ -289,25 +318,16 @@ public class JacksonObjectMapper implements ObjectMapper {
         }
     }
 
-    private boolean applyJsonIgnoreProperties(Property property, TSField tsField) {
-        List<JsonIgnoreProperties> jsonIgnorePropertiesList = discoverJsonIgnoreProperties(property.getDeclaringClass());
-        for (JsonIgnoreProperties jsonIgnoreProperties : jsonIgnorePropertiesList) {
-            for (String propertyName : jsonIgnoreProperties.value()) {
-                if (propertyName.trim().equals(property.getName())) {
-                    if (jsonIgnoreProperties.allowGetters() && property.getGetter() != null) {
-                        if (!jsonIgnoreProperties.allowSetters() || property.getSetter() == null) {
-                            tsField.setReadOnly(true);
-                        }
-                        return false;
-                    }
-                    if (jsonIgnoreProperties.allowSetters() && property.getSetter() != null) {
-                        return false;
-                    }
-                    return true;
-                }
-            }
+    private void applyJacksonInject(TSField tsField, JacksonInject jacksonInject) {
+        if (jacksonInject != null) {
+            tsField.setReadOnly(true);
         }
-        return false;
+    }
+
+    private void applyJsonRawValue(TSField tsField, JsonRawValue jsonRawValue) {
+        if (jsonRawValue != null && jsonRawValue.value()) {
+            tsField.setType(TypeMapper.tsAny);
+        }
     }
 
     private List<JsonIgnoreProperties> discoverJsonIgnoreProperties(Class<?> declaringClass) {
@@ -341,56 +361,36 @@ public class JacksonObjectMapper implements ObjectMapper {
         return jsonIgnorePropertiesPerClass.get(declaringClass);
     }
 
-    private Type applyJsonValue(Type fieldJavaType) {
-        if (fieldJavaType instanceof Class) {
-            Class fieldClass = (Class) fieldJavaType;
-            for (Method method : fieldClass.getMethods()) {
-                JsonValue jsonValue = method.getDeclaredAnnotation(JsonValue.class);
-                if (jsonValue != null && jsonValue.value()) {
-                    return method.getReturnType();
-                }
-            }
+    private boolean commonFilter(AccessibleObject member) {
+        JsonBackReference jsonBackReference = member.getDeclaredAnnotation(JsonBackReference.class);
+        if (jsonBackReference != null) {
+            return true;
         }
-        return fieldJavaType;
+
+        if (isJsonIgnoreActive(member)){
+            return true;
+        }
+        return false;
     }
 
-    private void applyReadOnly(TSField tsField, Property property) {
-        if(property.isReadOnly()){
-            tsField.setReadOnly(true);
-            return;
-        }
-        JsonProperty jsonProperty = property.getDeclaredAnnotation(JsonProperty.class);
-        if (jsonProperty != null) {
-            if (jsonProperty.access() == JsonProperty.Access.READ_ONLY) {
-                tsField.setReadOnly(true);
-            }
-        }
+    private JsonAutoDetect.Visibility setUpVisibility(JsonAutoDetect.Visibility visibility) {
+        return !isDefaultVisibility(visibility) ? visibility : JsonAutoDetect.Visibility.PUBLIC_ONLY;
     }
 
-    @Override
-    public void addTypeLevelSpecificFields(Class javaType, TSComplexType tsComplexType) {
-        JsonTypeInfo jsonTypeInfoAnnotation = (JsonTypeInfo) javaType.getAnnotation(JsonTypeInfo.class);
-        if (jsonTypeInfoAnnotation != null) {
-            switch (jsonTypeInfoAnnotation.include()) {
-                case PROPERTY:
-                    String propertyName = jsonTypeInfoAnnotation.property();
-                    if ("".equals(propertyName)) {
-                        propertyName = jsonTypeInfoAnnotation.use().toString();
-                    }
-                    for (TSField tsField : tsComplexType.getTsFields()) {
-                        if (propertyName.equals(tsField.getName())) {
-                            return;
-                        }
-                    }
-                    TSField tsField = new TSField(propertyName, tsComplexType, TypeMapper.tsString);
-                    tsComplexType.addTsField(tsField);
-                    break;
-                case WRAPPER_OBJECT:
-                case WRAPPER_ARRAY:
-                case EXTERNAL_PROPERTY:
-                case EXISTING_PROPERTY:
-                    break;
-            }
+    private boolean containsIgnoreTypeAnnotation(Class<?> type) {
+        JsonIgnoreType jsonIgnoreType = type.getDeclaredAnnotation(JsonIgnoreType.class);
+        return jsonIgnoreType != null && jsonIgnoreType.value();
+    }
+
+    private boolean isJsonIgnoreActive(AccessibleObject member) {
+        JsonIgnore jsonIgnore = member.getDeclaredAnnotation(JsonIgnore.class);
+        if (jsonIgnore != null && jsonIgnore.value()) {
+            return true;
         }
+        return false;
+    }
+
+    private boolean isDefaultVisibility(JsonAutoDetect.Visibility visibility) {
+        return visibility.equals(JsonAutoDetect.Visibility.DEFAULT);
     }
 }
