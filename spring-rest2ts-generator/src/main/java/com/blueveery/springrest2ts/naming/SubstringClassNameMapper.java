@@ -1,4 +1,4 @@
-package com.blueveery.springrest2ts;
+package com.blueveery.springrest2ts.naming;
 
 public class SubstringClassNameMapper implements ClassNameMapper {
     private String from;
