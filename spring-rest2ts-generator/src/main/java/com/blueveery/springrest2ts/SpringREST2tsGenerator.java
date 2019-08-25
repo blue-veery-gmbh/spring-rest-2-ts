@@ -2,6 +2,8 @@ package com.blueveery.springrest2ts;
 
 import com.blueveery.springrest2ts.converters.*;
 import com.blueveery.springrest2ts.filters.JavaTypeFilter;
+import com.blueveery.springrest2ts.naming.ClassNameMapper;
+import com.blueveery.springrest2ts.naming.NoChangeClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;

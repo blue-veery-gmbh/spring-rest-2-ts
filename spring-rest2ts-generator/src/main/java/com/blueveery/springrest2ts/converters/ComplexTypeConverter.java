@@ -1,6 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
-import com.blueveery.springrest2ts.ClassNameMapper;
+import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.INullableElement;
 
 import javax.annotation.Nullable;

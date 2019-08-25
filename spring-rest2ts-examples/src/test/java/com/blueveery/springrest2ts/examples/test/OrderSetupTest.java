@@ -3,7 +3,7 @@ package com.blueveery.springrest2ts.examples.test;
 
 import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.SpringREST2tsGenerator;
-import com.blueveery.springrest2ts.SubstringClassNameMapper;
+import com.blueveery.springrest2ts.naming.SubstringClassNameMapper;
 import com.blueveery.springrest2ts.converters.EnumConverter;
 import com.blueveery.springrest2ts.converters.JavaEnumToTsUnionConverter;
 import com.blueveery.springrest2ts.converters.ModulePerJavaPackageConverter;

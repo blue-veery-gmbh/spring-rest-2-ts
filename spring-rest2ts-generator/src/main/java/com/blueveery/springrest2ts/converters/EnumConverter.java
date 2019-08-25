@@ -1,6 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
-import com.blueveery.springrest2ts.ClassNameMapper;
+import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.TSEnum;
 import com.blueveery.springrest2ts.tsmodel.TSEnumConstant;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
