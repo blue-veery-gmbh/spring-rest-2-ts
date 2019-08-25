@@ -75,11 +75,13 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
                     }
                     addRestAnnotations(method.getAnnotations(), tsMethod);
                     tsClass.addTsMethod(tsMethod);
+                    conversionListener.tsMethodCreated(method, tsMethod);
                 }
             }
         }
 
         generationContext.getImplementationGenerator(tsClass).addComplexTypeUsage(tsClass);
+        conversionListener.tsComplexTypeCreated(javaClass, tsClass);
     }
 
     private void setOptional(TSParameter tsParameter) {

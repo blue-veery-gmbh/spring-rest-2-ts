@@ -56,11 +56,15 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
                 if (tsFieldList.size() == 1) {
                     setAsNullableType(property, tsFieldList.get(0));
                 }
-                tsFieldList.forEach(tsField -> tsInterface.addTsField(tsField));
+                for (TSField tsField : tsFieldList) {
+                    tsInterface.addTsField(tsField);
+                    conversionListener.tsFieldCreated(property, tsField);
+                }
             }
 
 
             objectMapper.addTypeLevelSpecificFields(javaClass, tsInterface);
+            conversionListener.tsComplexTypeCreated(javaClass, tsInterface);
         }
 
     }

@@ -13,8 +13,17 @@ import java.util.Optional;
  * Created by tomaszw on 31.07.2017.
  */
 public abstract class ComplexTypeConverter {
+    ConversionListener conversionListener = new NoActionConversionListener();
     public abstract boolean preConverted(ModuleConverter moduleConverter, Class javaClass, ClassNameMapper classNameMapper);
     public abstract void convert(Class javaClass);
+
+    public ConversionListener getConversionListener() {
+        return conversionListener;
+    }
+
+    public void setConversionListener(ConversionListener conversionListener) {
+        this.conversionListener = conversionListener;
+    }
 
     protected final void setAsNullableType(Type elementType, Annotation[] declaredAnnotations, INullableElement tsElement) {
         if(!tsElement.isNullable()){
