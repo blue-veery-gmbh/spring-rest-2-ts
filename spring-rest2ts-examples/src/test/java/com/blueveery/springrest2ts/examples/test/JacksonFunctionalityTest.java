@@ -1,6 +1,7 @@
 package com.blueveery.springrest2ts.examples.test;
 
 import com.blueveery.springrest2ts.examples.model.ProductDTO;
+import com.blueveery.springrest2ts.examples.model.enums.OrderDeliveryStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
@@ -18,5 +19,13 @@ public class JacksonFunctionalityTest {
         System.out.println(productAsString);
 
         ProductDTO newProductDTO = mapper.readValue(productAsString, ProductDTO.class);
+    }
+
+    @Test
+    public void serializeOrderDeliveryStatus() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+
+        String productAsString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(OrderDeliveryStatus.DELIVERED);
+        System.out.println(productAsString);
     }
 }

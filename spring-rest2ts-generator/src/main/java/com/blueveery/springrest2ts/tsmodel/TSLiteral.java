@@ -16,14 +16,20 @@ public class TSLiteral extends TSElement{
         this.value = value;
     }
 
+    public String toTsValue(){
+        StringBuilder stringValue = new StringBuilder();
+        if(tsType == TypeMapper.tsString){
+            stringValue.append("'");
+        }
+        stringValue.append(value);
+        if(tsType == TypeMapper.tsString){
+            stringValue.append("'");
+        }
+        return stringValue.toString();
+    }
+
     @Override
     public void write(GenerationContext generationContext, BufferedWriter writer) throws IOException {
-        if(tsType == TypeMapper.tsString){
-            writer.write("'");
-        }
-        writer.write(value);
-        if(tsType == TypeMapper.tsString){
-            writer.write("'");
-        }
+        writer.write(toTsValue());
     }
 }

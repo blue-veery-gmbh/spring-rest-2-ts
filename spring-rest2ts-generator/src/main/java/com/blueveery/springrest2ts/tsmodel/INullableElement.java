@@ -9,14 +9,14 @@ public interface INullableElement {
     default void setNullable(boolean isNullable) {
         if (getType() instanceof TsUnion) {
             TsUnion tsUnion = (TsUnion) getType();
-            boolean unionContainsNull = tsUnion.getJoinedTypeList().stream().anyMatch(t -> t == TypeMapper.tsNull);
+            boolean unionContainsNull = tsUnion.getJoinedTsElementList().stream().anyMatch(t -> t == TypeMapper.tsNull);
             if (isNullable) {
                 if(!unionContainsNull){
-                    tsUnion.getJoinedTypeList().add(TypeMapper.tsNull);
+                    tsUnion.getJoinedTsElementList().add(TypeMapper.tsNull);
                 }
             }else{
                 if(unionContainsNull){
-                    tsUnion.getJoinedTypeList().remove(TypeMapper.tsNull);
+                    tsUnion.getJoinedTsElementList().remove(TypeMapper.tsNull);
                 }
             }
         }else{
@@ -29,7 +29,7 @@ public interface INullableElement {
     default boolean isNullable(){
         if (getType() instanceof TsUnion) {
             TsUnion tsUnion = (TsUnion) getType();
-            boolean unionContainsNull = tsUnion.getJoinedTypeList().stream().anyMatch(t -> t == TypeMapper.tsNull);
+            boolean unionContainsNull = tsUnion.getJoinedTsElementList().stream().anyMatch(t -> t == TypeMapper.tsNull);
             return unionContainsNull;
         }
         return false;

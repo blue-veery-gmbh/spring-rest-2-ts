@@ -1,0 +1,24 @@
+{
+  "name": "spring-rest2rs-examples-verification",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "awesome-typescript-loader": "^5.2.1",
+    "source-map-loader": "^0.2.4",
+    "tslint": "^5.12.1",
+    "typescript": "^3.5.3",
+    "webpack": "^4.39.2"
+  },
+  "dependencies": {
+    "@angular/common": "^8.2.3",
+    "@angular/core": "^8.2.3",
+    "rxjs": "^6.5.2",
+    "rxjs-compat": "^6.5.2"
+  }
+}

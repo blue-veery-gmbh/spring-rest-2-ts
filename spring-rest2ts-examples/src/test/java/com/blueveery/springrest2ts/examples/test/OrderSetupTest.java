@@ -4,6 +4,8 @@ package com.blueveery.springrest2ts.examples.test;
 import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.SpringREST2tsGenerator;
 import com.blueveery.springrest2ts.SubstringClassNameMapper;
+import com.blueveery.springrest2ts.converters.EnumConverter;
+import com.blueveery.springrest2ts.converters.JavaEnumToTsUnionConverter;
 import com.blueveery.springrest2ts.converters.ModulePerJavaPackageConverter;
 import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.examples.ctrls.OrderCtrl;
@@ -34,7 +36,7 @@ import java.util.UUID;
 
 public class OrderSetupTest {
 
-    private static final Path OUTPUT_DIR_PATH = Paths.get("target/test-webapp/src/");
+    private static final Path OUTPUT_DIR_PATH = Paths.get("target/classes/test-webapp/src");
 
     private static SpringREST2tsGenerator tsGenerator;
     private static ModulePerJavaPackageConverter moduleConverter;
@@ -64,9 +66,17 @@ public class OrderSetupTest {
     }
 
     @Test
-    public void jacksonAnnotationTests() throws IOException {
+    public void jacksonAnnotationTestsOnProductDTO() throws IOException {
         tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("ProductDTO"));
         tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
+        tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+    }
+
+    @Test
+    public void enumsToUnionsTest() throws IOException {
+        tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("DTO"));
+        tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
+        tsGenerator.setEnumConverter(new JavaEnumToTsUnionConverter());
         tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
     }
 

@@ -42,7 +42,7 @@ public class CategoryDTO extends BaseDTO {
     }
 
     @JsonSetter("shortName")
-    public void setShortName(String shortName) {
+    public  void setShortName(String shortName) {
         this.shortName = shortName;
     }
 

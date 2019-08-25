@@ -29,6 +29,7 @@ public class SpringREST2tsGenerator {
     private Set<String> packagesNames = new HashSet<>();
     private Map<Class, TSType> customTypeMapping = new HashMap<>();
     private GenerationContext generationContext;
+    private ComplexTypeConverter enumConverter = new EnumConverter();;
 
     public void setModelClassesCondition(JavaTypeFilter modelClassesCondition) {
         this.modelClassesCondition = modelClassesCondition;
@@ -62,6 +63,10 @@ public class SpringREST2tsGenerator {
         this.generationContext = generationContext;
     }
 
+    public void setEnumConverter(ComplexTypeConverter enumConverter) {
+        this.enumConverter = enumConverter;
+    }
+
     public SortedSet<TSModule> generate(ModuleConverter moduleConverter, Path outputDir) throws IOException {
         Set<Class> modelClasses = new HashSet<>();
         Set<Class> restClasses = new HashSet<>();
@@ -85,8 +90,8 @@ public class SpringREST2tsGenerator {
         convertModules(modelClasses, moduleConverter);
         convertModules(restClasses, moduleConverter);
 
-        convertTypes(enumClasses, moduleConverter, new EnumConverter(), enumClassesNameMapper);
-        JacksonObjectMapper objectMapper = new JacksonObjectMapper(JsonAutoDetect.Visibility.NONE, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY);
+        convertTypes(enumClasses, moduleConverter, enumConverter, enumClassesNameMapper);
+        JacksonObjectMapper objectMapper = new JacksonObjectMapper(JsonAutoDetect.Visibility.ANY, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY);
         convertTypes(modelClasses, moduleConverter, new ModelClassToTsConverter(objectMapper, generationContext), modelClassesNameMapper);
         convertTypes(restClasses, moduleConverter, new SpringRestToTsConverter(generationContext), restClassesNameMapper);
 
