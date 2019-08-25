@@ -80,6 +80,14 @@ public class OrderSetupTest {
         tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
     }
 
+    @Test
+    public void javaEnumsToTsEnumTest() throws IOException {
+        tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("DTO"));
+        tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
+        tsGenerator.setEnumConverter(new EnumConverter());
+        tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+    }
+
 
     @Test
     public void classNameMappingTest() throws IOException {

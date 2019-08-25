@@ -10,9 +10,7 @@ import com.blueveery.springrest2ts.tsmodel.TSType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by tomaszw on 03.08.2017.
@@ -51,9 +49,9 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
                 }
             }
 
-            Map<String, Property> propertyMap = getClassProperties(javaClass);
+            SortedSet<Property> propertySet = getClassProperties(javaClass);
 
-            for (Property property : propertyMap.values()) {
+            for (Property property : propertySet) {
                 List<TSField> tsFieldList = objectMapper.mapToField(property, tsInterface, this);
                 if (tsFieldList.size() == 1) {
                     setAsNullableType(property, tsFieldList.get(0));
@@ -79,13 +77,14 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
 
     }
 
-    private Map<String, Property> getClassProperties(Class javaClass) {
+    private SortedSet<Property> getClassProperties(Class javaClass) {
         Map<String, Property> propertyMap = new HashMap<>();
+        int currentIndex = 0;
 
         for (Field field : javaClass.getDeclaredFields()) {
             if (!Modifier.isTransient(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())) {
                 if(objectMapper.filter(field)) {
-                    Property property = new Property(objectMapper.getPropertyName(field), field);
+                    Property property = new Property(objectMapper.getPropertyName(field), currentIndex++, field);
                     propertyMap.put(property.getName(), property);
                 }
             }
@@ -95,20 +94,22 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
             if (!Modifier.isStatic(method.getModifiers())) {
                 if(couldBeGetter(method) && objectMapper.filter(method, true)){
                     String propertyName = objectMapper.getPropertyName(method, true);
-                    Property property = propertyMap.computeIfAbsent(propertyName, (key) -> new Property(key));
+                    final int newIndex = currentIndex++;
+                    Property property = propertyMap.computeIfAbsent(propertyName, (key) -> new Property(key, newIndex));
                     property.setGetter(method);
                 }
 
                 if(couldBeSetter(method) && objectMapper.filter(method, false)){
                     String propertyName = objectMapper.getPropertyName(method, false);
-                    Property property = propertyMap.computeIfAbsent(propertyName, (key) -> new Property(key));
+                    final int newIndex = currentIndex++;
+                    Property property = propertyMap.computeIfAbsent(propertyName, (key) -> new Property(key, newIndex));
                     property.setSetter(method);
                 }
 
             }
         }
 
-        return propertyMap;
+        return new TreeSet<>(propertyMap.values());
     }
 
     public boolean couldBeGetter(Method method) {

@@ -7,19 +7,22 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-public class Property {
+public class Property implements Comparable<Property>{
     private String name;
+    private int index = 0;
     private Field field;
     private Method getter;
     private Method setter;
     private Class<?> declaringClass;
 
-    public Property(String name) {
+    public Property(String name, int index) {
         this.name = name;
+        this.index = index;
     }
 
-    public Property(String name, Field field) {
+    public Property(String name, int index, Field field) {
         this.name = name;
+        this.index = index;
         this.field = field;
         declaringClass = field.getDeclaringClass();
     }
@@ -88,5 +91,10 @@ public class Property {
             return setter;
         }
         return null;
+    }
+
+    @Override
+    public int compareTo(Property otherProperty) {
+        return index - otherProperty.index;
     }
 }
