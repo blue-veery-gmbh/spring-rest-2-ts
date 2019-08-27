@@ -17,11 +17,9 @@ import java.util.*;
  */
 public class ModelClassToTsConverter extends ComplexTypeConverter {
     private ObjectMapper objectMapper;
-    private GenerationContext generationContext;
 
-    public ModelClassToTsConverter(ObjectMapper objectMapper, GenerationContext generationContext) {
+    public ModelClassToTsConverter(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.generationContext = generationContext;
     }
 
     public boolean preConverted(ModuleConverter moduleConverter, Class javaClass, ClassNameMapper classNameMapper) {
@@ -70,15 +68,14 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
     }
 
     private void setAsNullableType(Property property, TSField tsField) {
-        if (property.getField() != null) {
-            setAsNullableType(property.getField().getType(), property.getField().getDeclaredAnnotations(), tsField);
+        if (property.getGetter() != null) {
+            setAsNullableType(property.getGetter().getReturnType(), property.getGetter().getDeclaredAnnotations(), tsField);
             return;
         }
 
-        if (property.getGetter() != null) {
-            setAsNullableType(property.getGetter().getReturnType(), property.getGetter().getDeclaredAnnotations(), tsField);
+        if (property.getField() != null) {
+            setAsNullableType(property.getField().getType(), property.getField().getDeclaredAnnotations(), tsField);
         }
-
     }
 
     private SortedSet<Property> getClassProperties(Class javaClass) {

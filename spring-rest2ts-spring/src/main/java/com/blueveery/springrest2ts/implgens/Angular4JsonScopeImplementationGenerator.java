@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class Angular4JsonScopeImplementationGenerator implements ImplementationGenerator {
+public class Angular4JsonScopeImplementationGenerator extends SpringMvcImplementationGenerator {
     private TSDecorator injectableDecorator;
     private TSClass observableClass;
     private TSClass httpClass;
@@ -92,8 +92,8 @@ public class Angular4JsonScopeImplementationGenerator implements ImplementationG
                 writer.newLine();
             }
         } else {
-            RequestMapping methodRequestMapping = method.getRequestMapping();
-            RequestMapping classRequestMapping = method.getOwner().getRequestMapping();
+            RequestMapping methodRequestMapping = getRequestMapping(method);
+            RequestMapping classRequestMapping = getRequestMapping(method.getOwner());
 
             String tsPath = "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" + getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "?'";
             String methodString = methodRequestMapping.method()[0].toString();
@@ -276,7 +276,7 @@ public class Angular4JsonScopeImplementationGenerator implements ImplementationG
             }
             return tsParameters;
         }
-        RequestMapping methodRequestMapping = method.getRequestMapping();
+        RequestMapping methodRequestMapping = getRequestMapping(method);
         if (methodRequestMapping != null) {
             String methodString = methodRequestMapping.method()[0].toString();
             if ("PUT".equals(methodString) || "POST".equals(methodString)) {

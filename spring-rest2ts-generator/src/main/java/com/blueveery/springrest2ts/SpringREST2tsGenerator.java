@@ -6,7 +6,6 @@ import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.naming.NoChangeClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ConfigurationBuilder;
@@ -32,6 +31,8 @@ public class SpringREST2tsGenerator {
     private Map<Class, TSType> customTypeMapping = new HashMap<>();
     private GenerationContext generationContext;
     private ComplexTypeConverter enumConverter = new EnumConverter();;
+    private ModelClassToTsConverter modelClassesConverter;
+    private ComplexTypeConverter restClassesConverter;
 
     public void setModelClassesCondition(JavaTypeFilter modelClassesCondition) {
         this.modelClassesCondition = modelClassesCondition;
@@ -51,6 +52,22 @@ public class SpringREST2tsGenerator {
 
     public void setRestClassesNameMapper(ClassNameMapper restClassesNameMapper) {
         this.restClassesNameMapper = restClassesNameMapper;
+    }
+
+    public ModelClassToTsConverter getModelClassesConverter() {
+        return modelClassesConverter;
+    }
+
+    public void setModelClassesConverter(ModelClassToTsConverter modelClassesConverter) {
+        this.modelClassesConverter = modelClassesConverter;
+    }
+
+    public ComplexTypeConverter getRestClassesConverter() {
+        return restClassesConverter;
+    }
+
+    public void setRestClassesConverter(ComplexTypeConverter restClassesConverter) {
+        this.restClassesConverter = restClassesConverter;
     }
 
     public Set<String> getPackagesNames() {
@@ -93,9 +110,19 @@ public class SpringREST2tsGenerator {
         convertModules(restClasses, moduleConverter);
 
         convertTypes(enumClasses, moduleConverter, enumConverter, enumClassesNameMapper);
-        JacksonObjectMapper objectMapper = new JacksonObjectMapper(JsonAutoDetect.Visibility.NONE, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY);
-        convertTypes(modelClasses, moduleConverter, new ModelClassToTsConverter(objectMapper, generationContext), modelClassesNameMapper);
-        convertTypes(restClasses, moduleConverter, new SpringRestToTsConverter(generationContext), restClassesNameMapper);
+        if (!modelClasses.isEmpty()) {
+            if (modelClassesConverter == null) {
+                throw new IllegalStateException("Model classes converter is not set");
+            }
+            convertTypes(modelClasses, moduleConverter, modelClassesConverter, modelClassesNameMapper);
+        }
+
+        if (!restClasses.isEmpty()) {
+            if (restClassesConverter == null) {
+                throw new IllegalStateException("Rest classes converter is not set");
+            }
+            convertTypes(restClasses, moduleConverter, restClassesConverter, restClassesNameMapper);
+        }
 
 
         writeTypeScriptTypes(moduleConverter.getTsModules(), generationContext, outputDir, logger);

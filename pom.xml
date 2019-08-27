@@ -15,6 +15,8 @@
 
     <modules>
         <module>spring-rest2ts-generator</module>
+        <module>spring-rest2ts-jackson</module>
+        <module>spring-rest2ts-spring</module>
         <module>spring-rest2ts-examples</module>
     </modules>
     <build>

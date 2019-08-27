@@ -3,11 +3,8 @@ package com.blueveery.springrest2ts.examples.test;
 
 import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.SpringREST2tsGenerator;
+import com.blueveery.springrest2ts.converters.*;
 import com.blueveery.springrest2ts.naming.SubstringClassNameMapper;
-import com.blueveery.springrest2ts.converters.EnumConverter;
-import com.blueveery.springrest2ts.converters.JavaEnumToTsUnionConverter;
-import com.blueveery.springrest2ts.converters.ModulePerJavaPackageConverter;
-import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.examples.ctrls.OrderCtrl;
 import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrl;
 import com.blueveery.springrest2ts.examples.model.CategoryDTO;
@@ -17,6 +14,7 @@ import com.blueveery.springrest2ts.examples.model.enums.OrderPaymentStatus;
 import com.blueveery.springrest2ts.filters.*;
 import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +46,14 @@ public class OrderSetupTest {
         tsGenerator = new SpringREST2tsGenerator();
         tsGenerator.setModelClassesCondition(new ExtendsJavaTypeFilter(BaseDTO.class));
         tsGenerator.setRestClassesCondition(new ExtendsJavaTypeFilter(BaseCtrl.class));
-        tsGenerator.setGenerationContext(new GenerationContext(new Angular4ImplementationGenerator()));
+
+        JacksonObjectMapper objectMapper = new JacksonObjectMapper(JsonAutoDetect.Visibility.ANY, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY);
+        ModelClassToTsConverter modelClassToTsConverter = new ModelClassToTsConverter(objectMapper);
+        tsGenerator.setModelClassesConverter(modelClassToTsConverter);
+
+        GenerationContext generationContext = new GenerationContext(new Angular4ImplementationGenerator());
+        tsGenerator.setGenerationContext(generationContext);
+        tsGenerator.setRestClassesConverter(new SpringRestToTsConverter(generationContext));
 
         HashMap<String, TSModule> packagesMap = new HashMap<>();
         packagesMap.put(BaseDTO.class.getPackage().getName(), new TSModule("core", Paths.get("app/sdk/model"), false));

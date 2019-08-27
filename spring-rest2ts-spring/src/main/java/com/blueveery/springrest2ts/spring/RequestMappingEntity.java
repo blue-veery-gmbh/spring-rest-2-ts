@@ -1,4 +1,4 @@
-package com.blueveery.springrest2ts.tsmodel;
+package com.blueveery.springrest2ts.spring;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

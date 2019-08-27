@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 
-public class Angular4ImplementationGenerator implements ImplementationGenerator {
+public class Angular4ImplementationGenerator extends SpringMvcImplementationGenerator implements ImplementationGenerator {
     private static final String FIELD_NAME_HTTP_SERVICE = "httpService";
     private static final String FIELD_NAME_URL_SERVICE = "urlService";
     private static final String FIELD_NAME_SUBJECT = "subject";
@@ -63,8 +63,8 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 writer.newLine();
             }
         } else {
-            RequestMapping methodRequestMapping = method.getRequestMapping();
-            RequestMapping classRequestMapping = method.getOwner().getRequestMapping();
+            RequestMapping methodRequestMapping = getRequestMapping(method);
+            RequestMapping classRequestMapping = getRequestMapping(method.getOwner());
 
             String tsPath = useUrlService ? "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" : "'";
             tsPath += getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "'";
@@ -295,7 +295,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             }
             return tsParameters;
         }
-        RequestMapping methodRequestMapping = method.getRequestMapping();
+        RequestMapping methodRequestMapping = getRequestMapping(method);
         if (methodRequestMapping != null) {
             String methodString = methodRequestMapping.method()[0].toString();
             if ("PUT".equals(methodString) || "POST".equals(methodString)) {
