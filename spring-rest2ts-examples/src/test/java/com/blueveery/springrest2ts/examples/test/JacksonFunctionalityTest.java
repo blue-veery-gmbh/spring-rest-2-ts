@@ -12,7 +12,7 @@ public class JacksonFunctionalityTest {
     @Test
     public void serializeProductDTO() throws IOException {
         ProductDTO productDTO = new ProductDTO();
-        productDTO.name("blat");
+        productDTO.name("123");
         ObjectMapper mapper = new ObjectMapper();
 
         String productAsString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(productDTO);

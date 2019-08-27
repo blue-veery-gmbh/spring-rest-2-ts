@@ -8,10 +8,10 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
-@JsonIgnoreProperties(value = {"barcode"}, allowGetters = true)
+//@JsonIgnoreProperties(value = {"barcode"}, allowGetters = true)
 public class ProductDTO extends BaseDTO {
 
-    private String name = "p";
+    public int name = 1;
     private BigInteger price;
     private String barcode;
     private LocalDateTime expirationDate;
@@ -20,30 +20,31 @@ public class ProductDTO extends BaseDTO {
 
 //    private String blabla;
 
-    @JsonManagedReference
+//    @JsonManagedReference
     public CategoryDTO categoryDTO;
 
     @JsonRawValue
     public Map<UUID, String> translationsMap;
 
-    public String getBarcode() {
-        return barcode;
+//    public String getBarcode() {
+//        return barcode;
+//    }
+
+
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
     }
 
-    @JsonProperty("blabla")
-    public String getName() {
+    //    @JsonProperty("blabla")
+    public int getName() {
         return name;
     }
 
 
-    @JsonIgnore
-    @JsonSetter(value = "blabla")
+    @JsonSetter(value = "name")
     public void name(String name) {
-        this.name = name;
+        this.name = Integer.valueOf(name);
     }
 
-    //    public String getBarcode() {
-//        return barcode;
-//    }
 }
 

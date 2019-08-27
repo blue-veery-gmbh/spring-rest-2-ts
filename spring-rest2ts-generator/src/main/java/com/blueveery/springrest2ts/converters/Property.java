@@ -57,13 +57,19 @@ public class Property implements Comparable<Property>{
         return field == null && setter == null;
     }
 
-    public Type getGenericType() {
-        if (field != null) {
-            return field.getGenericType();
-        }
+    public Type getGetterType() {
         if (getter != null) {
             return getter.getGenericReturnType();
         }
+        if (field != null) {
+            return field.getGenericType();
+        }
+
+        return null;
+    }
+
+
+    public Type getSetterType() {
 
         if (setter != null) {
             return setter.getParameterTypes()[0];

@@ -1,9 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
-import com.blueveery.springrest2ts.tsmodel.TSArray;
-import com.blueveery.springrest2ts.tsmodel.TSComplexType;
-import com.blueveery.springrest2ts.tsmodel.TSField;
-import com.blueveery.springrest2ts.tsmodel.TSType;
+import com.blueveery.springrest2ts.tsmodel.*;
 import com.fasterxml.jackson.annotation.*;
 
 import java.beans.Introspector;
@@ -167,18 +164,40 @@ public class JacksonObjectMapper implements ObjectMapper {
     @Override
     public List<TSField> mapToField(Property property, TSComplexType tsComplexType, ComplexTypeConverter complexTypeConverter) {
         List<TSField> tsFieldList = new ArrayList<>();
-        Type fieldJavaType = property.getGenericType();
-        fieldJavaType = applyJsonValue(fieldJavaType);
-        if (!applyJsonUnwrapped(fieldJavaType, property.getDeclaredAnnotation(JsonUnwrapped.class), tsComplexType, tsFieldList, complexTypeConverter)) {
-            TSType fieldType = TypeMapper.map(fieldJavaType);
-            TSField tsField = new TSField(property.getName(), tsComplexType, fieldType);
-            if (!applyJsonIgnoreProperties(property, tsField)) {
-                applyReadOnly(tsField, property);
-                applyJsonFormat(tsField, property.getDeclaredAnnotation(JsonFormat.class));
-                applyJacksonInject(tsField, property.getDeclaredAnnotation(JacksonInject.class));
-                applyJsonRawValue(tsField, property.getDeclaredAnnotation(JsonRawValue.class));
-                tsFieldList.add(tsField);
+        Type fieldJavaGetterType = property.getGetterType();
+        if (fieldJavaGetterType != null) {
+            fieldJavaGetterType = applyJsonValue(fieldJavaGetterType);
+            if (applyJsonUnwrapped(fieldJavaGetterType, property.getDeclaredAnnotation(JsonUnwrapped.class), tsComplexType, tsFieldList, complexTypeConverter)){
+                return tsFieldList;
             }
+        }
+
+        TSType fieldType;
+        if(property.getGetterType() == property.getSetterType()) {
+            fieldType = TypeMapper.map(fieldJavaGetterType);
+        }else{
+            TSType tsGetterType = TypeMapper.tsUndefined;
+            if (fieldJavaGetterType != null) {
+                tsGetterType = TypeMapper.map(fieldJavaGetterType);
+            }
+
+            if (property.getSetterType() != null) {
+                TSType tsSetterType = TypeMapper.map(property.getSetterType());
+                fieldType = new TsUnion(tsGetterType, tsSetterType);
+            }else{
+                fieldType = tsGetterType;
+            }
+
+        }
+
+
+        TSField tsField = new TSField(property.getName(), tsComplexType, fieldType);
+        if (!applyJsonIgnoreProperties(property, tsField)) {
+            applyReadOnly(tsField, property);
+            applyJsonFormat(tsField, property.getDeclaredAnnotation(JsonFormat.class));
+            applyJacksonInject(tsField, property.getDeclaredAnnotation(JacksonInject.class));
+            applyJsonRawValue(tsField, property.getDeclaredAnnotation(JsonRawValue.class));
+            tsFieldList.add(tsField);
         }
         return tsFieldList;
     }
