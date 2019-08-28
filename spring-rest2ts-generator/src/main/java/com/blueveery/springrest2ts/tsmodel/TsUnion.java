@@ -1,13 +1,13 @@
 package com.blueveery.springrest2ts.tsmodel;
 
-import com.blueveery.springrest2ts.GenerationContext;
+
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class TsUnion extends TSType {
     private List<TSElement> joinedTsElementList = new ArrayList<>();
@@ -41,7 +41,7 @@ public class TsUnion extends TSType {
     }
 
     @Override
-    public void write(GenerationContext generationContext, BufferedWriter writer) throws IOException {
+    public void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
         writer.write(generateUnionName(getJoinedTsElementList()));
     }
 }

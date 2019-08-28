@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
 
@@ -23,7 +24,7 @@ public class JavaEnumToTsUnionConverter extends ComplexTypeConverter {
     }
 
     @Override
-    public void convert(Class javaClass) {
+    public void convert(Class javaClass, ImplementationGenerator implementationGenerator) {
         TsTypeAlias tsTypeAlias = (TsTypeAlias) TypeMapper.map(javaClass);
         TsUnion tsUnion = (TsUnion) tsTypeAlias.getAliasedType();
         for (Object enumConstant : javaClass.getEnumConstants()) {

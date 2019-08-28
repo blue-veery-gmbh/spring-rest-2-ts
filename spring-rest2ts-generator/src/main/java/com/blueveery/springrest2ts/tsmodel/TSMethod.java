@@ -1,6 +1,6 @@
 package com.blueveery.springrest2ts.tsmodel;
 
-import com.blueveery.springrest2ts.GenerationContext;
+
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 
 import java.io.BufferedWriter;
@@ -42,10 +42,9 @@ public class TSMethod extends TSComplexTypeMember {
     }
 
     @Override
-    public void write(GenerationContext generationContext, BufferedWriter writer) throws IOException {
-        ImplementationGenerator implementationGenerator = generationContext.getImplementationGenerator(this.getOwner());
+    public void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
         List<TSDecorator> decorators = implementationGenerator.getDecorators(this);
-        writeDecorators(generationContext, writer, decorators);
+        writeDecorators(implementationGenerator, writer, decorators);
 
         writer.write("public ");
         if(isAbstract) {
@@ -56,8 +55,8 @@ public class TSMethod extends TSComplexTypeMember {
         List<TSParameter> totalTsParametersList = new ArrayList<>(parameterList);
         totalTsParametersList.addAll(implementationGenerator.getImplementationSpecificParameters(this));
 
-        int counter = writeParameters(totalTsParametersList, generationContext, writer, false, 0);
-        writeParameters(totalTsParametersList, generationContext, writer, true, counter);
+        int counter = writeParameters(totalTsParametersList, implementationGenerator, writer, false, 0);
+        writeParameters(totalTsParametersList, implementationGenerator, writer, true, counter);
 
         writer.write(")");
         if(!isConstructor) {
@@ -76,12 +75,12 @@ public class TSMethod extends TSComplexTypeMember {
         }
     }
 
-    private int writeParameters(List<TSParameter> totalTsParametersList, GenerationContext generationContext, BufferedWriter writer, boolean writeOptional, int counter) throws IOException {
+    private int writeParameters(List<TSParameter> totalTsParametersList, ImplementationGenerator implementationGenerator, BufferedWriter writer, boolean writeOptional, int counter) throws IOException {
         for (int i = 0; i < totalTsParametersList.size(); i++) {
             TSParameter p = totalTsParametersList.get(i);
             boolean isOptional = p.isOptional() || p.getDefaultValue() != null;
             if ((writeOptional && isOptional) || (!writeOptional && !isOptional)) {
-                p.write(generationContext, writer);
+                p.write(implementationGenerator, writer);
                 if(counter<totalTsParametersList.size()-1){
                     writer.write(", ");
                 }

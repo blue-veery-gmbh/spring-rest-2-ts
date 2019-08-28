@@ -1,7 +1,7 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
-import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.tsmodel.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,10 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 public class SpringRestToTsConverter extends ComplexTypeConverter{
-    private GenerationContext generationContext;
 
-    public SpringRestToTsConverter(GenerationContext generationContext) {
-        this.generationContext = generationContext;
+    public SpringRestToTsConverter() {
     }
 
     public boolean preConverted(ModuleConverter moduleConverter, Class javaClass, ClassNameMapper classNameMapper){
@@ -35,7 +33,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
     }
 
     @Override
-    public void convert(Class javaClass) {
+    public void convert(Class javaClass, ImplementationGenerator implementationGenerator) {
         TSClass tsClass = (TSClass) TypeMapper.map(javaClass);
 
         setSupperClass(javaClass, tsClass);
@@ -80,7 +78,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
             }
         }
 
-        generationContext.getImplementationGenerator(tsClass).addComplexTypeUsage(tsClass);
+        implementationGenerator.addComplexTypeUsage(tsClass);
         conversionListener.tsComplexTypeCreated(javaClass, tsClass);
     }
 

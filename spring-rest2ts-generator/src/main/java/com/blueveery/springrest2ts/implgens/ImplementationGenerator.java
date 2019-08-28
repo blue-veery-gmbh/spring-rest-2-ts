@@ -1,7 +1,5 @@
 package com.blueveery.springrest2ts.implgens;
 
-import com.blueveery.springrest2ts.GenerationContext;
-import com.blueveery.springrest2ts.converters.ModuleConverter;
 import com.blueveery.springrest2ts.tsmodel.*;
 
 import java.io.BufferedWriter;
@@ -13,8 +11,6 @@ import java.util.SortedSet;
  * Created by tomaszw on 31.07.2017.
  */
 public interface ImplementationGenerator {
-    void generateImplementationSpecificUtilTypes(GenerationContext generationContext, ModuleConverter tsModuleMap);
-
     void write(BufferedWriter writer, TSMethod method) throws IOException;
     TSType mapReturnType(TSMethod tsMethod, TSType tsType);
     SortedSet<TSField> getImplementationSpecificFields(TSComplexType tsComplexType);
@@ -27,5 +23,4 @@ public interface ImplementationGenerator {
     void addComplexTypeUsage(TSClass tsClass);
 
     void addImplementationSpecificFields(TSComplexType tsComplexType);
-
 }

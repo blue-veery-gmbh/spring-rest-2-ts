@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.INullableElement;
 
@@ -15,7 +16,7 @@ import java.util.Optional;
 public abstract class ComplexTypeConverter {
     ConversionListener conversionListener = new NoActionConversionListener();
     public abstract boolean preConverted(ModuleConverter moduleConverter, Class javaClass, ClassNameMapper classNameMapper);
-    public abstract void convert(Class javaClass);
+    public abstract void convert(Class javaClass, ImplementationGenerator implementationGenerator);
 
     public ConversionListener getConversionListener() {
         return conversionListener;

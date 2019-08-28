@@ -1,7 +1,7 @@
 package com.blueveery.springrest2ts.examples.test;
 
 
-import com.blueveery.springrest2ts.GenerationContext;
+
 import com.blueveery.springrest2ts.SpringREST2tsGenerator;
 import com.blueveery.springrest2ts.converters.*;
 import com.blueveery.springrest2ts.naming.SubstringClassNameMapper;
@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.UUID;
 
 public class OrderSetupTest {
@@ -37,7 +38,8 @@ public class OrderSetupTest {
     private static final Path OUTPUT_DIR_PATH = Paths.get("target/classes/test-webapp/src");
 
     private static SpringREST2tsGenerator tsGenerator;
-    private static ModulePerJavaPackageConverter moduleConverter;
+    private static ConfigureableTsModulesConverter moduleConverter;
+    private Set<String> javaPackageSet;
 
     @Before
     public void setUp() throws IOException {
@@ -48,12 +50,9 @@ public class OrderSetupTest {
         tsGenerator.setRestClassesCondition(new ExtendsJavaTypeFilter(BaseCtrl.class));
 
         JacksonObjectMapper objectMapper = new JacksonObjectMapper(JsonAutoDetect.Visibility.ANY, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY);
-        ModelClassToTsConverter modelClassToTsConverter = new ModelClassToTsConverter(objectMapper);
-        tsGenerator.setModelClassesConverter(modelClassToTsConverter);
-
-        GenerationContext generationContext = new GenerationContext(new Angular4ImplementationGenerator());
-        tsGenerator.setGenerationContext(generationContext);
-        tsGenerator.setRestClassesConverter(new SpringRestToTsConverter(generationContext));
+        tsGenerator.setModelClassesConverter(new ModelClassToTsConverter(objectMapper));
+        tsGenerator.setRestClassesConverter(new SpringRestToTsConverter());
+        tsGenerator.setRestImplementationGenerator(new Angular4ImplementationGenerator());
 
         HashMap<String, TSModule> packagesMap = new HashMap<>();
         packagesMap.put(BaseDTO.class.getPackage().getName(), new TSModule("core", Paths.get("app/sdk/model"), false));
@@ -61,20 +60,20 @@ public class OrderSetupTest {
         packagesMap.put(OrderPaymentStatus.class.getPackage().getName(), new TSModule("model-enums", Paths.get("app/sdk/enums"), false));
         packagesMap.put(OrderCtrl.class.getPackage().getName(), new TSModule("services", Paths.get("app/sdk/services"), false));
 
-        tsGenerator.getPackagesNames().addAll(packagesMap.keySet());
-        moduleConverter = new ModulePerJavaPackageConverter(packagesMap);
+        javaPackageSet = packagesMap.keySet();
+        moduleConverter = new ConfigureableTsModulesConverter(packagesMap);
     }
 
     @Test
     public void defaultSetup() throws IOException {
-        tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 
     @Test
     public void jacksonAnnotationTestsOnProductDTO() throws IOException {
         tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("ProductDTO"));
         tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
-        tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 
     @Test
@@ -82,7 +81,7 @@ public class OrderSetupTest {
         tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("DTO"));
         tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
         tsGenerator.setEnumConverter(new JavaEnumToTsUnionConverter());
-        tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 
     @Test
@@ -90,7 +89,7 @@ public class OrderSetupTest {
         tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("DTO"));
         tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
         tsGenerator.setEnumConverter(new EnumConverter());
-        tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 
 
@@ -98,21 +97,21 @@ public class OrderSetupTest {
     public void classNameMappingTest() throws IOException {
         tsGenerator.setModelClassesNameMapper(new SubstringClassNameMapper("DTO", ""));
         tsGenerator.setRestClassesNameMapper(new SubstringClassNameMapper("Ctrl", "Service"));
-        tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 
     @Test
     public void containsSubStringClassCondition() throws IOException {
         tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("DTO"));
         tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
-        tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 
     @Test
     public void regexClassCondition() throws IOException {
         tsGenerator.setModelClassesCondition(new RegexpJavaTypeFilter("\\w*DTO\\b"));
         tsGenerator.setRestClassesCondition(new RegexpJavaTypeFilter("\\w*Ctrl\\b"));
-        tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 
 
@@ -120,7 +119,7 @@ public class OrderSetupTest {
     public void complexRestClassCondition() throws IOException {
         OrFilterOperator annotationConditions = new OrFilterOperator(Arrays.asList(new HasAnnotationJavaTypeFilter(Controller.class), new HasAnnotationJavaTypeFilter(RestController.class)));
         tsGenerator.setRestClassesCondition(new AndFilterOperator(Arrays.asList(new ExtendsJavaTypeFilter(BaseCtrl.class), annotationConditions)));
-        tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 
     @Test
@@ -129,7 +128,7 @@ public class OrderSetupTest {
         tsGenerator.getCustomTypeMapping().put(BigInteger.class, TypeMapper.tsNumber);
         tsGenerator.getCustomTypeMapping().put(LocalDateTime.class, TypeMapper.tsDate);
         tsGenerator.getCustomTypeMapping().put(LocalDate.class, TypeMapper.tsDate);
-        tsGenerator.generate(moduleConverter, OUTPUT_DIR_PATH);
+        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 
     @Test

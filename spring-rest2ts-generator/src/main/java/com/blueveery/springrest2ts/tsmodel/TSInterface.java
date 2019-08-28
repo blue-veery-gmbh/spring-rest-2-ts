@@ -1,6 +1,7 @@
 package com.blueveery.springrest2ts.tsmodel;
 
-import com.blueveery.springrest2ts.GenerationContext;
+
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -24,7 +25,7 @@ public class TSInterface extends TSComplexType {
     }
 
     @Override
-    public void write(GenerationContext generationContext, BufferedWriter writer) throws IOException {
+    public void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
         writer.write("export interface " + getName() + " ");
 
         if(!extendsInterfaces.isEmpty()){
@@ -39,7 +40,7 @@ public class TSInterface extends TSComplexType {
         }
 
         writer.write("{");
-        writeMembers(generationContext, writer);
+        writeMembers(implementationGenerator, writer);
         writer.write("}");
     }
 }

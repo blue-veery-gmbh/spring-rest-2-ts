@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.*;
 import com.fasterxml.jackson.annotation.*;
 
@@ -162,12 +163,14 @@ public class JacksonObjectMapper implements ObjectMapper {
     }
 
     @Override
-    public List<TSField> mapToField(Property property, TSComplexType tsComplexType, ComplexTypeConverter complexTypeConverter) {
+    public List<TSField> mapJavaPropertyToField(Property property, TSComplexType tsComplexType,
+                                                ComplexTypeConverter complexTypeConverter, ImplementationGenerator implementationGenerator) {
         List<TSField> tsFieldList = new ArrayList<>();
         Type fieldJavaGetterType = property.getGetterType();
         if (fieldJavaGetterType != null) {
             fieldJavaGetterType = applyJsonValue(fieldJavaGetterType);
-            if (applyJsonUnwrapped(fieldJavaGetterType, property.getDeclaredAnnotation(JsonUnwrapped.class), tsComplexType, tsFieldList, complexTypeConverter)){
+            JsonUnwrapped declaredAnnotation = property.getDeclaredAnnotation(JsonUnwrapped.class);
+            if (applyJsonUnwrapped(fieldJavaGetterType, declaredAnnotation, tsComplexType, tsFieldList, complexTypeConverter, implementationGenerator)){
                 return tsFieldList;
             }
         }
@@ -253,7 +256,8 @@ public class JacksonObjectMapper implements ObjectMapper {
         return fieldJavaType;
     }
 
-    private boolean applyJsonUnwrapped(Type fieldJavaType, JsonUnwrapped declaredAnnotation, TSComplexType tsComplexType, List<TSField> tsFieldList, ComplexTypeConverter complexTypeConverter) {
+    private boolean applyJsonUnwrapped(Type fieldJavaType, JsonUnwrapped declaredAnnotation, TSComplexType tsComplexType,
+                                       List<TSField> tsFieldList, ComplexTypeConverter complexTypeConverter, ImplementationGenerator implementationGenerator) {
         if (declaredAnnotation != null) {
             TSType tsType = TypeMapper.map(fieldJavaType);
             if (!(tsType instanceof TSComplexType)) {
@@ -261,7 +265,7 @@ public class JacksonObjectMapper implements ObjectMapper {
             }
             TSComplexType referredTsType = (TSComplexType) tsType;
             if (!referredTsType.isConverted()) {
-                complexTypeConverter.convert((Class) fieldJavaType);
+                complexTypeConverter.convert((Class) fieldJavaType, implementationGenerator);
             }
             for (TSField nextTsField : referredTsType.getTsFields()) {
                 tsFieldList.add(new TSField(nextTsField.getName(), tsComplexType, nextTsField.getType()));

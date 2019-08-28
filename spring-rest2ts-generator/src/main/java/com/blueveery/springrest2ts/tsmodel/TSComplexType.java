@@ -1,6 +1,6 @@
 package com.blueveery.springrest2ts.tsmodel;
 
-import com.blueveery.springrest2ts.GenerationContext;
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -65,18 +65,18 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
         }
     }
 
-    protected void writeMembers(GenerationContext generationContext, BufferedWriter writer) throws IOException {
-        generationContext.getImplementationGenerator(this).addImplementationSpecificFields(this);
-        writeFields(generationContext, writer, tsFields);
-        SortedSet<TSField> implementationSpecificFields = generationContext.getImplementationGenerator(this).getImplementationSpecificFields(this);
-        writeFields(generationContext, writer, implementationSpecificFields);
+    protected void writeMembers(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
+        implementationGenerator.addImplementationSpecificFields(this);
+        writeFields(implementationGenerator, writer, tsFields);
+        SortedSet<TSField> implementationSpecificFields = implementationGenerator.getImplementationSpecificFields(this);
+        writeFields(implementationGenerator, writer, implementationSpecificFields);
 
         if (!tsMethods.isEmpty()) {
             writer.newLine();
             writer.newLine();
 
             for (TSMethod tsMethod : tsMethods) {
-                tsMethod.write(generationContext, writer);
+                tsMethod.write(implementationGenerator, writer);
                 writer.newLine();
                 writer.newLine();
             }
@@ -84,11 +84,11 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
 
     }
 
-    private void writeFields(GenerationContext generationContext, BufferedWriter writer, SortedSet<TSField> fieldList) throws IOException {
+    private void writeFields(ImplementationGenerator implementationGenerator, BufferedWriter writer, SortedSet<TSField> fieldList) throws IOException {
         if (!fieldList.isEmpty()) {
             writer.newLine();
             for (TSField tsField : fieldList) {
-                tsField.write(generationContext, writer);
+                tsField.write(implementationGenerator, writer);
                 writer.newLine();
             }
         }

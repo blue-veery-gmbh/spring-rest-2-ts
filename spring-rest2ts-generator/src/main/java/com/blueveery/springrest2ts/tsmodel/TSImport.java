@@ -1,6 +1,7 @@
 package com.blueveery.springrest2ts.tsmodel;
 
-import com.blueveery.springrest2ts.GenerationContext;
+
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class TSImport extends TSElement{
     }
 
     @Override
-    public void write(GenerationContext generationContext, BufferedWriter writer) throws IOException {
+    public void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
         StringBuilder whatString = new StringBuilder();
         int i=0;
         for(TSScopedType tsScopedType:getWhat()){

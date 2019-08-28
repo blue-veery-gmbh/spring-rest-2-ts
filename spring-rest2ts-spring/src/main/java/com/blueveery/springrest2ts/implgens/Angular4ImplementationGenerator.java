@@ -1,6 +1,5 @@
 package com.blueveery.springrest2ts.implgens;
 
-import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.converters.ModuleConverter;
 import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
@@ -343,10 +342,4 @@ public class Angular4ImplementationGenerator extends SpringMvcImplementationGene
             implementationSpecificFieldsSet.add(new TSField(FIELD_NAME_URL_SERVICE, tsComplexType, urlServiceClass));
         }
     }
-
-    @Override
-    public void generateImplementationSpecificUtilTypes(GenerationContext generationContext, ModuleConverter moduleConverter) {
-
-    }
-
 }

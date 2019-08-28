@@ -1,6 +1,5 @@
 package com.blueveery.springrest2ts.implgens;
 
-import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.converters.ModuleConverter;
 import com.blueveery.springrest2ts.tsmodel.*;
 
@@ -48,11 +47,6 @@ public class EmptyImplementationGenerator implements ImplementationGenerator {
 
     @Override
     public void addImplementationSpecificFields(TSComplexType tsComplexType) {
-
-    }
-
-    @Override
-    public void generateImplementationSpecificUtilTypes(GenerationContext generationContext, ModuleConverter tsModuleMap) {
 
     }
 }

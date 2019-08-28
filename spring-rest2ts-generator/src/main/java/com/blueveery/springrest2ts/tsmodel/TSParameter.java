@@ -1,7 +1,8 @@
 package com.blueveery.springrest2ts.tsmodel;
 
-import com.blueveery.springrest2ts.GenerationContext;
+
 import com.blueveery.springrest2ts.converters.TypeMapper;
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -67,15 +68,15 @@ public class TSParameter extends TSElement implements INullableElement, IAnnotat
     }
 
     @Override
-    public void write(GenerationContext generationContext, BufferedWriter writer) throws IOException {
-        writeDecorators(generationContext, writer, tsDecoratorList);
+    public void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
+        writeDecorators(implementationGenerator, writer, tsDecoratorList);
         writer.write(getName());
         if (optional && defaultValue == null) {
             writer.write("?");
         }
         writer.write(": ");
         if (type instanceof TSArrowFuncType) {
-            type.write(generationContext, writer);
+            type.write(implementationGenerator, writer);
         } else {
             writer.write(type.getName());
         }

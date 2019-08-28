@@ -1,6 +1,7 @@
 package com.blueveery.springrest2ts.tsmodel;
 
-import com.blueveery.springrest2ts.GenerationContext;
+
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class TSArray extends TSType {
     }
 
     @Override
-    public void write(GenerationContext context, BufferedWriter writer) throws IOException {
+    public void write(ImplementationGenerator context, BufferedWriter writer) throws IOException {
         writer.write(": " + elementType.getName() + getName());
     }
 }

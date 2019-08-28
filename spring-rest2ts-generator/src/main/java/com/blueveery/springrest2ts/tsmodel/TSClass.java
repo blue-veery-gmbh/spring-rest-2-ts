@@ -1,6 +1,6 @@
 package com.blueveery.springrest2ts.tsmodel;
 
-import com.blueveery.springrest2ts.GenerationContext;
+
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 
 import java.io.BufferedWriter;
@@ -44,10 +44,9 @@ public class TSClass extends TSComplexType {
     }
 
     @Override
-    public void write(GenerationContext generationContext, BufferedWriter writer) throws IOException {
-        ImplementationGenerator implementationGenerator = generationContext.getImplementationGenerator(this);
+    public void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
         List<TSDecorator> decorators = implementationGenerator.getDecorators(this);
-        writeDecorators(generationContext, writer, decorators);
+        writeDecorators(implementationGenerator, writer, decorators);
 
         writer.write("export");
         if (isAbstract) {
@@ -71,7 +70,7 @@ public class TSClass extends TSComplexType {
         }
 
         writer.write("{");
-        writeMembers(generationContext, writer);
+        writeMembers(implementationGenerator, writer);
         writer.write("}");
     }
 }

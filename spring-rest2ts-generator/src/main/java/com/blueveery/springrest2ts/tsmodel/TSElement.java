@@ -1,6 +1,7 @@
 package com.blueveery.springrest2ts.tsmodel;
 
-import com.blueveery.springrest2ts.GenerationContext;
+
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -39,5 +40,5 @@ public abstract class TSElement implements Comparable<TSElement>{
         return name.compareTo(otherTsElement.name);
     }
 
-    public abstract void write(GenerationContext generationContext, BufferedWriter writer) throws IOException;
+    public abstract void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException;
 }

@@ -1,7 +1,7 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
-import com.blueveery.springrest2ts.GenerationContext;
 import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.blueveery.springrest2ts.tsmodel.TSInterface;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
@@ -36,7 +36,7 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
     }
 
     @Override
-    public void convert(Class javaClass) {
+    public void convert(Class javaClass, ImplementationGenerator implementationGenerator) {
         TSInterface tsInterface = (TSInterface) TypeMapper.map(javaClass);
         if (!tsInterface.isConverted()) {
             tsInterface.setConverted(true);
@@ -50,7 +50,7 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
             SortedSet<Property> propertySet = getClassProperties(javaClass);
 
             for (Property property : propertySet) {
-                List<TSField> tsFieldList = objectMapper.mapToField(property, tsInterface, this);
+                List<TSField> tsFieldList = objectMapper.mapJavaPropertyToField(property, tsInterface, this,implementationGenerator );
                 if (tsFieldList.size() == 1) {
                     setAsNullableType(property, tsFieldList.get(0));
                 }

@@ -9,11 +9,11 @@ import java.util.TreeSet;
 /**
  * Created by tomaszw on 03.08.2017.
  */
-public class ModulePerJavaPackageConverter implements ModuleConverter {
+public class ConfigureableTsModulesConverter implements ModuleConverter {
     private Map<String, TSModule> packagesMap;
     private SortedSet<TSModule> tsModuleSortedSet = new TreeSet<>();
 
-    public ModulePerJavaPackageConverter(Map<String, TSModule> packagesMap) {
+    public ConfigureableTsModulesConverter(Map<String, TSModule> packagesMap) {
         this.packagesMap = packagesMap;
         tsModuleSortedSet.addAll(packagesMap.values());
     }

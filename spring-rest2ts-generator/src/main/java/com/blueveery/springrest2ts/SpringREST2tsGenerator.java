@@ -2,6 +2,8 @@ package com.blueveery.springrest2ts;
 
 import com.blueveery.springrest2ts.converters.*;
 import com.blueveery.springrest2ts.filters.JavaTypeFilter;
+import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.naming.NoChangeClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
@@ -24,15 +26,16 @@ public class SpringREST2tsGenerator {
     static Logger logger = LoggerFactory.getLogger("gen-logger");
     private JavaTypeFilter modelClassesCondition;
     private JavaTypeFilter restClassesCondition;
+    ModuleConverter moduleConverter = new TsModuleCreatorConverter(2);
     private ClassNameMapper enumClassesNameMapper = new NoChangeClassNameMapper();
     private ClassNameMapper modelClassesNameMapper = new NoChangeClassNameMapper();
     private ClassNameMapper restClassesNameMapper = new NoChangeClassNameMapper();
-    private Set<String> packagesNames = new HashSet<>();
     private Map<Class, TSType> customTypeMapping = new HashMap<>();
-    private GenerationContext generationContext;
     private ComplexTypeConverter enumConverter = new EnumConverter();;
-    private ModelClassToTsConverter modelClassesConverter;
+    private ComplexTypeConverter modelClassesConverter;
     private ComplexTypeConverter restClassesConverter;
+    private ImplementationGenerator modelImplementationGenerator = new EmptyImplementationGenerator();
+    private ImplementationGenerator restImplementationGenerator = new EmptyImplementationGenerator();
 
     public void setModelClassesCondition(JavaTypeFilter modelClassesCondition) {
         this.modelClassesCondition = modelClassesCondition;
@@ -54,11 +57,11 @@ public class SpringREST2tsGenerator {
         this.restClassesNameMapper = restClassesNameMapper;
     }
 
-    public ModelClassToTsConverter getModelClassesConverter() {
+    public ComplexTypeConverter getModelClassesConverter() {
         return modelClassesConverter;
     }
 
-    public void setModelClassesConverter(ModelClassToTsConverter modelClassesConverter) {
+    public void setModelClassesConverter(ComplexTypeConverter modelClassesConverter) {
         this.modelClassesConverter = modelClassesConverter;
     }
 
@@ -66,27 +69,27 @@ public class SpringREST2tsGenerator {
         return restClassesConverter;
     }
 
-    public void setRestClassesConverter(ComplexTypeConverter restClassesConverter) {
-        this.restClassesConverter = restClassesConverter;
+    public void setModelImplementationGenerator(ImplementationGenerator modelImplementationGenerator) {
+        this.modelImplementationGenerator = modelImplementationGenerator;
     }
 
-    public Set<String> getPackagesNames() {
-        return packagesNames;
+    public void setRestClassesConverter(ComplexTypeConverter restClassesConverter) {
+        this.restClassesConverter = restClassesConverter;
     }
 
     public Map<Class, TSType> getCustomTypeMapping() {
         return customTypeMapping;
     }
 
-    public void setGenerationContext(GenerationContext generationContext) {
-        this.generationContext = generationContext;
+    public void setRestImplementationGenerator(ImplementationGenerator restImplementationGenerator) {
+        this.restImplementationGenerator = restImplementationGenerator;
     }
 
     public void setEnumConverter(ComplexTypeConverter enumConverter) {
         this.enumConverter = enumConverter;
     }
 
-    public SortedSet<TSModule> generate(ModuleConverter moduleConverter, Path outputDir) throws IOException {
+    public SortedSet<TSModule> generate(Set<String> packagesNames, Path outputDir) throws IOException {
         Set<Class> modelClasses = new HashSet<>();
         Set<Class> restClasses = new HashSet<>();
         Set<Class> enumClasses = new HashSet<>();
@@ -101,9 +104,6 @@ public class SpringREST2tsGenerator {
 
         exploreRestClasses(restClasses, modelClassesCondition, modelClasses);
         exploreModelClasses(modelClasses, restClassesCondition);
-
-        generationContext.getDefaultImplementationGenerator().generateImplementationSpecificUtilTypes(generationContext, moduleConverter);
-
 
         convertModules(enumClasses, moduleConverter);
         convertModules(modelClasses, moduleConverter);
@@ -125,7 +125,7 @@ public class SpringREST2tsGenerator {
         }
 
 
-        writeTypeScriptTypes(moduleConverter.getTsModules(), generationContext, outputDir, logger);
+        writeTSModules(moduleConverter.getTsModules(), outputDir, logger);
 
         return moduleConverter.getTsModules();
     }
@@ -137,9 +137,9 @@ public class SpringREST2tsGenerator {
         }
     }
 
-    private void writeTypeScriptTypes(SortedSet<TSModule> tsModuleSortedSet, GenerationContext context, Path outputDir, Logger logger) throws IOException {
+    private void writeTSModules(SortedSet<TSModule> tsModuleSortedSet, Path outputDir, Logger logger) throws IOException {
         for (TSModule tsModule : tsModuleSortedSet) {
-            tsModule.writeModule(context, outputDir, logger);
+            tsModule.writeModule(restImplementationGenerator, outputDir, logger);
         }
     }
 
@@ -158,7 +158,7 @@ public class SpringREST2tsGenerator {
         }
 
         for (Class javaType : preConvertedTypes) {
-            complexTypeConverter.convert(javaType);
+            complexTypeConverter.convert(javaType, restImplementationGenerator);
         }
 
     }
