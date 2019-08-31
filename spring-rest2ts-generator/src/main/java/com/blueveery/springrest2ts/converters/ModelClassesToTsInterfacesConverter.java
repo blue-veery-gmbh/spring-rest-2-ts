@@ -43,7 +43,7 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
     }
 
     @Override
-    public void convert(Class javaClass, ConversionListener conversionListener) {
+    public void convert(Class javaClass) {
         TSInterface tsInterface = (TSInterface) TypeMapper.map(javaClass);
         if (!tsInterface.isConverted()) {
             tsInterface.setConverted(true);

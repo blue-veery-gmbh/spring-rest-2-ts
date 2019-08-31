@@ -82,11 +82,13 @@ public class SpringREST2tsGenerator {
         convertModules(modelClasses, moduleConverter);
         convertModules(restClasses, moduleConverter);
 
+        enumConverter.conversionListener = conversionListener;
         convertTypes(enumClasses, moduleConverter, enumConverter);
         if (!modelClasses.isEmpty()) {
             if (modelClassesConverter == null) {
                 throw new IllegalStateException("Model classes converter is not set");
             }
+            modelClassesConverter.conversionListener = conversionListener;
             convertTypes(modelClasses, moduleConverter, modelClassesConverter);
         }
 
@@ -94,6 +96,7 @@ public class SpringREST2tsGenerator {
             if (restClassesConverter == null) {
                 throw new IllegalStateException("Rest classes converter is not set");
             }
+            restClassesConverter.conversionListener = conversionListener;
             convertTypes(restClasses, moduleConverter, restClassesConverter);
         }
 
@@ -131,7 +134,7 @@ public class SpringREST2tsGenerator {
         }
 
         for (Class javaType : preConvertedTypes) {
-            complexTypeConverter.convert(javaType, conversionListener);
+            complexTypeConverter.convert(javaType);
         }
 
     }

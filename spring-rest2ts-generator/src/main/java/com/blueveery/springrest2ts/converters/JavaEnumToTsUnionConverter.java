@@ -32,7 +32,7 @@ public class JavaEnumToTsUnionConverter extends ComplexTypeConverter {
     }
 
     @Override
-    public void convert(Class javaClass, ConversionListener conversionListener) {
+    public void convert(Class javaClass) {
         TSTypeAlias tsTypeAlias = (TSTypeAlias) TypeMapper.map(javaClass);
         TSUnion tsUnion = (TSUnion) tsTypeAlias.getAliasedType();
         for (Object enumConstant : javaClass.getEnumConstants()) {
