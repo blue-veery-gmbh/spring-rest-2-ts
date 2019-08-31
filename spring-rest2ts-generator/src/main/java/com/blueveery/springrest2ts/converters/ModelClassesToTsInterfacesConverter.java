@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.TSField;
@@ -15,14 +16,21 @@ import java.util.*;
 /**
  * Created by tomaszw on 03.08.2017.
  */
-public class ModelClassToTsConverter extends ComplexTypeConverter {
+public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
     private ObjectMapper objectMapper;
 
-    public ModelClassToTsConverter(ObjectMapper objectMapper) {
+    public ModelClassesToTsInterfacesConverter(ObjectMapper objectMapper) {
+        super(new EmptyImplementationGenerator());
         this.objectMapper = objectMapper;
     }
 
-    public boolean preConverted(ModuleConverter moduleConverter, Class javaClass, ClassNameMapper classNameMapper) {
+    public ModelClassesToTsInterfacesConverter(ClassNameMapper classNameMapper, ObjectMapper objectMapper) {
+        super(new EmptyImplementationGenerator(), classNameMapper);
+        this.objectMapper = objectMapper;
+    }
+
+    @Override
+    public boolean preConverted(ModuleConverter moduleConverter, Class javaClass) {
         if (TypeMapper.map(javaClass) == TypeMapper.tsAny) {
             if (objectMapper.filterClass(javaClass)) {
                 TSModule tsModule = moduleConverter.getTsModule(javaClass);
@@ -36,7 +44,7 @@ public class ModelClassToTsConverter extends ComplexTypeConverter {
     }
 
     @Override
-    public void convert(Class javaClass, ImplementationGenerator implementationGenerator) {
+    public void convert(Class javaClass) {
         TSInterface tsInterface = (TSInterface) TypeMapper.map(javaClass);
         if (!tsInterface.isConverted()) {
             tsInterface.setConverted(true);

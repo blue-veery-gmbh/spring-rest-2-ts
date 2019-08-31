@@ -1,6 +1,5 @@
 package com.blueveery.springrest2ts.implgens;
 
-import com.blueveery.springrest2ts.converters.ModuleConverter;
 import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,18 +38,18 @@ public class Angular4ImplementationGenerator extends SpringMvcImplementationGene
 
         TSModule subjectModule = new TSModule("rxjs/Subject", null, true);
         TSModule observableModule = new TSModule("rxjs/Observable", null, true);
-        observableClass = new TSClass("Observable", observableModule);
-        subjectClass = new TSClass("Subject", subjectModule);
+        observableClass = new TSClass("Observable", observableModule, this);
+        subjectClass = new TSClass("Subject", subjectModule, this);
 
         TSModule angularHttpModule = new TSModule("@angular/common/http", null, true);
-        httpClass = new TSClass("HttpClient", angularHttpModule);
-        httpParamsClass = new TSClass("HttpParams", angularHttpModule);
-        httpHeadersClass = new TSClass("HttpHeaders", angularHttpModule);
+        httpClass = new TSClass("HttpClient", angularHttpModule, this);
+        httpParamsClass = new TSClass("HttpParams", angularHttpModule, this);
+        httpHeadersClass = new TSClass("HttpHeaders", angularHttpModule, this);
 
         useUrlService = urlServicePath != null;
         if (useUrlService) {
             TSModule urlServiceModule = new TSModule("url.service", urlServicePath, false);
-            urlServiceClass = new TSClass("UrlService", urlServiceModule);
+            urlServiceClass = new TSClass("UrlService", urlServiceModule, this);
         }
     }
 
@@ -289,7 +288,7 @@ public class Angular4ImplementationGenerator extends SpringMvcImplementationGene
         if (method.isConstructor() && isRestClass(method.getOwner())) {
             List<TSParameter> tsParameters = new ArrayList<>();
             for (TSField field : implementationSpecificFieldsSet) {
-                TSParameter newParameter = new TSParameter(field.getName(), field.getType());
+                TSParameter newParameter = new TSParameter(field.getName(), field.getType(), this);
                 tsParameters.add(newParameter);
             }
             return tsParameters;

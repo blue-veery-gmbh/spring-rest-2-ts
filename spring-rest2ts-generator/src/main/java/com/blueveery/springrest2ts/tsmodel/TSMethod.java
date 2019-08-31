@@ -12,12 +12,14 @@ import java.util.List;
  * Created by tomaszw on 30.07.2017.
  */
 public class TSMethod extends TSComplexTypeMember {
+    private ImplementationGenerator implementationGenerator;
     private boolean isConstructor;
     private boolean isAbstract;
     private List<TSParameter> parameterList = new ArrayList<>();
 
-    public TSMethod(String name, TSComplexType owner, TSType type, boolean isAbstract, boolean isConstructor) {
+    public TSMethod(String name, TSComplexType owner, TSType type, ImplementationGenerator implementationGenerator, boolean isAbstract, boolean isConstructor) {
         super(name, owner, type);
+        this.implementationGenerator = implementationGenerator;
         this.isAbstract = isAbstract;
         this.isConstructor = isConstructor;
         if(isConstructor){
@@ -42,9 +44,9 @@ public class TSMethod extends TSComplexTypeMember {
     }
 
     @Override
-    public void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
+    public void write(BufferedWriter writer) throws IOException {
         List<TSDecorator> decorators = implementationGenerator.getDecorators(this);
-        writeDecorators(implementationGenerator, writer, decorators);
+        writeDecorators(writer, decorators);
 
         writer.write("public ");
         if(isAbstract) {
@@ -80,7 +82,7 @@ public class TSMethod extends TSComplexTypeMember {
             TSParameter p = totalTsParametersList.get(i);
             boolean isOptional = p.isOptional() || p.getDefaultValue() != null;
             if ((writeOptional && isOptional) || (!writeOptional && !isOptional)) {
-                p.write(implementationGenerator, writer);
+                p.write(writer);
                 if(counter<totalTsParametersList.size()-1){
                     writer.write(", ");
                 }

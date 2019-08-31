@@ -17,14 +17,20 @@ import java.util.Map;
 
 public class SpringRestToTsConverter extends ComplexTypeConverter{
 
-    public SpringRestToTsConverter() {
+    public SpringRestToTsConverter(ImplementationGenerator implementationGenerator) {
+        super(implementationGenerator);
     }
 
-    public boolean preConverted(ModuleConverter moduleConverter, Class javaClass, ClassNameMapper classNameMapper){
+    public SpringRestToTsConverter(ImplementationGenerator implementationGenerator, ClassNameMapper classNameMapper) {
+        super(implementationGenerator, classNameMapper);
+    }
+
+    @Override
+    public boolean preConverted(ModuleConverter moduleConverter, Class javaClass){
         if(TypeMapper.map(javaClass) == TypeMapper.tsAny && !javaClass.isInterface()){
             TSModule tsModule = moduleConverter.getTsModule(javaClass);
             String simpleName = classNameMapper.mapJavaClassNameToTs(javaClass.getSimpleName());
-            TSClass tsClass = new TSClass(simpleName, tsModule);
+            TSClass tsClass = new TSClass(simpleName, tsModule, implementationGenerator);
             tsModule.addScopedType(tsClass);
             TypeMapper.registerTsType(javaClass, tsClass);
             return true;
@@ -33,7 +39,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
     }
 
     @Override
-    public void convert(Class javaClass, ImplementationGenerator implementationGenerator) {
+    public void convert(Class javaClass) {
         TSClass tsClass = (TSClass) TypeMapper.map(javaClass);
 
         setSupperClass(javaClass, tsClass);
@@ -43,7 +49,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
         typeParametersMap.putAll(createTypeParametersMap(javaClass.getGenericInterfaces()));
         typeParametersMap.putAll(createTypeParametersMap(javaClass.getGenericSuperclass()));
 
-        TSMethod tsConstructorMethod = new TSMethod("constructor", tsClass, null, false, true);
+        TSMethod tsConstructorMethod = new TSMethod("constructor", tsClass, null, implementationGenerator, false, true);
         tsClass.addTsMethod(tsConstructorMethod);
 
         for (Method method: javaClass.getMethods()) {
@@ -61,9 +67,9 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
                             genericReturnType = parameterizedType.getActualTypeArguments()[0];
                         }
                     }
-                    TSMethod tsMethod = new TSMethod(method.getName(), tsClass, TypeMapper.map(genericReturnType, fallbackTSType), false, false);
+                    TSMethod tsMethod = new TSMethod(method.getName(), tsClass, TypeMapper.map(genericReturnType, fallbackTSType), implementationGenerator, false, false);
                     for (Parameter parameter :method.getParameters()) {
-                        TSParameter tsParameter = new TSParameter(parameter.getName(), TypeMapper.map(parameter.getParameterizedType(), fallbackTSType));
+                        TSParameter tsParameter = new TSParameter(parameter.getName(), TypeMapper.map(parameter.getParameterizedType(), fallbackTSType), implementationGenerator);
                         addRestAnnotations(parameter.getAnnotations(), tsParameter);
                         if (parameterIsMapped(tsParameter.getAnnotationList())) {
                             setOptional(tsParameter);

@@ -19,27 +19,22 @@ public class TSParameter extends TSElement implements INullableElement, IAnnotat
     private boolean optional;
     private List<TSDecorator> tsDecoratorList = new ArrayList<>();
     private List<Annotation> annotationList = new ArrayList<>();
+    private ImplementationGenerator implementationGenerator;
 
-    public TSParameter(String name, TSType type) {
+    public TSParameter(String name, TSType type, ImplementationGenerator implementationGenerator) {
         super(name);
         this.type = type;
-        this.optional = false;
+        this.implementationGenerator = implementationGenerator;
         this.defaultValue = null;
+        this.optional = false;
     }
 
-    public TSParameter(String name, TSType type, String defaultValue) {
-        super(name);
-        this.type = type;
+    public TSParameter(String name, TSType type, ImplementationGenerator implementationGenerator, String defaultValue) {
+        this(name, type, implementationGenerator);
+        this.defaultValue = defaultValue;
         this.optional = true;
-        this.defaultValue = defaultValue;
     }
 
-    public TSParameter(String name, TSType type, boolean optional, String defaultValue) {
-        super(name);
-        this.type = type;
-        this.optional = optional;
-        this.defaultValue = defaultValue;
-    }
 
     @Override
     public TSType getType() {
@@ -68,15 +63,15 @@ public class TSParameter extends TSElement implements INullableElement, IAnnotat
     }
 
     @Override
-    public void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
-        writeDecorators(implementationGenerator, writer, tsDecoratorList);
+    public void write(BufferedWriter writer) throws IOException {
+        writeDecorators(writer, tsDecoratorList);
         writer.write(getName());
         if (optional && defaultValue == null) {
             writer.write("?");
         }
         writer.write(": ");
         if (type instanceof TSArrowFuncType) {
-            type.write(implementationGenerator, writer);
+            type.write(writer);
         } else {
             writer.write(type.getName());
         }

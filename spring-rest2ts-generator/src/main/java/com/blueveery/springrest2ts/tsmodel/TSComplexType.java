@@ -22,9 +22,11 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
 
     private List<Annotation> annotationList = new ArrayList<>();
     private boolean converted;
+    protected ImplementationGenerator implementationGenerator;
 
-    public TSComplexType(String name, TSModule module) {
+    public TSComplexType(String name, TSModule module, ImplementationGenerator implementationGenerator) {
         super(name, module);
+        this.implementationGenerator = implementationGenerator;
     }
 
 
@@ -65,18 +67,18 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
         }
     }
 
-    protected void writeMembers(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
+    protected void writeMembers(BufferedWriter writer) throws IOException {
         implementationGenerator.addImplementationSpecificFields(this);
-        writeFields(implementationGenerator, writer, tsFields);
+        writeFields(writer, tsFields);
         SortedSet<TSField> implementationSpecificFields = implementationGenerator.getImplementationSpecificFields(this);
-        writeFields(implementationGenerator, writer, implementationSpecificFields);
+        writeFields(writer, implementationSpecificFields);
 
         if (!tsMethods.isEmpty()) {
             writer.newLine();
             writer.newLine();
 
             for (TSMethod tsMethod : tsMethods) {
-                tsMethod.write(implementationGenerator, writer);
+                tsMethod.write(writer);
                 writer.newLine();
                 writer.newLine();
             }
@@ -84,11 +86,11 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
 
     }
 
-    private void writeFields(ImplementationGenerator implementationGenerator, BufferedWriter writer, SortedSet<TSField> fieldList) throws IOException {
+    private void writeFields(BufferedWriter writer, SortedSet<TSField> fieldList) throws IOException {
         if (!fieldList.isEmpty()) {
             writer.newLine();
             for (TSField tsField : fieldList) {
-                tsField.write(implementationGenerator, writer);
+                tsField.write(writer);
                 writer.newLine();
             }
         }

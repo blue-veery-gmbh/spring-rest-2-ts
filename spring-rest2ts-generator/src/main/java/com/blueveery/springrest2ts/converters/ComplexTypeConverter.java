@@ -2,6 +2,7 @@ package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
+import com.blueveery.springrest2ts.naming.NoChangeClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.INullableElement;
 
 import javax.annotation.Nullable;
@@ -14,9 +15,22 @@ import java.util.Optional;
  * Created by tomaszw on 31.07.2017.
  */
 public abstract class ComplexTypeConverter {
-    ConversionListener conversionListener = new NoActionConversionListener();
-    public abstract boolean preConverted(ModuleConverter moduleConverter, Class javaClass, ClassNameMapper classNameMapper);
-    public abstract void convert(Class javaClass, ImplementationGenerator implementationGenerator);
+    protected ImplementationGenerator implementationGenerator;
+    protected ConversionListener conversionListener = new NoActionConversionListener();
+    protected ClassNameMapper classNameMapper = new NoChangeClassNameMapper();
+
+    protected ComplexTypeConverter(ImplementationGenerator implementationGenerator) {
+        this.implementationGenerator = implementationGenerator;
+    }
+
+    public ComplexTypeConverter(ImplementationGenerator implementationGenerator, ClassNameMapper classNameMapper) {
+        this(implementationGenerator);
+        this.classNameMapper = classNameMapper;
+    }
+
+
+    public abstract boolean preConverted(ModuleConverter moduleConverter, Class javaClass);
+    public abstract void convert(Class javaClass);
 
     public ConversionListener getConversionListener() {
         return conversionListener;
@@ -25,6 +39,15 @@ public abstract class ComplexTypeConverter {
     public void setConversionListener(ConversionListener conversionListener) {
         this.conversionListener = conversionListener;
     }
+
+    public ClassNameMapper getClassNameMapper() {
+        return classNameMapper;
+    }
+
+    public void setClassNameMapper(ClassNameMapper classNameMapper) {
+        this.classNameMapper = classNameMapper;
+    }
+
 
     protected final void setAsNullableType(Type elementType, Annotation[] declaredAnnotations, INullableElement tsElement) {
         if(!tsElement.isNullable()){

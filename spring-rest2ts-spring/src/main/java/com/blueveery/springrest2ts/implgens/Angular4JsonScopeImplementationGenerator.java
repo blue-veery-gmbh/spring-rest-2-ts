@@ -1,9 +1,6 @@
 package com.blueveery.springrest2ts.implgens;
 
-import com.blueveery.springrest2ts.converters.ModuleConverter;
 import com.blueveery.springrest2ts.converters.TypeMapper;
-import com.blueveery.springrest2ts.tsmodel.TSArray;
-import com.blueveery.springrest2ts.tsmodel.TSArrowFuncType;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
 import com.blueveery.springrest2ts.tsmodel.TSComplexType;
 import com.blueveery.springrest2ts.tsmodel.TSDecorator;
@@ -56,29 +53,29 @@ public class Angular4JsonScopeImplementationGenerator extends SpringMvcImplement
         injectableDecorator = new TSDecorator("", new TSFunction("Injectable", angularCoreModule));
 
         TSModule rxjsModule = new TSModule("rxjs", null,true);
-        observableClass = new TSClass("Observable", rxjsModule);
-        subjectClass = new TSClass("Subject", rxjsModule);
+        observableClass = new TSClass("Observable", rxjsModule, this);
+        subjectClass = new TSClass("Subject", rxjsModule, this);
 
         TSModule angularHttpModule = new TSModule("@angular/http", null,true);
-        httpClass = new TSClass("Http", angularHttpModule);
-        responseClass = new TSClass("Response", angularHttpModule);
-        requestOptionsClass = new TSClass("RequestOptionsArgs", angularHttpModule);
-        headersClass = new TSClass("Headers", angularHttpModule);
+        httpClass = new TSClass("Http", angularHttpModule, this);
+        responseClass = new TSClass("Response", angularHttpModule, this);
+        requestOptionsClass = new TSClass("RequestOptionsArgs", angularHttpModule, this);
+        headersClass = new TSClass("Headers", angularHttpModule, this);
 
         TSModule urlServiceModule = new TSModule("url.service", sharedPath, false);
-        urlServiceClass = new TSClass("UrlService", urlServiceModule);
+        urlServiceClass = new TSClass("UrlService", urlServiceModule, this);
 
         TSModule errorHandlerServiceModule = new TSModule("default-error-handler.service", errorHandlingPath, false);
-        errorHandlerServiceClass = new TSClass("DefaultErrorHandlerService", errorHandlerServiceModule);
+        errorHandlerServiceClass = new TSClass("DefaultErrorHandlerService", errorHandlerServiceModule, this);
 
         TSModule jsonScopeModule = new TSModule("jsonScope", commonsPath, true);
-        jsonScope = new TSClass("JsonScope", jsonScopeModule);
+        jsonScope = new TSClass("JsonScope", jsonScopeModule, this);
 
         TSModule jsonScopedSerializerModule = new TSModule("jsonScopedSerializer", commonsPath, true);
-        jsonScopedSerializer = new TSClass("JsonScopedSerializer", jsonScopedSerializerModule);
+        jsonScopedSerializer = new TSClass("JsonScopedSerializer", jsonScopedSerializerModule, this);
 
         TSModule jsonParserModule = new TSModule("jsonParser", commonsPath, true);
-        jsonParser = new TSClass("JsonParser", jsonParserModule);
+        jsonParser = new TSClass("JsonParser", jsonParserModule, this);
 
     }
 
@@ -270,7 +267,7 @@ public class Angular4JsonScopeImplementationGenerator extends SpringMvcImplement
         if (method.isConstructor() && isRestClass(method.getOwner())) {
             List<TSParameter> tsParameters = new ArrayList<>();
             for (TSField field : implementationSpecificFieldsSet) {
-                TSParameter newParameter = new TSParameter(field.getName(), field.getType());
+                TSParameter newParameter = new TSParameter(field.getName(), field.getType(), this);
                 tsParameters.add(newParameter);
             }
             return tsParameters;
@@ -280,7 +277,7 @@ public class Angular4JsonScopeImplementationGenerator extends SpringMvcImplement
             String methodString = methodRequestMapping.method()[0].toString();
             if ("PUT".equals(methodString) || "POST".equals(methodString)) {
                 List<TSParameter> tsParameters = new ArrayList<>();
-                TSParameter jsonScopeParameter = new TSParameter("jsonScope", jsonScope, "new JsonScope(false, [])");
+                TSParameter jsonScopeParameter = new TSParameter("jsonScope", jsonScope, this, "new JsonScope(false, [])");
                 tsParameters.add(jsonScopeParameter);
                 return tsParameters;
             }

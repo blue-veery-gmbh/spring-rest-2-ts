@@ -1,7 +1,5 @@
 package com.blueveery.springrest2ts.tsmodel;
 
-import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 
@@ -34,7 +32,7 @@ public class TSField extends TSComplexTypeMember {
     }
 
     @Override
-    public void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
+    public void write(BufferedWriter writer) throws IOException {
         if(readOnly){
             writer.write("readonly ");
         }
@@ -46,7 +44,7 @@ public class TSField extends TSComplexTypeMember {
             }
             writer.write(": ");
             if (type instanceof TSArrowFuncType) {
-                type.write(implementationGenerator, writer);
+                type.write(writer);
             } else {
                 writer.write(type.getName());
             }

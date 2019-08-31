@@ -18,15 +18,11 @@ public class TSClass extends TSComplexType {
     private SortedSet<TSInterface> implementsInterfaces = new TreeSet<>();
     private boolean isAbstract;
 
-    public TSClass(String name, TSModule module) {
-        super(name, module);
+    public TSClass(String name, TSModule module, ImplementationGenerator implementationGenerator) {
+        super(name, module, implementationGenerator);
         isAbstract = false;
     }
 
-    public TSClass(String name, TSModule module, boolean isAbstract) {
-        this(name, module);
-        this.isAbstract = isAbstract;
-    }
 
     public TSClass getExtendsClass() {
         return extendsClass;
@@ -44,9 +40,9 @@ public class TSClass extends TSComplexType {
     }
 
     @Override
-    public void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
+    public void write(BufferedWriter writer) throws IOException {
         List<TSDecorator> decorators = implementationGenerator.getDecorators(this);
-        writeDecorators(implementationGenerator, writer, decorators);
+        writeDecorators(writer, decorators);
 
         writer.write("export");
         if (isAbstract) {
@@ -70,7 +66,7 @@ public class TSClass extends TSComplexType {
         }
 
         writer.write("{");
-        writeMembers(implementationGenerator, writer);
+        writeMembers(writer);
         writer.write("}");
     }
 }

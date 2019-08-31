@@ -1,8 +1,6 @@
 package com.blueveery.springrest2ts.tsmodel;
 
 
-import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,13 +25,13 @@ public class TSDecorator extends TSElement {
     }
 
     @Override
-    public void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
+    public void write(BufferedWriter writer) throws IOException {
         writer.write("@");
         writer.write(tsFunction.getName());
         writer.write("(");
         for (int i = 0; i < tsLiteralList.size(); i++) {
             TSLiteral tsLiteral = tsLiteralList.get(i);
-            tsLiteral.write(implementationGenerator, writer);
+            tsLiteral.write(writer);
             if (i < tsLiteralList.size()-1) {
                 writer.write(",");
             }

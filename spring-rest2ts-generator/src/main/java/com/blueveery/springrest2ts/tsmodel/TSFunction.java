@@ -1,8 +1,6 @@
 package com.blueveery.springrest2ts.tsmodel;
 
 
-import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,7 +19,7 @@ public class TSFunction extends TSScopedType{
     }
 
     @Override
-    public void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
+    public void write(BufferedWriter writer) throws IOException {
         throw new UnsupportedOperationException();
     }
 }

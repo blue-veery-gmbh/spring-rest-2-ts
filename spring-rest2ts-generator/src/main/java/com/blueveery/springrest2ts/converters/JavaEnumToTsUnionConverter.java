@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
@@ -8,14 +9,22 @@ import com.blueveery.springrest2ts.tsmodel.*;
  * Created by tomek on 08.08.17.
  */
 public class JavaEnumToTsUnionConverter extends ComplexTypeConverter {
-    @Override
 
-    public boolean preConverted(ModuleConverter moduleConverter, Class javaClass, ClassNameMapper classNameMapper) {
+    public JavaEnumToTsUnionConverter() {
+        super(new EmptyImplementationGenerator());
+    }
+
+    public JavaEnumToTsUnionConverter(ClassNameMapper classNameMapper) {
+        super(new EmptyImplementationGenerator(), classNameMapper);
+    }
+
+    @Override
+    public boolean preConverted(ModuleConverter moduleConverter, Class javaClass) {
         if (TypeMapper.map(javaClass) == TypeMapper.tsAny) {
             TSModule tsModule = moduleConverter.getTsModule(javaClass);
-            TsUnion tsUnion = new TsUnion();
+            TSUnion tsUnion = new TSUnion();
             String aliasName = classNameMapper.mapJavaClassNameToTs(javaClass.getSimpleName());
-            TsTypeAlias tsTypeAlias = new TsTypeAlias(aliasName, tsModule, tsUnion);
+            TSTypeAlias tsTypeAlias = new TSTypeAlias(aliasName, tsModule, tsUnion);
             tsModule.addScopedType(tsTypeAlias);
             TypeMapper.registerTsType(javaClass, tsTypeAlias);
             return true;
@@ -24,9 +33,9 @@ public class JavaEnumToTsUnionConverter extends ComplexTypeConverter {
     }
 
     @Override
-    public void convert(Class javaClass, ImplementationGenerator implementationGenerator) {
-        TsTypeAlias tsTypeAlias = (TsTypeAlias) TypeMapper.map(javaClass);
-        TsUnion tsUnion = (TsUnion) tsTypeAlias.getAliasedType();
+    public void convert(Class javaClass) {
+        TSTypeAlias tsTypeAlias = (TSTypeAlias) TypeMapper.map(javaClass);
+        TSUnion tsUnion = (TSUnion) tsTypeAlias.getAliasedType();
         for (Object enumConstant : javaClass.getEnumConstants()) {
             String enumConstantStringValue = enumConstant.toString();
             TSLiteral tsLiteral = new TSLiteral(enumConstantStringValue, TypeMapper.tsString, enumConstantStringValue);

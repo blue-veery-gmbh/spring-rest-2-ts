@@ -170,7 +170,7 @@ public class JacksonObjectMapper implements ObjectMapper {
         if (fieldJavaGetterType != null) {
             fieldJavaGetterType = applyJsonValue(fieldJavaGetterType);
             JsonUnwrapped declaredAnnotation = property.getDeclaredAnnotation(JsonUnwrapped.class);
-            if (applyJsonUnwrapped(fieldJavaGetterType, declaredAnnotation, tsComplexType, tsFieldList, complexTypeConverter, implementationGenerator)){
+            if (applyJsonUnwrapped(fieldJavaGetterType, declaredAnnotation, tsComplexType, tsFieldList, complexTypeConverter)){
                 return tsFieldList;
             }
         }
@@ -186,7 +186,7 @@ public class JacksonObjectMapper implements ObjectMapper {
 
             if (property.getSetterType() != null) {
                 TSType tsSetterType = TypeMapper.map(property.getSetterType());
-                fieldType = new TsUnion(tsGetterType, tsSetterType);
+                fieldType = new TSUnion(tsGetterType, tsSetterType);
             }else{
                 fieldType = tsGetterType;
             }
@@ -257,7 +257,7 @@ public class JacksonObjectMapper implements ObjectMapper {
     }
 
     private boolean applyJsonUnwrapped(Type fieldJavaType, JsonUnwrapped declaredAnnotation, TSComplexType tsComplexType,
-                                       List<TSField> tsFieldList, ComplexTypeConverter complexTypeConverter, ImplementationGenerator implementationGenerator) {
+                                       List<TSField> tsFieldList, ComplexTypeConverter complexTypeConverter) {
         if (declaredAnnotation != null) {
             TSType tsType = TypeMapper.map(fieldJavaType);
             if (!(tsType instanceof TSComplexType)) {
@@ -265,7 +265,7 @@ public class JacksonObjectMapper implements ObjectMapper {
             }
             TSComplexType referredTsType = (TSComplexType) tsType;
             if (!referredTsType.isConverted()) {
-                complexTypeConverter.convert((Class) fieldJavaType, implementationGenerator);
+                complexTypeConverter.convert((Class) fieldJavaType);
             }
             for (TSField nextTsField : referredTsType.getTsFields()) {
                 tsFieldList.add(new TSField(nextTsField.getName(), tsComplexType, nextTsField.getType()));

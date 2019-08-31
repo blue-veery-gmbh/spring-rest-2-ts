@@ -1,18 +1,16 @@
 package com.blueveery.springrest2ts.tsmodel;
 
 
-import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class TsUnion extends TSType {
+public class TSUnion extends TSType {
     private List<TSElement> joinedTsElementList = new ArrayList<>();
 
-    public TsUnion(TSType... joinedTypes) {
+    public TSUnion(TSType... joinedTypes) {
         super(generateUnionName(Arrays.asList(joinedTypes)));
         for (TSType joinedType : joinedTypes) {
             joinedTsElementList.add(joinedType);
@@ -41,7 +39,7 @@ public class TsUnion extends TSType {
     }
 
     @Override
-    public void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
+    public void write(BufferedWriter writer) throws IOException {
         writer.write(generateUnionName(getJoinedTsElementList()));
     }
 }

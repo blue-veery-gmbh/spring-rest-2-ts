@@ -2,7 +2,6 @@ package com.blueveery.springrest2ts.tsmodel;
 
 
 import com.blueveery.springrest2ts.converters.TypeMapper;
-import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -30,7 +29,7 @@ public class TSLiteral extends TSElement{
     }
 
     @Override
-    public void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
+    public void write(BufferedWriter writer) throws IOException {
         writer.write(toTsValue());
     }
 }

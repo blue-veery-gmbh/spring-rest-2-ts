@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import org.slf4j.Logger;
 
 import static com.blueveery.springrest2ts.tsmodel.ModuleExtensionType.implementation;
@@ -42,26 +41,26 @@ public class TSModule extends TSElement {
         return isExternal;
     }
 
-    public void writeModule(ImplementationGenerator implementationGenerator, Path outputDir, Logger logger) throws IOException {
+    public void writeModule(Path outputDir, Logger logger) throws IOException {
         Path tsModuleDir = outputDir.resolve(moduleRelativePath);
         Files.createDirectories(tsModuleDir);
         Path tsModuleFile = tsModuleDir.resolve(getName() + "." + moduleExtensionType);
         logger.info(String.format("Generating module into %s", tsModuleFile.toAbsolutePath().normalize().toUri()));
         BufferedWriter writer = Files.newBufferedWriter(tsModuleFile);
-        write(implementationGenerator, writer);
+        write(writer);
         writer.close();
     }
 
     @Override
-    public void write(ImplementationGenerator implementationGenerator, BufferedWriter writer) throws IOException {
+    public void write(BufferedWriter writer) throws IOException {
         for (TSImport tsImport:importMap.values()) {
-            tsImport.write(implementationGenerator, writer);
+            tsImport.write(writer);
             writer.newLine();
         }
 
         writer.newLine();
         for (TSScopedType tsScopedType: scopedTypesSet) {
-            tsScopedType.write(implementationGenerator, writer);
+            tsScopedType.write(writer);
             writer.newLine();
             writer.newLine();
         }

@@ -2,10 +2,6 @@ package com.blueveery.springrest2ts;
 
 import com.blueveery.springrest2ts.converters.*;
 import com.blueveery.springrest2ts.filters.JavaTypeFilter;
-import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
-import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
-import com.blueveery.springrest2ts.naming.ClassNameMapper;
-import com.blueveery.springrest2ts.naming.NoChangeClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import org.reflections.Reflections;
@@ -24,18 +20,18 @@ import org.slf4j.LoggerFactory;
 public class SpringREST2tsGenerator {
 
     static Logger logger = LoggerFactory.getLogger("gen-logger");
+    private Map<Class, TSType> customTypeMapping = new HashMap<>();
+
     private JavaTypeFilter modelClassesCondition;
     private JavaTypeFilter restClassesCondition;
-    ModuleConverter moduleConverter = new TsModuleCreatorConverter(2);
-    private ClassNameMapper enumClassesNameMapper = new NoChangeClassNameMapper();
-    private ClassNameMapper modelClassesNameMapper = new NoChangeClassNameMapper();
-    private ClassNameMapper restClassesNameMapper = new NoChangeClassNameMapper();
-    private Map<Class, TSType> customTypeMapping = new HashMap<>();
-    private ComplexTypeConverter enumConverter = new EnumConverter();;
+    private ModuleConverter moduleConverter = new TsModuleCreatorConverter(2);
+    private ComplexTypeConverter enumConverter = new JavaEnumToTsEnumConverter();;
     private ComplexTypeConverter modelClassesConverter;
     private ComplexTypeConverter restClassesConverter;
-    private ImplementationGenerator modelImplementationGenerator = new EmptyImplementationGenerator();
-    private ImplementationGenerator restImplementationGenerator = new EmptyImplementationGenerator();
+
+    public Map<Class, TSType> getCustomTypeMapping() {
+        return customTypeMapping;
+    }
 
     public void setModelClassesCondition(JavaTypeFilter modelClassesCondition) {
         this.modelClassesCondition = modelClassesCondition;
@@ -45,48 +41,20 @@ public class SpringREST2tsGenerator {
         this.restClassesCondition = restClassesCondition;
     }
 
-    public void setEnumClassesNameMapper(ClassNameMapper enumClassesNameMapper) {
-        this.enumClassesNameMapper = enumClassesNameMapper;
+    public void setModuleConverter(ModuleConverter moduleConverter) {
+        this.moduleConverter = moduleConverter;
     }
 
-    public void setModelClassesNameMapper(ClassNameMapper modelClassesNameMapper) {
-        this.modelClassesNameMapper = modelClassesNameMapper;
-    }
-
-    public void setRestClassesNameMapper(ClassNameMapper restClassesNameMapper) {
-        this.restClassesNameMapper = restClassesNameMapper;
-    }
-
-    public ComplexTypeConverter getModelClassesConverter() {
-        return modelClassesConverter;
+    public void setEnumConverter(ComplexTypeConverter enumConverter) {
+        this.enumConverter = enumConverter;
     }
 
     public void setModelClassesConverter(ComplexTypeConverter modelClassesConverter) {
         this.modelClassesConverter = modelClassesConverter;
     }
 
-    public ComplexTypeConverter getRestClassesConverter() {
-        return restClassesConverter;
-    }
-
-    public void setModelImplementationGenerator(ImplementationGenerator modelImplementationGenerator) {
-        this.modelImplementationGenerator = modelImplementationGenerator;
-    }
-
     public void setRestClassesConverter(ComplexTypeConverter restClassesConverter) {
         this.restClassesConverter = restClassesConverter;
-    }
-
-    public Map<Class, TSType> getCustomTypeMapping() {
-        return customTypeMapping;
-    }
-
-    public void setRestImplementationGenerator(ImplementationGenerator restImplementationGenerator) {
-        this.restImplementationGenerator = restImplementationGenerator;
-    }
-
-    public void setEnumConverter(ComplexTypeConverter enumConverter) {
-        this.enumConverter = enumConverter;
     }
 
     public SortedSet<TSModule> generate(Set<String> packagesNames, Path outputDir) throws IOException {
@@ -109,19 +77,19 @@ public class SpringREST2tsGenerator {
         convertModules(modelClasses, moduleConverter);
         convertModules(restClasses, moduleConverter);
 
-        convertTypes(enumClasses, moduleConverter, enumConverter, enumClassesNameMapper);
+        convertTypes(enumClasses, moduleConverter, enumConverter);
         if (!modelClasses.isEmpty()) {
             if (modelClassesConverter == null) {
                 throw new IllegalStateException("Model classes converter is not set");
             }
-            convertTypes(modelClasses, moduleConverter, modelClassesConverter, modelClassesNameMapper);
+            convertTypes(modelClasses, moduleConverter, modelClassesConverter);
         }
 
         if (!restClasses.isEmpty()) {
             if (restClassesConverter == null) {
                 throw new IllegalStateException("Rest classes converter is not set");
             }
-            convertTypes(restClasses, moduleConverter, restClassesConverter, restClassesNameMapper);
+            convertTypes(restClasses, moduleConverter, restClassesConverter);
         }
 
 
@@ -139,7 +107,7 @@ public class SpringREST2tsGenerator {
 
     private void writeTSModules(SortedSet<TSModule> tsModuleSortedSet, Path outputDir, Logger logger) throws IOException {
         for (TSModule tsModule : tsModuleSortedSet) {
-            tsModule.writeModule(restImplementationGenerator, outputDir, logger);
+            tsModule.writeModule(outputDir, logger);
         }
     }
 
@@ -149,16 +117,16 @@ public class SpringREST2tsGenerator {
         }
     }
 
-    private void convertTypes(Set<Class> javaTypes, ModuleConverter tsModuleSortedMap, ComplexTypeConverter complexTypeConverter, ClassNameMapper classNameMapper) {
+    private void convertTypes(Set<Class> javaTypes, ModuleConverter tsModuleSortedMap, ComplexTypeConverter complexTypeConverter) {
         Set<Class> preConvertedTypes = new HashSet<>();
         for (Class javaType : javaTypes) {
-            if (complexTypeConverter.preConverted(tsModuleSortedMap, javaType, classNameMapper)) {
+            if (complexTypeConverter.preConverted(tsModuleSortedMap, javaType)) {
                 preConvertedTypes.add(javaType);
             }
         }
 
         for (Class javaType : preConvertedTypes) {
-            complexTypeConverter.convert(javaType, restImplementationGenerator);
+            complexTypeConverter.convert(javaType);
         }
 
     }

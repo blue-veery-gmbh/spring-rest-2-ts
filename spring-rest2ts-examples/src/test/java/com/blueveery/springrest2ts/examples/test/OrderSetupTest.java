@@ -40,6 +40,8 @@ public class OrderSetupTest {
     private static SpringREST2tsGenerator tsGenerator;
     private static ConfigureableTsModulesConverter moduleConverter;
     private Set<String> javaPackageSet;
+    private ModelClassesToTsInterfacesConverter modelClassesConverter;
+    private SpringRestToTsConverter restClassesConverter;
 
     @Before
     public void setUp() throws IOException {
@@ -50,9 +52,10 @@ public class OrderSetupTest {
         tsGenerator.setRestClassesCondition(new ExtendsJavaTypeFilter(BaseCtrl.class));
 
         JacksonObjectMapper objectMapper = new JacksonObjectMapper(JsonAutoDetect.Visibility.ANY, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY);
-        tsGenerator.setModelClassesConverter(new ModelClassToTsConverter(objectMapper));
-        tsGenerator.setRestClassesConverter(new SpringRestToTsConverter());
-        tsGenerator.setRestImplementationGenerator(new Angular4ImplementationGenerator());
+        modelClassesConverter = new ModelClassesToTsInterfacesConverter(objectMapper);
+        tsGenerator.setModelClassesConverter(modelClassesConverter);
+        restClassesConverter = new SpringRestToTsConverter(new Angular4ImplementationGenerator());
+        tsGenerator.setRestClassesConverter(restClassesConverter);
 
         HashMap<String, TSModule> packagesMap = new HashMap<>();
         packagesMap.put(BaseDTO.class.getPackage().getName(), new TSModule("core", Paths.get("app/sdk/model"), false));
@@ -88,15 +91,15 @@ public class OrderSetupTest {
     public void javaEnumsToTsEnumTest() throws IOException {
         tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("DTO"));
         tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
-        tsGenerator.setEnumConverter(new EnumConverter());
+        tsGenerator.setEnumConverter(new JavaEnumToTsEnumConverter());
         tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 
 
     @Test
     public void classNameMappingTest() throws IOException {
-        tsGenerator.setModelClassesNameMapper(new SubstringClassNameMapper("DTO", ""));
-        tsGenerator.setRestClassesNameMapper(new SubstringClassNameMapper("Ctrl", "Service"));
+        modelClassesConverter.setClassNameMapper(new SubstringClassNameMapper("DTO", ""));
+        restClassesConverter.setClassNameMapper(new SubstringClassNameMapper("Ctrl", "Service"));
         tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 
