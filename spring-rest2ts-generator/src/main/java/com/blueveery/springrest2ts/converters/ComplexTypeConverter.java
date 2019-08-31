@@ -16,7 +16,7 @@ import java.util.Optional;
  */
 public abstract class ComplexTypeConverter {
     protected ImplementationGenerator implementationGenerator;
-    protected ConversionListener conversionListener = new NoActionConversionListener();
+
     protected ClassNameMapper classNameMapper = new NoChangeClassNameMapper();
 
     protected ComplexTypeConverter(ImplementationGenerator implementationGenerator) {
@@ -30,15 +30,7 @@ public abstract class ComplexTypeConverter {
 
 
     public abstract boolean preConverted(ModuleConverter moduleConverter, Class javaClass);
-    public abstract void convert(Class javaClass);
-
-    public ConversionListener getConversionListener() {
-        return conversionListener;
-    }
-
-    public void setConversionListener(ConversionListener conversionListener) {
-        this.conversionListener = conversionListener;
-    }
+    public abstract void convert(Class javaClass, ConversionListener conversionListener);
 
     public ClassNameMapper getClassNameMapper() {
         return classNameMapper;

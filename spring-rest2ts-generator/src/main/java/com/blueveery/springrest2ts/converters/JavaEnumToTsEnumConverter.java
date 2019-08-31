@@ -1,7 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
-import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.TSEnum;
 import com.blueveery.springrest2ts.tsmodel.TSEnumConstant;
@@ -33,7 +32,7 @@ public class JavaEnumToTsEnumConverter extends ComplexTypeConverter {
     }
 
     @Override
-    public void convert(Class javaClass) {
+    public void convert(Class javaClass, ConversionListener conversionListener) {
         TSEnum tsEnum = (TSEnum) TypeMapper.map(javaClass);
         for (Object enumConstant : javaClass.getEnumConstants()) {
             tsEnum.getTsEnumConstantList().add(new TSEnumConstant(((Enum) enumConstant).name()));

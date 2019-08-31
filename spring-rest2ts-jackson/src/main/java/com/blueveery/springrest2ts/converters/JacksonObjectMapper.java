@@ -265,7 +265,7 @@ public class JacksonObjectMapper implements ObjectMapper {
             }
             TSComplexType referredTsType = (TSComplexType) tsType;
             if (!referredTsType.isConverted()) {
-                complexTypeConverter.convert((Class) fieldJavaType);
+                complexTypeConverter.convert((Class) fieldJavaType, conversionListener);
             }
             for (TSField nextTsField : referredTsType.getTsFields()) {
                 tsFieldList.add(new TSField(nextTsField.getName(), tsComplexType, nextTsField.getType()));

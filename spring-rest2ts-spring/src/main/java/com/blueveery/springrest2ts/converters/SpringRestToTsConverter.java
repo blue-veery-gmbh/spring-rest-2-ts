@@ -39,7 +39,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
     }
 
     @Override
-    public void convert(Class javaClass) {
+    public void convert(Class javaClass, ConversionListener conversionListener) {
         TSClass tsClass = (TSClass) TypeMapper.map(javaClass);
 
         setSupperClass(javaClass, tsClass);

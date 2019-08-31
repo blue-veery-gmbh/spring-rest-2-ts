@@ -28,6 +28,7 @@ public class SpringREST2tsGenerator {
     private ComplexTypeConverter enumConverter = new JavaEnumToTsEnumConverter();;
     private ComplexTypeConverter modelClassesConverter;
     private ComplexTypeConverter restClassesConverter;
+    private DispatcherConversionListener conversionListener = new DispatcherConversionListener();
 
     public Map<Class, TSType> getCustomTypeMapping() {
         return customTypeMapping;
@@ -55,6 +56,10 @@ public class SpringREST2tsGenerator {
 
     public void setRestClassesConverter(ComplexTypeConverter restClassesConverter) {
         this.restClassesConverter = restClassesConverter;
+    }
+
+    public DispatcherConversionListener getConversionListener() {
+        return conversionListener;
     }
 
     public SortedSet<TSModule> generate(Set<String> packagesNames, Path outputDir) throws IOException {
@@ -126,7 +131,7 @@ public class SpringREST2tsGenerator {
         }
 
         for (Class javaType : preConvertedTypes) {
-            complexTypeConverter.convert(javaType);
+            complexTypeConverter.convert(javaType, conversionListener);
         }
 
     }

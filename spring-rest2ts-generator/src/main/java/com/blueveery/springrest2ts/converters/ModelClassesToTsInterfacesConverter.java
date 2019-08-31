@@ -1,7 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
-import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.blueveery.springrest2ts.tsmodel.TSInterface;
@@ -44,7 +43,7 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
     }
 
     @Override
-    public void convert(Class javaClass) {
+    public void convert(Class javaClass, ConversionListener conversionListener) {
         TSInterface tsInterface = (TSInterface) TypeMapper.map(javaClass);
         if (!tsInterface.isConverted()) {
             tsInterface.setConverted(true);
