@@ -11,13 +11,13 @@ public class ContainsSubStringJavaTypeFilter implements JavaTypeFilter {
     }
 
     @Override
-    public boolean filter(Class javaType) {
+    public boolean accept(Class javaType) {
         return javaType.getSimpleName().contains(substring);
     }
 
     @Override
     public void explain(Class packageClass, Logger logger, String indentation) {
-        if (filter(packageClass)) {
+        if (accept(packageClass)) {
             logger.info(indentation + String.format("TRUE => class %s simple name contains \"%s\"", packageClass.getSimpleName(), substring));
         }else {
             logger.warn(indentation + String.format("FALSE => class %s simple name doesn't contains \"%s\"", packageClass.getSimpleName(), substring));

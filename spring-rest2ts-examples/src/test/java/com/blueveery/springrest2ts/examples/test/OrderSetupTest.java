@@ -2,7 +2,7 @@ package com.blueveery.springrest2ts.examples.test;
 
 
 
-import com.blueveery.springrest2ts.SpringREST2tsGenerator;
+import com.blueveery.springrest2ts.Rest2tsGenerator;
 import com.blueveery.springrest2ts.converters.*;
 import com.blueveery.springrest2ts.naming.SubstringClassNameMapper;
 import com.blueveery.springrest2ts.examples.ctrls.OrderCtrl;
@@ -37,7 +37,7 @@ public class OrderSetupTest {
 
     private static final Path OUTPUT_DIR_PATH = Paths.get("target/classes/test-webapp/src");
 
-    private static SpringREST2tsGenerator tsGenerator;
+    private static Rest2tsGenerator tsGenerator;
     private static ConfigureableTsModulesConverter moduleConverter;
     private Set<String> javaPackageSet;
     private ModelClassesToTsInterfacesConverter modelClassesConverter;
@@ -47,7 +47,7 @@ public class OrderSetupTest {
     public void setUp() throws IOException {
         FileSystemUtils.deleteRecursively(OUTPUT_DIR_PATH.resolve("app/sdk").toFile());
 
-        tsGenerator = new SpringREST2tsGenerator();
+        tsGenerator = new Rest2tsGenerator();
         tsGenerator.setModelClassesCondition(new ExtendsJavaTypeFilter(BaseDTO.class));
         tsGenerator.setRestClassesCondition(new ExtendsJavaTypeFilter(BaseCtrl.class));
 

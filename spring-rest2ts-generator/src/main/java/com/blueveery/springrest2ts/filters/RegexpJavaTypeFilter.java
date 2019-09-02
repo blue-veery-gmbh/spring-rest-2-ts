@@ -11,13 +11,13 @@ public class RegexpJavaTypeFilter implements JavaTypeFilter {
     }
 
     @Override
-    public boolean filter(Class javaType) {
+    public boolean accept(Class javaType) {
         return javaType.getSimpleName().matches(pattern);
     }
 
     @Override
     public void explain(Class packageClass, Logger logger, String indentation) {
-        if (filter(packageClass)) {
+        if (accept(packageClass)) {
             logger.info(indentation + String.format("TRUE => class %s simple name matches regex \"%s\"", packageClass.getSimpleName(), pattern ));
         }else {
             logger.warn(indentation + String.format("FALSE => class %s simple name doesn't matches regex \"%s\"", packageClass.getSimpleName(), pattern));

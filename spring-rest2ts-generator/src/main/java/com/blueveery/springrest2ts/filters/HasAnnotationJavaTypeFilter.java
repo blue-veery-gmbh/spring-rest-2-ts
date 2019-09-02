@@ -20,13 +20,13 @@ public class HasAnnotationJavaTypeFilter implements JavaTypeFilter {
     }
 
     @Override
-    public boolean filter(Class javaType) {
+    public boolean accept(Class javaType) {
         return javaType.isAnnotationPresent(annotation);
     }
 
     @Override
     public void explain(Class packageClass, Logger logger, String indentation) {
-        if (filter(packageClass)) {
+        if (accept(packageClass)) {
             logger.info(indentation + String.format("TRUE => class %s has annotation %s", packageClass.getSimpleName(), annotation.getSimpleName()));
         }else {
             logger.warn(indentation + String.format("FALSE => class %s doesn't have annotation %s", packageClass.getSimpleName(), annotation.getSimpleName() ));

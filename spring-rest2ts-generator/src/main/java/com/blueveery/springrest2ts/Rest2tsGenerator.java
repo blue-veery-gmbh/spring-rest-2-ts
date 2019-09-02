@@ -2,6 +2,7 @@ package com.blueveery.springrest2ts;
 
 import com.blueveery.springrest2ts.converters.*;
 import com.blueveery.springrest2ts.filters.JavaTypeFilter;
+import com.blueveery.springrest2ts.filters.RejectJavaTypeFilter;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import org.reflections.Reflections;
@@ -17,19 +18,20 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by tomaszw on 30.07.2017.
  */
-public class SpringREST2tsGenerator {
+public class Rest2tsGenerator {
 
     static Logger logger = LoggerFactory.getLogger("gen-logger");
     private Map<Class, TSType> customTypeMapping = new HashMap<>();
 
-    private JavaTypeFilter modelClassesCondition;
-    private JavaTypeFilter restClassesCondition;
+    private JavaTypeFilter modelClassesCondition = new RejectJavaTypeFilter();
+    private JavaTypeFilter restClassesCondition = new RejectJavaTypeFilter();
+
+    private NullableTypeStrategy nullableTypeStrategy = new DefaultNullableTypeStrategy();
 
     private ModuleConverter moduleConverter = new TsModuleCreatorConverter(2);
     private ComplexTypeConverter enumConverter = new JavaEnumToTsEnumConverter();;
     private ComplexTypeConverter modelClassesConverter;
     private ComplexTypeConverter restClassesConverter;
-    private NullableTypeStrategy nullableTypeStrategy = new DefaultNullableTypeStrategy();
 
     public Map<Class, TSType> getCustomTypeMapping() {
         return customTypeMapping;
@@ -151,7 +153,7 @@ public class SpringREST2tsGenerator {
         Set<Class<?>> packageClassesSet = reflections.getSubTypesOf(Object.class);
         for (Class packageClass : packageClassesSet) {
             logger.info(String.format("Found class : %s", packageClass.getName()));
-            if (javaTypeFilter.filter(packageClass) && packagesNames.contains(packageClass.getPackage().getName())) {
+            if (javaTypeFilter.accept(packageClass) && packagesNames.contains(packageClass.getPackage().getName())) {
                 classesSet.add(packageClass);
             }else{
                 logger.warn(String.format("Class filtered out : %s", packageClass.getSimpleName()));

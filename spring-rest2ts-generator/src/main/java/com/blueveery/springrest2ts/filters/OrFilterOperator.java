@@ -10,9 +10,9 @@ public class OrFilterOperator extends ComplexFilterOperator {
     }
 
     @Override
-    public boolean filter(Class javaType) {
+    public boolean accept(Class javaType) {
         for (JavaTypeFilter typeFilter : getJavaTypeFilters()) {
-            if (typeFilter.filter(javaType)) {
+            if (typeFilter.accept(javaType)) {
                 return true;
             }
         }

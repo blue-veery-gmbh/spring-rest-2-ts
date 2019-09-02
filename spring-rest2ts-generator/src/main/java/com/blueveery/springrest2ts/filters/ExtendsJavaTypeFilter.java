@@ -13,13 +13,13 @@ public class ExtendsJavaTypeFilter implements JavaTypeFilter {
     }
 
     @Override
-    public boolean filter(Class javaType) {
+    public boolean accept(Class javaType) {
         return baseType.isAssignableFrom(javaType);
     }
 
     @Override
     public void explain(Class packageClass, Logger logger, String indentation) {
-        if (filter(packageClass)) {
+        if (accept(packageClass)) {
             logger.info(indentation + String.format("TRUE => class %s extends type %s", packageClass.getSimpleName(), baseType.getSimpleName() ));
         }else {
             logger.warn(indentation + String.format("FALSE => class %s doesn't extends base type %s", packageClass.getSimpleName(), baseType.getSimpleName()));
