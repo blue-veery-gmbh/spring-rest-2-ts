@@ -6,9 +6,11 @@ import com.fasterxml.jackson.annotation.*;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 //@JsonIgnoreProperties(value = {"barcode"}, allowGetters = true)
+@JsonTypeInfo(include = JsonTypeInfo.As.PROPERTY, use = JsonTypeInfo.Id.CUSTOM)
 public class ProductDTO extends BaseDTO {
 
     public int name = 1;
@@ -41,9 +43,9 @@ public class ProductDTO extends BaseDTO {
     }
 
 
-    @JsonSetter(value = "name")
-    public void name(String name) {
-        this.name = Integer.valueOf(name);
+    @JsonSetter(value = "secondName")
+    public void name( String name) {
+
     }
 
 }

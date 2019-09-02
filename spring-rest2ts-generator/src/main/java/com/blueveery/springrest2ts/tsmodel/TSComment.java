@@ -19,12 +19,14 @@ public class TSComment extends TSElement {
     @Override
     public void write(BufferedWriter writer) throws IOException {
         if (!tsCommentSectionMap.isEmpty()) {
+            writer.newLine();
             writer.write("/**");
+            writer.newLine();
             for (TSCommentSection section : tsCommentSectionMap.values()) {
                 section.write(writer);
-                writer.newLine();
             }
             writer.write("*/");
+            writer.newLine();
         }
     }
 }

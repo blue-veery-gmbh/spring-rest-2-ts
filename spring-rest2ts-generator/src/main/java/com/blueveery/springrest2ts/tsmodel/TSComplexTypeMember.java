@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by tomaszw on 30.07.2017.
  */
-public abstract class TSComplexTypeMember extends TSElement implements INullableElement, IAnnotated, IDecorated{
+public abstract class TSComplexTypeMember extends TSElement implements INullableElement, ICommentedElement, IAnnotated, IDecorated{
     protected TSComment tsComment = new TSComment("ComplexTypeMemberComment");
     private TSComplexType owner;
     private TSType type;
@@ -22,6 +22,7 @@ public abstract class TSComplexTypeMember extends TSElement implements INullable
         this.owner.addScopedTypeUsage(type);
     }
 
+    @Override
     public TSComment getTsComment() {
         return tsComment;
     }

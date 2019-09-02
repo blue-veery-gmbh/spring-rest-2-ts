@@ -43,7 +43,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
         TSClass tsClass = (TSClass) TypeMapper.map(javaClass);
 
         setSupperClass(javaClass, tsClass);
-        tsClass.getAnnotationList().add(javaClass.getAnnotation(RequestMapping.class));
+        tsClass.addAllAnnotations(javaClass.getAnnotations());
 
         Map<String, TSType> typeParametersMap = new HashMap<>();
         typeParametersMap.putAll(createTypeParametersMap(javaClass.getGenericInterfaces()));
@@ -70,14 +70,14 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
                     TSMethod tsMethod = new TSMethod(method.getName(), tsClass, TypeMapper.map(genericReturnType, fallbackTSType), implementationGenerator, false, false);
                     for (Parameter parameter :method.getParameters()) {
                         TSParameter tsParameter = new TSParameter(parameter.getName(), TypeMapper.map(parameter.getParameterizedType(), fallbackTSType), implementationGenerator);
-                        addRestAnnotations(parameter.getAnnotations(), tsParameter);
+                        tsParameter.addAllAnnotations(parameter.getAnnotations());
                         if (parameterIsMapped(tsParameter.getAnnotationList())) {
                             setOptional(tsParameter);
                             setAsNullableType(parameter.getParameterizedType(), parameter.getDeclaredAnnotations(), tsParameter);
                             tsMethod.getParameterList().add(tsParameter);
                         }
                     }
-                    addRestAnnotations(method.getAnnotations(), tsMethod);
+                    tsMethod.addAllAnnotations(method.getAnnotations());
                     tsClass.addTsMethod(tsMethod);
                     conversionListener.tsMethodCreated(method, tsMethod);
                 }
@@ -85,7 +85,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
         }
 
         implementationGenerator.addComplexTypeUsage(tsClass);
-        conversionListener.tsComplexTypeCreated(javaClass, tsClass);
+        conversionListener.tsScopedTypeCreated(javaClass, tsClass);
     }
 
     private void setOptional(TSParameter tsParameter) {
@@ -135,14 +135,6 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
             }
         }
         return typeParametersMap;
-    }
-
-    private void addRestAnnotations(Annotation[] annotations, IAnnotated annotatedElement) {
-        for(Annotation annotation:annotations){
-            if (annotation.annotationType().getPackage().equals(RequestMapping.class.getPackage())) {
-                annotatedElement.getAnnotationList().add(annotation);
-            }
-        }
     }
 
     private boolean isRestMethod(Method method) {

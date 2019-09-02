@@ -69,6 +69,12 @@ public class OrderSetupTest {
 
     @Test
     public void defaultSetup() throws IOException {
+       tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
+    }
+
+    @Test
+    public void swaggerAnnotationTest() throws IOException {
+        restClassesConverter.getConversionListener().getConversionListenerSet().add(new SwaggerConversionListener());
         tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 

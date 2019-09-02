@@ -1,10 +1,7 @@
 package com.blueveery.springrest2ts.examples.model;
 
 import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

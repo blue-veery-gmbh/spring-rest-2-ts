@@ -2,6 +2,7 @@ package com.blueveery.springrest2ts.examples.ctrls;
 
 import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrl;
 import com.blueveery.springrest2ts.examples.model.OrderDTO;
+import io.swagger.oas.annotations.Operation;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @RequestMapping("api/order")
 public class OrderCtrl implements BaseCtrl<OrderDTO> {
 
+    @Operation(summary = "method creates order", description = "method creates order based on given data")
     @RequestMapping(method = RequestMethod.POST, consumes = {"application/json"}, produces = {"application/json"})
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)

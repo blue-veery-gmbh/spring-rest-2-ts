@@ -58,10 +58,6 @@ public class SpringREST2tsGenerator {
         this.restClassesConverter = restClassesConverter;
     }
 
-    public DispatcherConversionListener getConversionListener() {
-        return conversionListener;
-    }
-
     public SortedSet<TSModule> generate(Set<String> packagesNames, Path outputDir) throws IOException {
         Set<Class> modelClasses = new HashSet<>();
         Set<Class> restClasses = new HashSet<>();
@@ -82,13 +78,11 @@ public class SpringREST2tsGenerator {
         convertModules(modelClasses, moduleConverter);
         convertModules(restClasses, moduleConverter);
 
-        enumConverter.conversionListener = conversionListener;
         convertTypes(enumClasses, moduleConverter, enumConverter);
         if (!modelClasses.isEmpty()) {
             if (modelClassesConverter == null) {
                 throw new IllegalStateException("Model classes converter is not set");
             }
-            modelClassesConverter.conversionListener = conversionListener;
             convertTypes(modelClasses, moduleConverter, modelClassesConverter);
         }
 
@@ -96,7 +90,6 @@ public class SpringREST2tsGenerator {
             if (restClassesConverter == null) {
                 throw new IllegalStateException("Rest classes converter is not set");
             }
-            restClassesConverter.conversionListener = conversionListener;
             convertTypes(restClasses, moduleConverter, restClassesConverter);
         }
 

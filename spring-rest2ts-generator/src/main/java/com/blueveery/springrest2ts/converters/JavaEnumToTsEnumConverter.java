@@ -37,6 +37,7 @@ public class JavaEnumToTsEnumConverter extends ComplexTypeConverter {
         for (Object enumConstant : javaClass.getEnumConstants()) {
             tsEnum.getTsEnumConstantList().add(new TSEnumConstant(((Enum) enumConstant).name()));
         }
-        conversionListener.tsComplexTypeCreated(javaClass, tsEnum);
+        tsEnum.addAllAnnotations(javaClass.getAnnotations());
+        conversionListener.tsScopedTypeCreated(javaClass, tsEnum);
     }
 }

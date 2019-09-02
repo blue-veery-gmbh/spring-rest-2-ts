@@ -37,14 +37,14 @@ public class JacksonObjectMapper implements ObjectMapper {
                 case PROPERTY:
                     String propertyName = jsonTypeInfoAnnotation.property();
                     if ("".equals(propertyName)) {
-                        propertyName = jsonTypeInfoAnnotation.use().toString();
+                        propertyName = "@class";
                     }
                     for (TSField tsField : tsComplexType.getTsFields()) {
                         if (propertyName.equals(tsField.getName())) {
                             return;
                         }
                     }
-                    TSField tsField = new TSField(propertyName, tsComplexType, TypeMapper.tsString);
+                    TSField tsField = new TSField("\""+propertyName+"\"", tsComplexType, TypeMapper.tsString);
                     tsComplexType.addTsField(tsField);
                     break;
                 case WRAPPER_OBJECT:

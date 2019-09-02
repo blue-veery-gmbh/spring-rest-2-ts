@@ -6,6 +6,12 @@ import java.util.List;
 public interface IAnnotated {
     List<Annotation> getAnnotationList();
 
+    default void addAllAnnotations(Annotation[] annotations){
+        for (Annotation annotation : annotations) {
+            getAnnotationList().add(annotation);
+        }
+    }
+
     default <T> T findAnnotation(Class<? extends Annotation> aClass){
         for (Annotation annotation:getAnnotationList()) {
             if(annotation.annotationType() == aClass){

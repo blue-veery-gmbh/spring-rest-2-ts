@@ -7,27 +7,33 @@
     <parent>
         <groupId>com.blueveery</groupId>
         <artifactId>spring-rest2ts</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>spring-rest2ts-examples</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
             <groupId>com.blueveery</groupId>
             <artifactId>spring-rest2ts-generator</artifactId>
-            <version>1.1.1</version>
+            <version>1.1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.blueveery</groupId>
             <artifactId>spring-rest2ts-jackson</artifactId>
-            <version>1.1.1</version>
+            <version>1.1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.blueveery</groupId>
             <artifactId>spring-rest2ts-spring</artifactId>
-            <version>1.1.1</version>
+            <version>1.1.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.blueveery</groupId>
+            <artifactId>spring-rest2ts-swagger</artifactId>
+            <version>1.1.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -36,22 +42,17 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
 
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.9.8</version>
         </dependency>
-
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.8</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

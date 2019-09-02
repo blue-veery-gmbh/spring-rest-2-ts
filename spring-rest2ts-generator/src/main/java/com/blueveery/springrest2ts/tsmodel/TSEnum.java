@@ -22,6 +22,7 @@ public class TSEnum extends TSScopedType {
 
     @Override
     public void write(BufferedWriter writer) throws IOException {
+        tsComment.write(writer);
         writer.write("export enum " + getName() + " {");
         writer.newLine();
         for(int i=0;i<tsEnumConstantList.size();i++){

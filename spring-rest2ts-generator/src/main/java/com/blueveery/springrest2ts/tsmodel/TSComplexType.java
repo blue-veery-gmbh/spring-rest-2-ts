@@ -13,14 +13,11 @@ import java.util.TreeSet;
 /**
  * Created by tomaszw on 30.07.2017.
  */
-public abstract class TSComplexType extends TSScopedType implements IAnnotated, IDecorated {
-
-    protected TSComment tsComment = new TSComment("ComplexTypeComment");
+public abstract class TSComplexType extends TSScopedType implements IDecorated {
     private SortedSet<TSField> tsFields = new TreeSet<>();
     private SortedSet<TSMethod> tsMethods = new TreeSet<>();
     private List<TSDecorator> tsDecoratorList = new ArrayList<>();
 
-    private List<Annotation> annotationList = new ArrayList<>();
     private boolean converted;
     protected ImplementationGenerator implementationGenerator;
 
@@ -29,16 +26,8 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
         this.implementationGenerator = implementationGenerator;
     }
 
-    public TSComment getTsComment() {
-        return tsComment;
-    }
-
     public List<TSDecorator> getTsDecoratorList() {
         return tsDecoratorList;
-    }
-
-    public List<Annotation> getAnnotationList() {
-        return annotationList;
     }
 
     public SortedSet<TSField> getTsFields() {

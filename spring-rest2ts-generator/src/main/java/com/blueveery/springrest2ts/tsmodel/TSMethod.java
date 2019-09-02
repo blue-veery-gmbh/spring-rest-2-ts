@@ -23,7 +23,7 @@ public class TSMethod extends TSComplexTypeMember {
         this.isAbstract = isAbstract;
         this.isConstructor = isConstructor;
         if(isConstructor){
-            name = "constructor";
+            setName("constructor");
         }
     }
 
@@ -45,6 +45,7 @@ public class TSMethod extends TSComplexTypeMember {
 
     @Override
     public void write(BufferedWriter writer) throws IOException {
+        tsComment.write(writer);
         List<TSDecorator> decorators = implementationGenerator.getDecorators(this);
         writeDecorators(writer, decorators);
 

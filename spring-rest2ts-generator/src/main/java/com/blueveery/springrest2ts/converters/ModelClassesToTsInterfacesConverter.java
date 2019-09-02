@@ -67,9 +67,9 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
                 }
             }
 
-
             objectMapper.addTypeLevelSpecificFields(javaClass, tsInterface);
-            conversionListener.tsComplexTypeCreated(javaClass, tsInterface);
+            tsInterface.addAllAnnotations(javaClass.getAnnotations());
+            conversionListener.tsScopedTypeCreated(javaClass, tsInterface);
         }
 
     }

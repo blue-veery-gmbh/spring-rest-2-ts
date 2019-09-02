@@ -17,11 +17,14 @@ public class TSCommentSection extends TSElement {
 
     @Override
     public void write(BufferedWriter writer) throws IOException {
-        String[] lines = commentText.toString().split("\\\\r?\\\\n");
-        for (String line : lines) {
-            writer.write("/*\t");
+        String[] lines = commentText.toString().split("\r?\n");
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+            writer.write("*\t");
             writer.write(line);
-            writer.newLine();
+            if(i+1<lines.length){
+                writer.newLine();
+            }
         }
         writer.newLine();
 

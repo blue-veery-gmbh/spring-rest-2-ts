@@ -17,8 +17,8 @@ public class DispatcherConversionListener implements ConversionListener {
     }
 
     @Override
-    public void tsComplexTypeCreated(Class javaType, TSScopedType tsScopedType) {
-        conversionListenerSet.forEach(l -> l.tsComplexTypeCreated(javaType, tsScopedType));
+    public void tsScopedTypeCreated(Class javaType, TSScopedType tsScopedType) {
+        conversionListenerSet.forEach(l -> l.tsScopedTypeCreated(javaType, tsScopedType));
     }
 
     @Override

@@ -40,6 +40,7 @@ public class JavaEnumToTsUnionConverter extends ComplexTypeConverter {
             TSLiteral tsLiteral = new TSLiteral(enumConstantStringValue, TypeMapper.tsString, enumConstantStringValue);
             tsUnion.getJoinedTsElementList().add(tsLiteral);
         }
-        conversionListener.tsComplexTypeCreated(javaClass, tsTypeAlias);
+        tsTypeAlias.addAllAnnotations(javaClass.getAnnotations());
+        conversionListener.tsScopedTypeCreated(javaClass, tsTypeAlias);
     }
 }

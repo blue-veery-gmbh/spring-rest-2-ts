@@ -18,6 +18,7 @@ public class TSTypeAlias extends TSScopedType {
 
     @Override
     public void write(BufferedWriter writer) throws IOException {
+        tsComment.write(writer);
         writer.write("export type " + getName() + " = " );
         aliasedType.write(writer);
         writer.write(";" );
