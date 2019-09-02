@@ -311,6 +311,11 @@ public class JacksonObjectMapper implements ObjectMapper {
 
     private void applyJsonFormat(TSField tsField, JsonFormat jsonFormat) {
         if (jsonFormat != null) {
+            String pattern = jsonFormat.pattern();
+            if (!"".equals(pattern)) {
+                StringBuilder commentText = tsField.getTsComment().getTsCommentSection("jackson").getCommentText();
+                commentText.append("pattern : ").append(pattern);
+            }
             switch (jsonFormat.shape()) {
                 case ANY:
                     tsField.setType(TypeMapper.tsAny);

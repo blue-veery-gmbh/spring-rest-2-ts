@@ -15,7 +15,7 @@ import java.util.TreeSet;
  */
 public abstract class TSComplexType extends TSScopedType implements IAnnotated, IDecorated {
 
-
+    protected TSComment tsComment = new TSComment("ComplexTypeComment");
     private SortedSet<TSField> tsFields = new TreeSet<>();
     private SortedSet<TSMethod> tsMethods = new TreeSet<>();
     private List<TSDecorator> tsDecoratorList = new ArrayList<>();
@@ -29,6 +29,9 @@ public abstract class TSComplexType extends TSScopedType implements IAnnotated, 
         this.implementationGenerator = implementationGenerator;
     }
 
+    public TSComment getTsComment() {
+        return tsComment;
+    }
 
     public List<TSDecorator> getTsDecoratorList() {
         return tsDecoratorList;

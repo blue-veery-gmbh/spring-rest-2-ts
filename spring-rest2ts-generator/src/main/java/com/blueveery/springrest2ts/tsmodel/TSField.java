@@ -33,6 +33,7 @@ public class TSField extends TSComplexTypeMember {
 
     @Override
     public void write(BufferedWriter writer) throws IOException {
+        tsComment.write(writer);
         if(readOnly){
             writer.write("readonly ");
         }

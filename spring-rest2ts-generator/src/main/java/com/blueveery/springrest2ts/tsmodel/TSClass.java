@@ -41,6 +41,7 @@ public class TSClass extends TSComplexType {
 
     @Override
     public void write(BufferedWriter writer) throws IOException {
+        tsComment.write(writer);
         List<TSDecorator> decorators = implementationGenerator.getDecorators(this);
         writeDecorators(writer, decorators);
 
