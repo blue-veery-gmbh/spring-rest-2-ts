@@ -132,8 +132,8 @@ public class TsCodeGenerationsTest {
     public void customTypeMapping() throws IOException {
         tsGenerator.getCustomTypeMapping().put(UUID.class, TypeMapper.tsString);
         tsGenerator.getCustomTypeMapping().put(BigInteger.class, TypeMapper.tsNumber);
-        tsGenerator.getCustomTypeMapping().put(LocalDateTime.class, TypeMapper.tsDate);
-        tsGenerator.getCustomTypeMapping().put(LocalDate.class, TypeMapper.tsDate);
+        tsGenerator.getCustomTypeMapping().put(LocalDateTime.class, TypeMapper.tsNumber);
+        tsGenerator.getCustomTypeMapping().put(LocalDate.class, TypeMapper.tsString);
         tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 }
