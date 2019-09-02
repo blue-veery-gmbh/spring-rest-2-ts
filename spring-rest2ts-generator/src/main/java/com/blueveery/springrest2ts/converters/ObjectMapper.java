@@ -17,7 +17,7 @@ public interface ObjectMapper {
     boolean filter(Method method, boolean isGetter);
 
     List<TSField> mapJavaPropertyToField(Property property, TSComplexType tsComplexType,
-                                         ComplexTypeConverter complexTypeConverter, ImplementationGenerator implementationGenerator);
+                                         ComplexTypeConverter complexTypeConverter, ImplementationGenerator implementationGenerator, NullableTypeStrategy nullableTypeStrategy);
 
 
     String getPropertyName(Field field);

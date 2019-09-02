@@ -39,7 +39,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
     }
 
     @Override
-    public void convert(Class javaClass) {
+    public void convert(Class javaClass, NullableTypeStrategy nullableTypeStrategy) {
         TSClass tsClass = (TSClass) TypeMapper.map(javaClass);
 
         setSupperClass(javaClass, tsClass);
@@ -73,7 +73,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
                         tsParameter.addAllAnnotations(parameter.getAnnotations());
                         if (parameterIsMapped(tsParameter.getAnnotationList())) {
                             setOptional(tsParameter);
-                            setAsNullableType(parameter.getParameterizedType(), parameter.getDeclaredAnnotations(), tsParameter);
+                            nullableTypeStrategy.setAsNullableType(parameter.getParameterizedType(), parameter.getDeclaredAnnotations(), tsParameter);
                             tsMethod.getParameterList().add(tsParameter);
                         }
                     }

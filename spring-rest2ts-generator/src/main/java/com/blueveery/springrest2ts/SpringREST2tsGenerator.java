@@ -24,11 +24,12 @@ public class SpringREST2tsGenerator {
 
     private JavaTypeFilter modelClassesCondition;
     private JavaTypeFilter restClassesCondition;
+
     private ModuleConverter moduleConverter = new TsModuleCreatorConverter(2);
     private ComplexTypeConverter enumConverter = new JavaEnumToTsEnumConverter();;
     private ComplexTypeConverter modelClassesConverter;
     private ComplexTypeConverter restClassesConverter;
-    private DispatcherConversionListener conversionListener = new DispatcherConversionListener();
+    private NullableTypeStrategy nullableTypeStrategy = new DefaultNullableTypeStrategy();
 
     public Map<Class, TSType> getCustomTypeMapping() {
         return customTypeMapping;
@@ -56,6 +57,10 @@ public class SpringREST2tsGenerator {
 
     public void setRestClassesConverter(ComplexTypeConverter restClassesConverter) {
         this.restClassesConverter = restClassesConverter;
+    }
+
+    public void setNullableTypeStrategy(NullableTypeStrategy nullableTypeStrategy) {
+        this.nullableTypeStrategy = nullableTypeStrategy;
     }
 
     public SortedSet<TSModule> generate(Set<String> packagesNames, Path outputDir) throws IOException {
@@ -127,7 +132,7 @@ public class SpringREST2tsGenerator {
         }
 
         for (Class javaType : preConvertedTypes) {
-            complexTypeConverter.convert(javaType);
+            complexTypeConverter.convert(javaType, nullableTypeStrategy);
         }
 
     }
