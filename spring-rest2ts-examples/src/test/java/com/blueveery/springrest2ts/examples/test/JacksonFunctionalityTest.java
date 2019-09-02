@@ -6,12 +6,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Date;
 
 public class JacksonFunctionalityTest {
 
     @Test
     public void serializeProductDTO() throws IOException {
         ProductDTO productDTO = new ProductDTO();
+        productDTO.expirationDate = new Date();
         ObjectMapper mapper = new ObjectMapper();
 
         String productAsString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(productDTO);

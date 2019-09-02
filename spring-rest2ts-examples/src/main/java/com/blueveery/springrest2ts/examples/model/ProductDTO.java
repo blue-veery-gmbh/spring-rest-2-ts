@@ -6,18 +6,19 @@ import com.fasterxml.jackson.annotation.*;
 import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 //@JsonIgnoreProperties(value = {"barcode"}, allowGetters = true)
-@JsonTypeInfo(include = JsonTypeInfo.As.PROPERTY, use = JsonTypeInfo.Id.CUSTOM)
+@JsonTypeInfo(include = JsonTypeInfo.As.PROPERTY, use = JsonTypeInfo.Id.NAME)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ProductDTO extends BaseDTO {
 
     public int name = 1;
     private BigInteger price;
     private String barcode;
-    private LocalDateTime expirationDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    public Date expirationDate;
     private ManufacturerDTO manufacturer;
     private Map<String, String> tags;
 
@@ -29,9 +30,9 @@ public class ProductDTO extends BaseDTO {
     @JsonRawValue
     public Map<UUID, String> translationsMap;
 
-//    public String getBarcode() {
-//        return barcode;
-//    }
+    public String getBarcode() {
+        return barcode;
+    }
 
 
     public void setBarcode(String barcode) {
