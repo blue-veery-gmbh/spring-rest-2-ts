@@ -6,6 +6,8 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Property implements Comparable<Property>{
     private String name;
@@ -70,33 +72,67 @@ public class Property implements Comparable<Property>{
 
 
     public Type getSetterType() {
-
         if (setter != null) {
-            return setter.getParameterTypes()[0];
+            return setter.getGenericParameterTypes()[0];
+        }
+        if (field != null) {
+            return field.getGenericType();
         }
         return null;
     }
 
     public <A extends Annotation> A getDeclaredAnnotation(Class<A> annotationClass) {
-        return getFirstMember().getDeclaredAnnotation(annotationClass);
+        A requiredAnnotation = null;
+        if (getter != null) {
+            requiredAnnotation = getter.getDeclaredAnnotation(annotationClass);
+            if (requiredAnnotation != null) {
+                return requiredAnnotation;
+            }
+        }
+
+        if (setter != null) {
+            requiredAnnotation = setter.getDeclaredAnnotation(annotationClass);
+            if (requiredAnnotation != null) {
+                return requiredAnnotation;
+            }
+            requiredAnnotation = setter.getParameters()[0].getDeclaredAnnotation(annotationClass);
+            if (requiredAnnotation != null) {
+                return requiredAnnotation;
+            }
+        }
+        if (field != null) {
+            return field.getDeclaredAnnotation(annotationClass);
+        }
+        return null;
+    }
+
+
+    public Annotation[] getDeclaredAnnotations() {
+        List<Annotation> annotationList = new ArrayList<>();
+        if (getter != null) {
+            for (Annotation annotation : getter.getDeclaredAnnotations()) {
+                annotationList.add(annotation);
+            }
+        }
+
+        if (setter != null) {
+            for (Annotation annotation : setter.getDeclaredAnnotations()) {
+                annotationList.add(annotation);
+            }
+            for (Annotation annotation : setter.getParameters()[0].getDeclaredAnnotations()) {
+                annotationList.add(annotation);
+            }
+        }
+        if (field != null) {
+            for (Annotation annotation : field.getDeclaredAnnotations()) {
+                annotationList.add(annotation);
+            }
+        }
+        return annotationList.toArray(new Annotation[annotationList.size()]);
     }
 
     public Class<?> getDeclaringClass(){
         return declaringClass;
-    }
-
-    private AccessibleObject getFirstMember(){
-        if (field != null) {
-            return field;
-        }
-        if (getter != null) {
-            return getter;
-        }
-
-        if (setter != null) {
-            return setter;
-        }
-        return null;
     }
 
     @Override

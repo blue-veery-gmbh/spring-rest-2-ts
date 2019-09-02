@@ -3,6 +3,7 @@ package com.blueveery.springrest2ts.examples.model;
 import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
 import com.fasterxml.jackson.annotation.*;
 
+import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Map;

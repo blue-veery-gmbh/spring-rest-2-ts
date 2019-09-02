@@ -75,13 +75,13 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
     }
 
     private void setAsNullableType(Property property, TSField tsField) {
-        if (property.getGetter() != null) {
-            setAsNullableType(property.getGetter().getReturnType(), property.getGetter().getDeclaredAnnotations(), tsField);
+        if (property.getGetterType() != null) {
+            setAsNullableType(property.getGetterType(), property.getDeclaredAnnotations(), tsField);
             return;
         }
 
-        if (property.getField() != null) {
-            setAsNullableType(property.getField().getType(), property.getField().getDeclaredAnnotations(), tsField);
+        if (property.getSetterType() != null && property.getGetterType() != property.getSetterType()) {
+            setAsNullableType(property.getSetterType(), property.getDeclaredAnnotations(), tsField);
         }
     }
 

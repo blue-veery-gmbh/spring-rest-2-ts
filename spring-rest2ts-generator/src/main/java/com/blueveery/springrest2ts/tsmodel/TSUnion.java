@@ -17,6 +17,11 @@ public class TSUnion extends TSType {
         }
     }
 
+    @Override
+    public String getName() {
+        return generateUnionName(joinedTsElementList);
+    }
+
     private static String generateUnionName(List<TSElement> joinedTypes) {
         List<String> list = new ArrayList<>();
         for (TSElement tsElement : joinedTypes) {
