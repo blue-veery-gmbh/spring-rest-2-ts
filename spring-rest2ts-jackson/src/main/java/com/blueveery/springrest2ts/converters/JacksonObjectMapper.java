@@ -21,11 +21,35 @@ public class JacksonObjectMapper implements ObjectMapper {
     public JacksonObjectMapper() {
     }
 
-    public JacksonObjectMapper(JsonAutoDetect.Visibility fieldsVisibility, JsonAutoDetect.Visibility gettersVisibility,
-                               JsonAutoDetect.Visibility isGetterVisibility, JsonAutoDetect.Visibility settersVisibility) {
+    public JsonAutoDetect.Visibility getFieldsVisibility() {
+        return fieldsVisibility;
+    }
+
+    public void setFieldsVisibility(JsonAutoDetect.Visibility fieldsVisibility) {
         this.fieldsVisibility = fieldsVisibility;
+    }
+
+    public JsonAutoDetect.Visibility getGettersVisibility() {
+        return gettersVisibility;
+    }
+
+    public void setGettersVisibility(JsonAutoDetect.Visibility gettersVisibility) {
         this.gettersVisibility = gettersVisibility;
+    }
+
+    public JsonAutoDetect.Visibility getIsGetterVisibility() {
+        return isGetterVisibility;
+    }
+
+    public void setIsGetterVisibility(JsonAutoDetect.Visibility isGetterVisibility) {
         this.isGetterVisibility = isGetterVisibility;
+    }
+
+    public JsonAutoDetect.Visibility getSettersVisibility() {
+        return settersVisibility;
+    }
+
+    public void setSettersVisibility(JsonAutoDetect.Visibility settersVisibility) {
         this.settersVisibility = settersVisibility;
     }
 

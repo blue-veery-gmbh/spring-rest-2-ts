@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 
-public class OrderSetupTest {
+public class TsCodeGenerationsTest {
 
     private static final Path OUTPUT_DIR_PATH = Paths.get("target/classes/test-webapp/src");
 
@@ -51,17 +51,19 @@ public class OrderSetupTest {
         tsGenerator.setModelClassesCondition(new ExtendsJavaTypeFilter(BaseDTO.class));
         tsGenerator.setRestClassesCondition(new ExtendsJavaTypeFilter(BaseCtrl.class));
 
-        JacksonObjectMapper objectMapper = new JacksonObjectMapper(JsonAutoDetect.Visibility.ANY, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY, JsonAutoDetect.Visibility.PUBLIC_ONLY);
-        modelClassesConverter = new ModelClassesToTsInterfacesConverter(objectMapper);
+        JacksonObjectMapper jacksonObjectMapper = new JacksonObjectMapper();
+        jacksonObjectMapper.setFieldsVisibility(JsonAutoDetect.Visibility.ANY);
+        modelClassesConverter = new ModelClassesToTsInterfacesConverter(jacksonObjectMapper);
         tsGenerator.setModelClassesConverter(modelClassesConverter);
+
         restClassesConverter = new SpringRestToTsConverter(new Angular4ImplementationGenerator());
         tsGenerator.setRestClassesConverter(restClassesConverter);
 
         HashMap<String, TSModule> packagesMap = new HashMap<>();
-        packagesMap.put(BaseDTO.class.getPackage().getName(), new TSModule("core", Paths.get("app/sdk/model"), false));
-        packagesMap.put(OrderDTO.class.getPackage().getName(), new TSModule("model", Paths.get("app/sdk/model"), false));
-        packagesMap.put(OrderPaymentStatus.class.getPackage().getName(), new TSModule("model-enums", Paths.get("app/sdk/enums"), false));
-        packagesMap.put(OrderCtrl.class.getPackage().getName(), new TSModule("services", Paths.get("app/sdk/services"), false));
+        packagesMap.put("com.blueveery.springrest2ts.examples.model.core", new TSModule("core", Paths.get("app/sdk/model"), false));
+        packagesMap.put("com.blueveery.springrest2ts.examples.model", new TSModule("model", Paths.get("app/sdk/model"), false));
+        packagesMap.put("com.blueveery.springrest2ts.examples.model.enums", new TSModule("model-enums", Paths.get("app/sdk/enums"), false));
+        packagesMap.put("com.blueveery.springrest2ts.examples.ctrls", new TSModule("services", Paths.get("app/sdk/services"), false));
 
         javaPackageSet = packagesMap.keySet();
         moduleConverter = new ConfigureableTsModulesConverter(packagesMap);
@@ -73,13 +75,13 @@ public class OrderSetupTest {
     }
 
     @Test
-    public void swaggerAnnotationTest() throws IOException {
+    public void swaggerAnnotation() throws IOException {
         restClassesConverter.getConversionListener().getConversionListenerSet().add(new SwaggerConversionListener());
         tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 
     @Test
-    public void jacksonAnnotationTestsOnProductDTO() throws IOException {
+    public void jacksonAnnotationOnProductDTO() throws IOException {
         tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("ProductDTO"));
         tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
         tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
@@ -139,13 +141,4 @@ public class OrderSetupTest {
         tsGenerator.getCustomTypeMapping().put(LocalDate.class, TypeMapper.tsDate);
         tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
-
-    @Test
-    public void jacksonSetterGetters() throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        CategoryDTO category = new CategoryDTO("Phones");
-        System.out.println(objectMapper.writeValueAsString(category));
-    }
-
 }

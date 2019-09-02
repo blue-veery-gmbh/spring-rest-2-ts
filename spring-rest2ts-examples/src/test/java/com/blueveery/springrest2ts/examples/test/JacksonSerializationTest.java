@@ -8,7 +8,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Date;
 
-public class JacksonFunctionalityTest {
+public class JacksonSerializationTest {
 
     @Test
     public void serializeProductDTO() throws IOException {
