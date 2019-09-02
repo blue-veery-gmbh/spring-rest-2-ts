@@ -22,8 +22,6 @@ public class ProductDTO extends BaseDTO {
     private ManufacturerDTO manufacturer;
     private Map<String, String> tags;
 
-//    private String blabla;
-
 //    @JsonManagedReference
     public CategoryDTO categoryDTO;
 
@@ -39,15 +37,13 @@ public class ProductDTO extends BaseDTO {
         this.barcode = barcode;
     }
 
-    //    @JsonProperty("blabla")
     public int getName() {
         return name;
     }
 
 
     @JsonSetter(value = "secondName")
-    public void name( String name) {
-
+    public void name(@Nullable String name) {
     }
 
 }
