@@ -8,7 +8,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Optional;
 
-public class DefaultNullableTypeStrategy implements NullableTypeStrategy{
+public class DefaultNullableTypesStrategy implements NullableTypesStrategy {
     @Override
     public void setAsNullableType(Type elementType, Annotation[] declaredAnnotations, INullableElement tsElement) {
         if(!tsElement.isNullable()){

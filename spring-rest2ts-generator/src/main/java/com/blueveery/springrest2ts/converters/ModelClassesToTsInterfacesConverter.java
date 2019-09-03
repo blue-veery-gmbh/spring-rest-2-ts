@@ -43,7 +43,7 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
     }
 
     @Override
-    public void convert(Class javaClass, NullableTypeStrategy nullableTypeStrategy) {
+    public void convert(Class javaClass, NullableTypesStrategy nullableTypesStrategy) {
         TSInterface tsInterface = (TSInterface) TypeMapper.map(javaClass);
         if (!tsInterface.isConverted()) {
             tsInterface.setConverted(true);
@@ -57,9 +57,9 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
             SortedSet<Property> propertySet = getClassProperties(javaClass);
 
             for (Property property : propertySet) {
-                List<TSField> tsFieldList = objectMapper.mapJavaPropertyToField(property, tsInterface, this,implementationGenerator, nullableTypeStrategy);
+                List<TSField> tsFieldList = objectMapper.mapJavaPropertyToField(property, tsInterface, this,implementationGenerator, nullableTypesStrategy);
                 if (tsFieldList.size() == 1) {
-                    setAsNullableType(property, tsFieldList.get(0), nullableTypeStrategy);
+                    setAsNullableType(property, tsFieldList.get(0), nullableTypesStrategy);
                 }
                 for (TSField tsField : tsFieldList) {
                     tsInterface.addTsField(tsField);
@@ -74,14 +74,14 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
 
     }
 
-    private void setAsNullableType(Property property, TSField tsField, NullableTypeStrategy nullableTypeStrategy) {
+    private void setAsNullableType(Property property, TSField tsField, NullableTypesStrategy nullableTypesStrategy) {
         if (property.getGetterType() != null) {
-            nullableTypeStrategy.setAsNullableType(property.getGetterType(), property.getDeclaredAnnotations(), tsField);
+            nullableTypesStrategy.setAsNullableType(property.getGetterType(), property.getDeclaredAnnotations(), tsField);
             return;
         }
 
         if (property.getSetterType() != null && property.getGetterType() != property.getSetterType()) {
-            nullableTypeStrategy.setAsNullableType(property.getSetterType(), property.getDeclaredAnnotations(), tsField);
+            nullableTypesStrategy.setAsNullableType(property.getSetterType(), property.getDeclaredAnnotations(), tsField);
         }
     }
 

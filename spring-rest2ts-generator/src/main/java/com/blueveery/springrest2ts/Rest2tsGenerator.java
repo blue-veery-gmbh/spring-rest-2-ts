@@ -28,7 +28,7 @@ public class Rest2tsGenerator {
     private JavaTypeFilter modelClassesCondition = new RejectJavaTypeFilter();
     private JavaTypeFilter restClassesCondition = new RejectJavaTypeFilter();
 
-    private NullableTypeStrategy nullableTypeStrategy = new DefaultNullableTypeStrategy();
+    private NullableTypesStrategy nullableTypesStrategy = new DefaultNullableTypesStrategy();
 
     private ModuleConverter moduleConverter = new TsModuleCreatorConverter(2);
     private ComplexTypeConverter enumConverter = new JavaEnumToTsEnumConverter();;
@@ -63,8 +63,8 @@ public class Rest2tsGenerator {
         this.restClassesConverter = restClassesConverter;
     }
 
-    public void setNullableTypeStrategy(NullableTypeStrategy nullableTypeStrategy) {
-        this.nullableTypeStrategy = nullableTypeStrategy;
+    public void setNullableTypesStrategy(NullableTypesStrategy nullableTypesStrategy) {
+        this.nullableTypesStrategy = nullableTypesStrategy;
     }
 
     public SortedSet<TSModule> generate(Set<String> packagesNames, Path outputDir) throws IOException {
@@ -137,7 +137,7 @@ public class Rest2tsGenerator {
         }
 
         for (Class javaType : preConvertedTypes) {
-            complexTypeConverter.convert(javaType, nullableTypeStrategy);
+            complexTypeConverter.convert(javaType, nullableTypesStrategy);
         }
 
     }

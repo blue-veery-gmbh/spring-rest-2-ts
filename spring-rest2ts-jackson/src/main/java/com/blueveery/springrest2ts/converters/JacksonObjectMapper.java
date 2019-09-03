@@ -190,13 +190,13 @@ public class JacksonObjectMapper implements ObjectMapper {
     public List<TSField> mapJavaPropertyToField(Property property, TSComplexType tsComplexType,
                                                 ComplexTypeConverter complexTypeConverter,
                                                 ImplementationGenerator implementationGenerator,
-                                                NullableTypeStrategy nullableTypeStrategy) {
+                                                NullableTypesStrategy nullableTypesStrategy) {
         List<TSField> tsFieldList = new ArrayList<>();
         Type fieldJavaGetterType = property.getGetterType();
         if (fieldJavaGetterType != null) {
             fieldJavaGetterType = applyJsonValue(fieldJavaGetterType);
             JsonUnwrapped declaredAnnotation = property.getDeclaredAnnotation(JsonUnwrapped.class);
-            if (applyJsonUnwrapped(fieldJavaGetterType, declaredAnnotation, tsComplexType, tsFieldList, complexTypeConverter, nullableTypeStrategy)){
+            if (applyJsonUnwrapped(fieldJavaGetterType, declaredAnnotation, tsComplexType, tsFieldList, complexTypeConverter, nullableTypesStrategy)){
                 return tsFieldList;
             }
         }
@@ -283,7 +283,7 @@ public class JacksonObjectMapper implements ObjectMapper {
     }
 
     private boolean applyJsonUnwrapped(Type fieldJavaType, JsonUnwrapped declaredAnnotation, TSComplexType tsComplexType,
-                                       List<TSField> tsFieldList, ComplexTypeConverter complexTypeConverter, NullableTypeStrategy nullableTypeStrategy) {
+                                       List<TSField> tsFieldList, ComplexTypeConverter complexTypeConverter, NullableTypesStrategy nullableTypesStrategy) {
         if (declaredAnnotation != null) {
             TSType tsType = TypeMapper.map(fieldJavaType);
             if (!(tsType instanceof TSComplexType)) {
@@ -291,7 +291,7 @@ public class JacksonObjectMapper implements ObjectMapper {
             }
             TSComplexType referredTsType = (TSComplexType) tsType;
             if (!referredTsType.isConverted()) {
-                complexTypeConverter.convert((Class) fieldJavaType, nullableTypeStrategy);
+                complexTypeConverter.convert((Class) fieldJavaType, nullableTypesStrategy);
             }
             for (TSField nextTsField : referredTsType.getTsFields()) {
                 tsFieldList.add(new TSField(nextTsField.getName(), tsComplexType, nextTsField.getType()));

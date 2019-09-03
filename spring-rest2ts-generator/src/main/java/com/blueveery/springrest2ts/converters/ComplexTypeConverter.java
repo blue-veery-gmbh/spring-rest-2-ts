@@ -26,7 +26,7 @@ public abstract class ComplexTypeConverter {
     }
 
     public abstract boolean preConverted(ModuleConverter moduleConverter, Class javaClass);
-    public abstract void convert(Class javaClass, NullableTypeStrategy nullableTypeStrategy);
+    public abstract void convert(Class javaClass, NullableTypesStrategy nullableTypesStrategy);
 
     public ClassNameMapper getClassNameMapper() {
         return classNameMapper;
