@@ -5,11 +5,13 @@ import com.blueveery.springrest2ts.filters.JavaTypeFilter;
 import com.blueveery.springrest2ts.filters.RejectJavaTypeFilter;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.util.ConfigurationBuilder;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.*;
 import org.slf4j.Logger;
@@ -71,9 +73,10 @@ public class Rest2tsGenerator {
         Set<Class> enumClasses = new HashSet<>();
 
         logger.info("Scanning model classes");
-        scanPackages(packagesNames, modelClassesCondition, modelClasses, enumClasses, logger);
+        List<Class> loadedClasses= loadClasses(packagesNames);
+        searchClasses(loadedClasses, modelClassesCondition, modelClasses, enumClasses, logger);
         logger.info("Scanning rest controllers classes");
-        scanPackages(packagesNames, restClassesCondition, restClasses, enumClasses, logger);
+        searchClasses(loadedClasses, restClassesCondition, restClasses, enumClasses, logger);
 
 
         registerCustomTypesMapping(customTypeMapping);
@@ -147,26 +150,68 @@ public class Rest2tsGenerator {
 
     }
 
-    private void scanPackages(Set<String> packagesNames, JavaTypeFilter javaTypeFilter, Set<Class> classesSet, Set<Class> enumClasses, Logger logger) {
-        Reflections reflections = new Reflections(new ConfigurationBuilder().setScanners(new SubTypesScanner(false)).forPackages(packagesNames.toArray(new String[0])));
-
-        Set<Class<?>> packageClassesSet = reflections.getSubTypesOf(Object.class);
-        for (Class packageClass : packageClassesSet) {
-            logger.info(String.format("Found class : %s", packageClass.getName()));
-            if (javaTypeFilter.accept(packageClass) && packagesNames.contains(packageClass.getPackage().getName())) {
-                classesSet.add(packageClass);
-            }else{
-                logger.warn(String.format("Class filtered out : %s", packageClass.getSimpleName()));
+    private void searchClasses(List<Class> loadedClasses, JavaTypeFilter javaTypeFilter, Set<Class> classSet, Set<Class> enumClassSet, Logger logger) throws IOException {
+        for (Class foundClass : loadedClasses) {
+            logger.info(String.format("Found class : %s", foundClass.getName()));
+            if (Enum.class.isAssignableFrom(foundClass)) {
+                logger.info(String.format("Found enum class : %s", foundClass.getName()));
+                enumClassSet.add(foundClass);
+                continue;
             }
-            javaTypeFilter.explain(packageClass, logger, "");
-        }
 
-        Set<Class<? extends Enum>> packageEnumsSet = reflections.getSubTypesOf(Enum.class);
-        for (Class packageEnumClass : packageEnumsSet) {
-            if (packagesNames.contains(packageEnumClass.getPackage().getName())) {
-                logger.info(String.format("Found enum class : %s", packageEnumClass.getName()));
-                enumClasses.add(packageEnumClass);
+            if (javaTypeFilter.accept(foundClass)) {
+                classSet.add(foundClass);
+            }else{
+                logger.warn(String.format("Class filtered out : %s", foundClass.getSimpleName()));
+            }
+            javaTypeFilter.explain(foundClass, logger, "");
+        }
+    }
+
+
+    private List<Class> loadClasses(Set<String> packageSet) throws IOException {
+        ClassLoader classLoader = this.getClass().getClassLoader();
+        if(!(classLoader instanceof URLClassLoader)){
+            throw new IllegalStateException("Generator must be run under URLClassLoader to scan classes, current ClassLoader is : " + classLoader.getClass().getSimpleName());
+        }
+        URLClassLoader currentClassLoader = (URLClassLoader) classLoader;
+        List<Class> classList = new ArrayList<>();
+        for (String packageName : packageSet) {
+            Enumeration<URL> urlEnumeration = currentClassLoader.findResources(packageName.replace(".", "/"));
+            while (urlEnumeration.hasMoreElements()) {
+                URL url = urlEnumeration.nextElement();
+                scanPackagesRecursively(currentClassLoader, url, packageName, classList);
+            }
+        }
+        return classList;
+    }
+
+    private void scanPackagesRecursively(URLClassLoader classLoader, URL url, String packageName, List<Class> classList) throws IOException {
+        try(InputStream inputStream = url.openStream()) {
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+            } catch (Exception e) {
+                System.out.println("Failed to open package : " + packageName);
+                return;
+            }
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.contains(".")) {
+                    String newPackageName = packageName + "/" + line;
+                    scanPackagesRecursively(classLoader, new URL(url.toString() + "/" + line), newPackageName, classList);                } else {
+                    if (line.endsWith(".class")) {
+                        String className = (packageName + "/" + line).replace(".class", "").replace("/", ".");
+                        try {
+                            Class<?> loadedClass = classLoader.loadClass(className);
+                            classList.add(loadedClass);
+                        } catch (Exception e) {
+                            System.out.println(String.format("Failed to lad class %s due to error %s:%s", className, e.getClass().getSimpleName(), e.getMessage()));
+                        }
+                    }
+                }
             }
         }
     }
+
 }

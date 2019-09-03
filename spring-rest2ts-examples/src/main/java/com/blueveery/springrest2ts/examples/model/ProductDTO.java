@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.*;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -16,6 +17,7 @@ public class ProductDTO extends BaseDTO {
     public int name = 1;
     private BigInteger price;
     private String barcode;
+    public URI websiteURI;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     public Date expirationDate;
