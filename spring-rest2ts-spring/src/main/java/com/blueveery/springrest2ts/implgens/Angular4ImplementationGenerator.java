@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.implgens;
 
+import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getRequestMapping;
 import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,7 +13,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 
-public class Angular4ImplementationGenerator extends SpringMvcImplementationGenerator implements ImplementationGenerator {
+public class Angular4ImplementationGenerator implements ImplementationGenerator {
     private static final String FIELD_NAME_HTTP_SERVICE = "httpService";
     private static final String FIELD_NAME_URL_SERVICE = "urlService";
     private static final String FIELD_NAME_SUBJECT = "subject";
@@ -61,8 +62,8 @@ public class Angular4ImplementationGenerator extends SpringMvcImplementationGene
                 writer.newLine();
             }
         } else {
-            RequestMapping methodRequestMapping = getRequestMapping(method);
-            RequestMapping classRequestMapping = getRequestMapping(method.getOwner());
+            RequestMapping methodRequestMapping = getRequestMapping(method.getAnnotationList());
+            RequestMapping classRequestMapping = getRequestMapping(method.getOwner().getAnnotationList());
 
             String tsPath = useUrlService ? "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" : "'";
             tsPath += getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "'";
@@ -293,7 +294,7 @@ public class Angular4ImplementationGenerator extends SpringMvcImplementationGene
             }
             return tsParameters;
         }
-        RequestMapping methodRequestMapping = getRequestMapping(method);
+        RequestMapping methodRequestMapping = getRequestMapping(method.getAnnotationList());
         if (methodRequestMapping != null) {
             String methodString = methodRequestMapping.method()[0].toString();
             if ("PUT".equals(methodString) || "POST".equals(methodString)) {

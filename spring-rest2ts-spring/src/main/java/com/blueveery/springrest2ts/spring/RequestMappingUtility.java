@@ -1,17 +1,15 @@
-package com.blueveery.springrest2ts.implgens;
+package com.blueveery.springrest2ts.spring;
 
-import com.blueveery.springrest2ts.spring.RequestMappingEntity;
-import com.blueveery.springrest2ts.tsmodel.IAnnotated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.List;
 
-public abstract class SpringMvcImplementationGenerator implements ImplementationGenerator{
-
-    protected Annotation findRequestMapping(IAnnotated annotatedElement){
-        for (Annotation annotation:annotatedElement.getAnnotationList()) {
+public class RequestMappingUtility {
+    public static Annotation findRequestMapping(List<Annotation> annotationList){
+        for (Annotation annotation:annotationList) {
             if(annotation.annotationType() == RequestMapping.class){
                 return annotation;
             }
@@ -24,8 +22,8 @@ public abstract class SpringMvcImplementationGenerator implements Implementation
         return null;
     }
 
-    protected RequestMapping getRequestMapping(IAnnotated annotatedElement){
-        Annotation requestMapping = findRequestMapping(annotatedElement);
+    public static RequestMapping getRequestMapping(List<Annotation> annotationList){
+        Annotation requestMapping = findRequestMapping(annotationList);
         if (requestMapping == null) {
             return null;
         }
