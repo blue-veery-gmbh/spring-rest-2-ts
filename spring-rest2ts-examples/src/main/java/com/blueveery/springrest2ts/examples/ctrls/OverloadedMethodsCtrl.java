@@ -16,7 +16,7 @@ public class OverloadedMethodsCtrl implements GetObjectCtrl<ProductDTO> {
         return entity;
     }
 
-    @PutMapping(consumes = {"application/json"}, produces = {"application/json"})
+    @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
     @ResponseStatus(HttpStatus.CREATED)
     public ProductDTO createProduct(@RequestBody ProductDTO entity, @RequestParam boolean update) {
         return entity;

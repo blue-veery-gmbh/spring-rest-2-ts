@@ -121,7 +121,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
             appendHttpPathToMethodName(overloadedMethodNamesMap, methodsRequestMappingsMap);
         }
         if(!methodNamesAreUnique(overloadedMethodNamesMap)){
-            throw new IllegalStateException("Met overloaded methods which names are not unique after appending http method and http path : " + currentMethod);
+            logger.error("There are overloaded REST methods which names are not unique after appending http method and http path : " + currentMethod);
         }
         overloadedMethodNamesMap.forEach((method, name) -> methodNamesMap.put(method, name));
         return overloadedMethodNamesMap.get(currentMethod).toString();
