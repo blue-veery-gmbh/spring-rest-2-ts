@@ -1,6 +1,5 @@
 package com.blueveery.springrest2ts.implgens;
 
-import com.blueveery.springrest2ts.converters.ModuleConverter;
 import com.blueveery.springrest2ts.tsmodel.*;
 
 import java.io.BufferedWriter;

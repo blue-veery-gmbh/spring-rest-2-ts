@@ -80,7 +80,7 @@ public class TsCodeGenerationsTest {
         packagesMap.put("com.blueveery.springrest2ts.examples.ctrls.core", servicesModule);
         packagesMap.put("com.blueveery.springrest2ts.examples.ctrls", servicesModule);
         ConfigurableTsModulesConverter moduleConverter = new ConfigurableTsModulesConverter(packagesMap);
-        tsGenerator.setModuleConverter(moduleConverter);
+        tsGenerator.setJavaPackageToTsModuleConverter(moduleConverter);
 
         tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }

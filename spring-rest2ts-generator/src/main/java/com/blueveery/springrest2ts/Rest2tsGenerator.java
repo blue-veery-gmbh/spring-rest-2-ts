@@ -30,7 +30,7 @@ public class Rest2tsGenerator {
 
     private NullableTypesStrategy nullableTypesStrategy = new DefaultNullableTypesStrategy();
 
-    private ModuleConverter moduleConverter = new TsModuleCreatorConverter(2);
+    private JavaPackageToTsModuleConverter javaPackageToTsModuleConverter = new TsModuleCreatorConverter(2);
     private ComplexTypeConverter enumConverter = new JavaEnumToTsEnumConverter();;
     private ComplexTypeConverter modelClassesConverter;
     private ComplexTypeConverter restClassesConverter;
@@ -47,8 +47,8 @@ public class Rest2tsGenerator {
         this.restClassesCondition = restClassesCondition;
     }
 
-    public void setModuleConverter(ModuleConverter moduleConverter) {
-        this.moduleConverter = moduleConverter;
+    public void setJavaPackageToTsModuleConverter(JavaPackageToTsModuleConverter javaPackageToTsModuleConverter) {
+        this.javaPackageToTsModuleConverter = javaPackageToTsModuleConverter;
     }
 
     public void setEnumConverter(ComplexTypeConverter enumConverter) {
@@ -84,29 +84,29 @@ public class Rest2tsGenerator {
         exploreRestClasses(restClasses, modelClassesCondition, modelClasses);
         exploreModelClasses(modelClasses, restClassesCondition);
 
-        convertModules(enumClasses, moduleConverter);
-        convertModules(modelClasses, moduleConverter);
-        convertModules(restClasses, moduleConverter);
+        convertModules(enumClasses, javaPackageToTsModuleConverter);
+        convertModules(modelClasses, javaPackageToTsModuleConverter);
+        convertModules(restClasses, javaPackageToTsModuleConverter);
 
-        convertTypes(enumClasses, moduleConverter, enumConverter);
+        convertTypes(enumClasses, javaPackageToTsModuleConverter, enumConverter);
         if (!modelClasses.isEmpty()) {
             if (modelClassesConverter == null) {
                 throw new IllegalStateException("Model classes converter is not set");
             }
-            convertTypes(modelClasses, moduleConverter, modelClassesConverter);
+            convertTypes(modelClasses, javaPackageToTsModuleConverter, modelClassesConverter);
         }
 
         if (!restClasses.isEmpty()) {
             if (restClassesConverter == null) {
                 throw new IllegalStateException("Rest classes converter is not set");
             }
-            convertTypes(restClasses, moduleConverter, restClassesConverter);
+            convertTypes(restClasses, javaPackageToTsModuleConverter, restClassesConverter);
         }
 
 
-        writeTSModules(moduleConverter.getTsModules(), outputDir, logger);
+        writeTSModules(javaPackageToTsModuleConverter.getTsModules(), outputDir, logger);
 
-        return moduleConverter.getTsModules();
+        return javaPackageToTsModuleConverter.getTsModules();
     }
 
     private void registerCustomTypesMapping(Map<Class, TSType> customTypeMapping) {
@@ -122,13 +122,13 @@ public class Rest2tsGenerator {
         }
     }
 
-    private void convertModules(Set<Class> javaClasses, ModuleConverter moduleConverter) {
+    private void convertModules(Set<Class> javaClasses, JavaPackageToTsModuleConverter javaPackageToTsModuleConverter) {
         for (Class javaType : javaClasses) {
-            moduleConverter.mapJavaTypeToTsModule(javaType);
+            javaPackageToTsModuleConverter.mapJavaTypeToTsModule(javaType);
         }
     }
 
-    private void convertTypes(Set<Class> javaTypes, ModuleConverter tsModuleSortedMap, ComplexTypeConverter complexTypeConverter) {
+    private void convertTypes(Set<Class> javaTypes, JavaPackageToTsModuleConverter tsModuleSortedMap, ComplexTypeConverter complexTypeConverter) {
         Set<Class> preConvertedTypes = new HashSet<>();
         for (Class javaType : javaTypes) {
             if (complexTypeConverter.preConverted(tsModuleSortedMap, javaType)) {

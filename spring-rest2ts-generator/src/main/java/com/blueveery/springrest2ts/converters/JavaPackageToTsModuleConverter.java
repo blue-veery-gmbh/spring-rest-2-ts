@@ -7,7 +7,7 @@ import java.util.SortedSet;
 /**
  * Created by tomaszw on 03.08.2017.
  */
-public interface ModuleConverter {
+public interface JavaPackageToTsModuleConverter {
     void mapJavaTypeToTsModule(Class packageName);
     TSModule getTsModule(Class javaClass);
     SortedSet<TSModule> getTsModules();

@@ -11,7 +11,7 @@ import java.util.TreeSet;
 /**
  * Created by tomaszw on 03.08.2017.
  */
-public class TsModuleCreatorConverter implements ModuleConverter {
+public class TsModuleCreatorConverter implements JavaPackageToTsModuleConverter {
     private int numberOfSubPackages;
     private Map<String, TSModule> packagesMap = new HashMap<>();
     private SortedSet<TSModule> tsModuleSortedSet = new TreeSet<>();
@@ -37,7 +37,7 @@ public class TsModuleCreatorConverter implements ModuleConverter {
         if (tsModule == null) {
             String[] subPackages = packageName.split("\\.");
             StringBuilder moduleName = new StringBuilder();
-            for(int i=subPackages.length-numberOfSubPackages; i<subPackages.length; i++) {
+            for(int i=Math.max(subPackages.length-numberOfSubPackages, 0); i<subPackages.length; i++) {
                 moduleName.append(subPackages[i]);
                 if (i+1<subPackages.length) {
                     moduleName.append("-");

@@ -29,10 +29,10 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
     }
 
     @Override
-    public boolean preConverted(ModuleConverter moduleConverter, Class javaClass) {
+    public boolean preConverted(JavaPackageToTsModuleConverter javaPackageToTsModuleConverter, Class javaClass) {
         if (TypeMapper.map(javaClass) == TypeMapper.tsAny) {
             if (objectMapper.filterClass(javaClass)) {
-                TSModule tsModule = moduleConverter.getTsModule(javaClass);
+                TSModule tsModule = javaPackageToTsModuleConverter.getTsModule(javaClass);
                 TSInterface tsInterface = new TSInterface(classNameMapper.mapJavaClassNameToTs(javaClass.getSimpleName()), tsModule);
                 tsModule.addScopedType(tsInterface);
                 TypeMapper.registerTsType(javaClass, tsInterface);
