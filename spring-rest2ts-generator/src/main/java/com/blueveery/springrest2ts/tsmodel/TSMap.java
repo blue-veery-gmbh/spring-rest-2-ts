@@ -28,4 +28,14 @@ public class TSMap extends TSType {
     public void write(BufferedWriter writer) throws IOException {
         writer.write(": " + getName());
     }
+
+    @Override
+    public boolean equals(Object object) {
+        TSElement otherTsElement = (TSElement) object;
+        if (!(otherTsElement instanceof TSMap) ){
+            return false;
+        }
+        TSMap otherTsMap = (TSMap) otherTsElement;
+        return valueType.equals(otherTsMap.valueType);
+    }
 }

@@ -23,4 +23,14 @@ public class TSArray extends TSType {
     public void write(BufferedWriter writer) throws IOException {
         writer.write(": " + elementType.getName() + getName());
     }
+
+    @Override
+    public boolean equals(Object object) {
+        TSElement otherTsElement = (TSElement) object;
+        if (!(otherTsElement instanceof TSArray) ){
+            return false;
+        }
+        TSArray otherTsArray = (TSArray) otherTsElement;
+        return elementType.equals(otherTsArray.elementType);
+    }
 }

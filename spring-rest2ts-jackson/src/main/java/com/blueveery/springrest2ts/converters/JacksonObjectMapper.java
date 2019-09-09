@@ -6,10 +6,7 @@ import com.fasterxml.jackson.annotation.*;
 
 import java.beans.Introspector;
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class JacksonObjectMapper implements ObjectMapper {
     private final Map<Class, List<JsonIgnoreProperties>> jsonIgnorePropertiesPerClass = new HashMap<>();
@@ -202,7 +199,7 @@ public class JacksonObjectMapper implements ObjectMapper {
         }
 
         TSType fieldType;
-        if(property.getGetterType() == property.getSetterType()) {
+        if(Objects.equals(property.getGetterType(), property.getSetterType())) {
             fieldType = TypeMapper.map(fieldJavaGetterType);
         }else{
             TSType tsGetterType = TypeMapper.tsUndefined;
