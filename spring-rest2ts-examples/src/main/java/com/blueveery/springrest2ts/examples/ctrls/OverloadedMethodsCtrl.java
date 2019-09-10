@@ -1,36 +1,36 @@
 package com.blueveery.springrest2ts.examples.ctrls;
 
 import com.blueveery.springrest2ts.examples.ctrls.core.GetObjectCtrl;
-import com.blueveery.springrest2ts.examples.model.ProductDTO;
+import com.blueveery.springrest2ts.examples.model.CategoryDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @RequestMapping("api/product")
-public class OverloadedMethodsCtrl implements GetObjectCtrl<ProductDTO> {
+public class OverloadedMethodsCtrl implements GetObjectCtrl<CategoryDTO.ProductDTO> {
 
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductDTO createProduct(@RequestBody ProductDTO entity) {
+    public CategoryDTO.ProductDTO createProduct(@RequestBody CategoryDTO.ProductDTO entity) {
         return entity;
     }
 
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductDTO createProduct(@RequestBody ProductDTO entity, @RequestParam boolean update) {
+    public CategoryDTO.ProductDTO createProduct(@RequestBody CategoryDTO.ProductDTO entity, @RequestParam boolean update) {
         return entity;
     }
 
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"}, path = "/product/create/{id}")
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductDTO createOrder(@RequestBody ProductDTO entity) {
+    public CategoryDTO.ProductDTO createOrder(@RequestBody CategoryDTO.ProductDTO entity) {
         return entity;
     }
 
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"}, path = "/product/create/fake")
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductDTO createOrder(@RequestBody ProductDTO entity, @RequestParam boolean update) {
+    public CategoryDTO.ProductDTO createOrder(@RequestBody CategoryDTO.ProductDTO entity, @RequestParam boolean update) {
         return entity;
     }
 

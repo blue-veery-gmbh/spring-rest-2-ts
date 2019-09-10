@@ -204,6 +204,7 @@ public class Rest2tsGenerator {
                         String className = (packageName + "/" + line).replace(".class", "").replace("/", ".");
                         try {
                             Class<?> loadedClass = classLoader.loadClass(className);
+                            addNestedClasses(loadedClass.getDeclaredClasses(), classList);
                             classList.add(loadedClass);
                         } catch (Exception e) {
                             System.out.println(String.format("Failed to lad class %s due to error %s:%s", className, e.getClass().getSimpleName(), e.getMessage()));
@@ -211,6 +212,13 @@ public class Rest2tsGenerator {
                     }
                 }
             }
+        }
+    }
+
+    private void addNestedClasses(Class<?>[] nestedClasses, List<Class> classList) {
+        for (Class<?> nestedClass : nestedClasses) {
+            classList.add(nestedClass);
+            addNestedClasses(nestedClass.getDeclaredClasses(), classList);
         }
     }
 

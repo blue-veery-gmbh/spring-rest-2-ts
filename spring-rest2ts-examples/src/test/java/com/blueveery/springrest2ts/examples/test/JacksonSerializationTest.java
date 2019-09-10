@@ -1,6 +1,6 @@
 package com.blueveery.springrest2ts.examples.test;
 
-import com.blueveery.springrest2ts.examples.model.ProductDTO;
+import com.blueveery.springrest2ts.examples.model.CategoryDTO;
 import com.blueveery.springrest2ts.examples.model.enums.OrderDeliveryStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
@@ -14,7 +14,7 @@ public class JacksonSerializationTest {
 
     @Test
     public void serializeProductDTO() throws IOException, URISyntaxException {
-        ProductDTO productDTO = new ProductDTO();
+        CategoryDTO.ProductDTO productDTO = new CategoryDTO.ProductDTO();
         productDTO.expirationDate = new Date();
         productDTO.websiteURI = new URI("/path");
         ObjectMapper mapper = new ObjectMapper();
@@ -22,7 +22,7 @@ public class JacksonSerializationTest {
         String productAsString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(productDTO);
         System.out.println(productAsString);
 
-        ProductDTO newProductDTO = mapper.readValue(productAsString, ProductDTO.class);
+        CategoryDTO.ProductDTO newProductDTO = mapper.readValue(productAsString, CategoryDTO.ProductDTO.class);
     }
 
     @Test

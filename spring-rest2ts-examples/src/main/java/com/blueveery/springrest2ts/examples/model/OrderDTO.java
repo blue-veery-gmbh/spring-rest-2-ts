@@ -13,7 +13,7 @@ public class OrderDTO extends BaseDTO {
 
     private PersonDTO buyer;
     private AddressDTO deliveryAddressDTO;
-    private List<ProductDTO> productList = new ArrayList<>();
+    private List<CategoryDTO.ProductDTO> productList = new ArrayList<>();
     private OrderPaymentStatus orderPaymentStatus;
     private OrderDeliveryStatus orderDeliveryStatus;
 
