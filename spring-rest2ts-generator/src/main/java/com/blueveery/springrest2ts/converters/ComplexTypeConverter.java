@@ -6,6 +6,10 @@ import com.blueveery.springrest2ts.naming.NoChangeClassNameMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Created by tomaszw on 31.07.2017.
  */
@@ -37,5 +41,16 @@ public abstract class ComplexTypeConverter {
 
     public void setClassNameMapper(ClassNameMapper classNameMapper) {
         this.classNameMapper = classNameMapper;
+    }
+
+    protected String createTsClassName(Class javaClass) {
+        List<String> classNameComponentList = new ArrayList<>();
+        do {
+            classNameComponentList.add(classNameMapper.mapJavaClassNameToTs(javaClass.getSimpleName()));
+            javaClass = javaClass.getDeclaringClass();
+        }while (javaClass != null);
+        Collections.reverse(classNameComponentList);
+
+        return String.join("$", classNameComponentList);
     }
 }
