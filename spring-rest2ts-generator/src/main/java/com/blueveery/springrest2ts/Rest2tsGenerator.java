@@ -5,6 +5,8 @@ import com.blueveery.springrest2ts.filters.JavaTypeFilter;
 import com.blueveery.springrest2ts.filters.RejectJavaTypeFilter;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,8 +16,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by tomaszw on 30.07.2017.
@@ -204,8 +204,10 @@ public class Rest2tsGenerator {
                         String className = (packageName + "/" + line).replace(".class", "").replace("/", ".");
                         try {
                             Class<?> loadedClass = classLoader.loadClass(className);
-                            addNestedClasses(loadedClass.getDeclaredClasses(), classList);
-                            classList.add(loadedClass);
+                            if (!loadedClass.isAnnotation()) {
+                                addNestedClasses(loadedClass.getDeclaredClasses(), classList);
+                                classList.add(loadedClass);
+                            }
                         } catch (Exception e) {
                             System.out.println(String.format("Failed to lad class %s due to error %s:%s", className, e.getClass().getSimpleName(), e.getMessage()));
                         }
@@ -217,7 +219,9 @@ public class Rest2tsGenerator {
 
     private void addNestedClasses(Class<?>[] nestedClasses, List<Class> classList) {
         for (Class<?> nestedClass : nestedClasses) {
-            classList.add(nestedClass);
+            if (!nestedClass.isAnnotation()) {
+                classList.add(nestedClass);
+            }
             addNestedClasses(nestedClass.getDeclaredClasses(), classList);
         }
     }

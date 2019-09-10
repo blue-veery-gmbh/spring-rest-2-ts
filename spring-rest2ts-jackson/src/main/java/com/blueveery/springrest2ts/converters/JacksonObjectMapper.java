@@ -235,7 +235,7 @@ public class JacksonObjectMapper implements ObjectMapper {
             if ("".equals(jsonProperty.value())) {
                 return field.getName();
             }else{
-                jsonProperty.value();
+                return jsonProperty.value();
             }
         }
         return field.getName();
