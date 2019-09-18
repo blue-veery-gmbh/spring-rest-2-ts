@@ -69,6 +69,7 @@ interface fields are generated. From jackson there are supported following annot
    + JsonFormat - changes TS property type, add to TS comment pattern if given
    + JacksonInject - marks TS property as readonly
    + JsonRawValue - changes TS property type to any
+   
 Java collections are converted into arrays, Java Map is converted into object where key has a string type and value is converted 
 Typescript Type
 
