@@ -7,6 +7,7 @@ import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrl;
 import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
 import com.blueveery.springrest2ts.filters.*;
 import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
+import com.blueveery.springrest2ts.tsmodel.TSArray;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.junit.Before;
@@ -66,7 +67,15 @@ public class TsCodeGenerationsTest {
         tsGenerator.getCustomTypeMapping().put(UUID.class, TypeMapper.tsString);
         tsGenerator.getCustomTypeMapping().put(BigInteger.class, TypeMapper.tsNumber);
         tsGenerator.getCustomTypeMapping().put(LocalDateTime.class, TypeMapper.tsNumber);
-        tsGenerator.getCustomTypeMapping().put(LocalDate.class, TypeMapper.tsString);
+        tsGenerator.getCustomTypeMapping().put(LocalDate.class, new TSArray(TypeMapper.tsNumber));
+        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
+    }
+
+    @Test
+    public void tsModuleCreatorConverter() throws IOException {
+        TsModuleCreatorConverter moduleConverter = new TsModuleCreatorConverter(3);
+        tsGenerator.setJavaPackageToTsModuleConverter(moduleConverter);
+
         tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 
@@ -82,6 +91,14 @@ public class TsCodeGenerationsTest {
         ConfigurableTsModulesConverter moduleConverter = new ConfigurableTsModulesConverter(packagesMap);
         tsGenerator.setJavaPackageToTsModuleConverter(moduleConverter);
 
+        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
+    }
+
+    @Test
+    public void nullableTypesConfig() throws IOException {
+        DefaultNullableTypesStrategy nullableTypesStrategy = new DefaultNullableTypesStrategy();
+        nullableTypesStrategy.setUsePrimitiveTypesWrappers(false);
+        tsGenerator.setNullableTypesStrategy(nullableTypesStrategy);
         tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 
