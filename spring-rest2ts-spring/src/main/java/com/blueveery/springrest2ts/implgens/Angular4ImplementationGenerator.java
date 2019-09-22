@@ -1,6 +1,5 @@
 package com.blueveery.springrest2ts.implgens;
 
-import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getRequestMapping;
 import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +11,8 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+
+import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getRequestMapping;
 
 public class Angular4ImplementationGenerator implements ImplementationGenerator {
     private static final String FIELD_NAME_HTTP_SERVICE = "httpService";
@@ -59,7 +60,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         if (method.isConstructor()) {
             for (TSField field : implementationSpecificFieldsSet) {
                 writer.write("this." + field.getName() + " = " + field.getName() + ";");
-                writer.newLine();
             }
         } else {
             RequestMapping methodRequestMapping = getRequestMapping(method.getAnnotationList());
@@ -68,11 +68,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             String tsPath = useUrlService ? "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" : "'";
             tsPath += getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "'";
             String httpMethod = methodRequestMapping.method()[0].toString();
-
-            writer.write("// path = " + tsPath);
-            writer.newLine();
-            writer.write("// HTTP method = " + httpMethod);
-            writer.newLine();
 
             String requestBodyVar = "body";
             String requestHeadersVar = "headers";
@@ -83,7 +78,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             StringBuilder requestParamsBuilder = new StringBuilder();
 
             readMethodParameters(writer, method, httpMethod, requestParamsVar, pathStringBuilder, requestBodyBuilder, requestParamsBuilder);
-            writer.newLine();
 
             boolean isRequestBodyDefined = !isStringBuilderEmpty(requestBodyBuilder);
             writeRequestOption(writer, requestBodyVar, requestBodyBuilder.toString(), isRequestBodyDefined);
@@ -95,29 +89,16 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             boolean isRequestHeaderDefined = !consumeHeader.isEmpty();
             writeRequestOption(writer, requestHeadersVar, consumeHeader, isRequestHeaderDefined);
 
-            TSParameterisedType subjectAnyType = new TSParameterisedType("", subjectClass, TypeMapper.tsAny);
-            writer.write("const " + FIELD_NAME_SUBJECT + " = new " + subjectAnyType.getName() + "();");
-            writer.newLine();
-
             String requestOptions = "";
             boolean isMethodProduceTextContent = Arrays.asList(methodRequestMapping.produces()).contains("text/plain");
             requestOptions = composeRequestOptions(requestBodyVar, requestHeadersVar, requestParamsVar, isRequestBodyDefined, isRequestParamDefined, isRequestHeaderDefined, requestOptions, isMethodProduceTextContent);
 
             tsPath = pathStringBuilder.toString();
             writer.write(
-                    "this." + FIELD_NAME_HTTP_SERVICE + ".request("
-                            + "'" + httpMethod + "'"
-                            + ", " + tsPath
+                    "return this." + FIELD_NAME_HTTP_SERVICE + "." + httpMethod.toLowerCase() + "<" + method.getType().getName() + ">" + "("
+                            + tsPath
                             + requestOptions
-                            + ").subscribe("
-                            + "res => " + FIELD_NAME_SUBJECT + getResponseFromRequestMapping(method.getType())
-                            + "(err) => {"
-                            + FIELD_NAME_SUBJECT + ".error(err ? err : {});});"
-            );
-            writer.newLine();
-
-            writer.write("return " + FIELD_NAME_SUBJECT + ".asObservable();");
-            writer.newLine();
+                            + ");");
 
         }
 
@@ -125,21 +106,18 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
     private void readMethodParameters(BufferedWriter writer, TSMethod method, String httpMethod, String requestParamsVar, StringBuilder pathStringBuilder, StringBuilder requestBodyBuilder, StringBuilder requestParamsBuilder) throws IOException {
         for (TSParameter tsParameter : method.getParameterList()) {
-            writer.newLine();
             String tsParameterName = tsParameter.getName();
 
             if (tsParameter.findAnnotation(RequestBody.class) != null) {
-                writer.write(String.format("// parameter %s is sent in request body ", tsParameterName));
                 requestBodyBuilder.append(tsParameterName).append(";");
                 continue;
             }
             PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
             if (pathVariable != null) {
                 String variableName = pathVariable.value();
-                if("".equals(variableName)){
+                if ("".equals(variableName)) {
                     variableName = tsParameterName;
                 }
-                writer.write(String.format("// parameter %s is sent in path variable %s ", tsParameterName, variableName));
 
                 String targetToReplace = "{" + variableName + "}";
                 if ("id".equals(variableName) && httpMethod.equals("PUT")) {
@@ -156,7 +134,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 if ("".equals(requestParamName)) {
                     requestParamName = tsParameter.getName();
                 }
-                writer.write(String.format("// parameter %s is sent as request param %s ", tsParameterName, requestParamName));
                 if (isStringBuilderEmpty(requestParamsBuilder)) {
                     requestParamsBuilder.append(" new HttpParams();");
                 }
@@ -252,17 +229,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             return " new HttpHeaders().set('Content-type'," + " '" + requestMapping.consumes()[0] + "');";
         }
         return "";
-    }
-
-    private String getResponseFromRequestMapping(TSType methodType) {
-        if (methodType == TypeMapper.tsNumber) {
-            return ".next(res ? Number(res) : null),";
-        }
-        if (methodType == TypeMapper.tsBoolean) {
-            return ".next(res ? res.toLowerCase() === 'true' : false),";
-        }
-
-        return ".next(res ?  res : null),";
     }
 
     @Override
