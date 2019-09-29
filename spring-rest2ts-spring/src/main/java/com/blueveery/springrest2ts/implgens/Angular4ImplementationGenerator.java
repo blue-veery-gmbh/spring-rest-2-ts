@@ -17,7 +17,6 @@ import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getReques
 public class Angular4ImplementationGenerator implements ImplementationGenerator {
     private static final String FIELD_NAME_HTTP_SERVICE = "httpService";
     private static final String FIELD_NAME_URL_SERVICE = "urlService";
-    private static final String FIELD_NAME_SUBJECT = "subject";
 
     private TSDecorator injectableDecorator;
     private TSClass observableClass;
@@ -25,7 +24,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
     private TSClass httpParamsClass;
     private TSClass httpHeadersClass;
     private TSClass urlServiceClass;
-    private TSClass subjectClass;
     private Set<TSField> implementationSpecificFieldsSet;
 
     private boolean useUrlService;
@@ -41,7 +39,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         TSModule subjectModule = new TSModule("rxjs/Subject", null, true);
         TSModule observableModule = new TSModule("rxjs/Observable", null, true);
         observableClass = new TSClass("Observable", observableModule, this);
-        subjectClass = new TSClass("Subject", subjectModule, this);
 
         TSModule angularHttpModule = new TSModule("@angular/common/http", null, true);
         httpClass = new TSClass("HttpClient", angularHttpModule, this);
@@ -69,7 +66,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             tsPath += getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "'";
             String httpMethod = methodRequestMapping.method()[0].toString();
 
-            String requestBodyVar = "body";
             String requestHeadersVar = "headers";
             String requestParamsVar = "params";
 
@@ -80,7 +76,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             readMethodParameters(writer, method, httpMethod, requestParamsVar, pathStringBuilder, requestBodyBuilder, requestParamsBuilder);
 
             boolean isRequestBodyDefined = !isStringBuilderEmpty(requestBodyBuilder);
-            writeRequestOption(writer, requestBodyVar, requestBodyBuilder.toString(), isRequestBodyDefined);
 
             boolean isRequestParamDefined = !isStringBuilderEmpty(requestParamsBuilder);
             writeRequestOption(writer, requestParamsVar, requestParamsBuilder.toString(), isRequestParamDefined);
@@ -91,7 +86,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
 
             String requestOptions = "";
             boolean isMethodProduceTextContent = Arrays.asList(methodRequestMapping.produces()).contains("text/plain");
-            requestOptions = composeRequestOptions(requestBodyVar, requestHeadersVar, requestParamsVar, isRequestBodyDefined, isRequestParamDefined, isRequestHeaderDefined, requestOptions, isMethodProduceTextContent);
+            requestOptions = composeRequestOptions(requestBodyBuilder.toString(), requestHeadersVar, requestParamsVar, isRequestBodyDefined, isRequestParamDefined, isRequestHeaderDefined, requestOptions, isMethodProduceTextContent);
 
             tsPath = pathStringBuilder.toString();
             writer.write(
@@ -109,7 +104,7 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             String tsParameterName = tsParameter.getName();
 
             if (tsParameter.findAnnotation(RequestBody.class) != null) {
-                requestBodyBuilder.append(tsParameterName).append(";");
+                requestBodyBuilder.append(tsParameterName);
                 continue;
             }
             PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
@@ -189,17 +184,17 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         }
     }
 
-    private String composeRequestOptions(String requestBodyVar, String requestHeadersVar, String requestParamsVar, boolean isRequestBodyDefined, boolean isRequestParamDefined, boolean isRequestHeaderDefined, String requestOptions, boolean isMethodProduceTextContent) {
-        if (isRequestHeaderDefined || isRequestParamDefined || isRequestBodyDefined || isMethodProduceTextContent) {
+    private String composeRequestOptions(String requestBody, String requestHeadersVar, String requestParamsVar, boolean isRequestBodyDefined, boolean isRequestParamDefined, boolean isRequestHeaderDefined, String requestOptions, boolean isMethodProduceTextContent) {
+        if (isRequestBodyDefined) {
+            requestOptions += ", " + requestBody + " ";
+        }
+        if (isRequestHeaderDefined || isRequestParamDefined || isMethodProduceTextContent) {
             List<String> requestOptionsList = new ArrayList<>();
             if (isRequestHeaderDefined) {
                 requestOptionsList.add(requestHeadersVar);
             }
             if (isRequestParamDefined) {
                 requestOptionsList.add(requestParamsVar);
-            }
-            if (isRequestBodyDefined) {
-                requestOptionsList.add(requestBodyVar);
             }
             if (isMethodProduceTextContent) {
                 requestOptionsList.add("responseType: 'text'");
@@ -260,14 +255,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             }
             return tsParameters;
         }
-        RequestMapping methodRequestMapping = getRequestMapping(method.getAnnotationList());
-        if (methodRequestMapping != null) {
-            String methodString = methodRequestMapping.method()[0].toString();
-            if ("PUT".equals(methodString) || "POST".equals(methodString)) {
-                List<TSParameter> tsParameters = new ArrayList<>();
-                return tsParameters;
-            }
-        }
         return Collections.emptyList();
     }
 
@@ -292,7 +279,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             tsClass.addScopedTypeUsage(httpClass);
             tsClass.addScopedTypeUsage(httpParamsClass);
             tsClass.addScopedTypeUsage(httpHeadersClass);
-            tsClass.addScopedTypeUsage(subjectClass);
             tsClass.addScopedTypeUsage(injectableDecorator.getTsFunction());
             if (useUrlService) {
                 tsClass.addScopedTypeUsage(urlServiceClass);
