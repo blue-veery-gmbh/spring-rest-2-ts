@@ -9,26 +9,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.SortedSet;
 
 import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getRequestMapping;
 
-public class FetchAPIImplementationGenerator implements ImplementationGenerator {
+public class FetchBasedImplementationGenerator implements ImplementationGenerator {
 
-    private Set<TSField> implementationSpecificFieldsSet;
-
-    public FetchAPIImplementationGenerator() {
-        implementationSpecificFieldsSet = new HashSet<>();
-    }
-
-    // TODO set content type only for POST and PUT
     @Override
     public void write(BufferedWriter writer, TSMethod method) throws IOException {
-        if (method.isConstructor()) {
-            for (TSField field : implementationSpecificFieldsSet) {
-                writer.write("this." + field.getName() + " = " + field.getName() + ";");
-            }
-        } else {
+        if (!method.isConstructor()) {
             RequestMapping methodRequestMapping = getRequestMapping(method.getAnnotationList());
             RequestMapping classRequestMapping = getRequestMapping(method.getOwner().getAnnotationList());
 
@@ -56,16 +48,20 @@ public class FetchAPIImplementationGenerator implements ImplementationGenerator 
             writer.write(requestParamsBuilder.toString());
             writer.newLine();
 
-            boolean isMethodProduceTextContent = Arrays.asList(methodRequestMapping.produces()).contains("text/plain");
-            String requestOptions = composeRequestOptions(requestBodyVar, isRequestBodyDefined, true, isMethodProduceTextContent);
+            String requestOptions = composeRequestOptions(requestBodyVar, isRequestBodyDefined, httpMethod, methodRequestMapping.consumes());
 
             writer.write(
-                    "return fetch(" + requestUrlVar + ", {"
-                            + "method: '" + httpMethod + "',"
+                    "return fetch(" + requestUrlVar + ".toString(), {"
+                            + "method: '" + httpMethod + (requestOptions.isEmpty() ? "'" : "',")
                             + requestOptions
-                            + "});");
+                            + "}).then(" + getContentFromResponseFunction() + ");");
         }
 
+    }
+
+    private String getContentFromResponseFunction() {
+        String methodBase = "res => res";
+        return methodBase + ".json()";
     }
 
     private void readMethodParameters(BufferedWriter writer, TSMethod method, String httpMethod, String requestParamsVar, StringBuilder pathStringBuilder, StringBuilder requestBodyBuilder, StringBuilder requestParamsBuilder) throws IOException {
@@ -138,22 +134,20 @@ public class FetchAPIImplementationGenerator implements ImplementationGenerator 
         pathStringBuilder.replace(start, end, replacement);
     }
 
-    private String composeRequestOptions(String requestBodyVar, boolean isRequestBodyDefined, boolean isRequestHeaderDefined, boolean isMethodProduceTextContent) {
+    private String composeRequestOptions(String requestBodyVar, boolean isRequestBodyDefined, String httpMethod, String[] consumesContentType) {
         String requestOptions = "";
-        if (isRequestHeaderDefined || isRequestBodyDefined || isMethodProduceTextContent) {
-            List<String> requestOptionsList = new ArrayList<>();
-            if (isRequestHeaderDefined) {
-                String headers = "headers: {";
-                headers += "'Content-Type': " + (isMethodProduceTextContent ? "'text/plain'" : "'application/json'");
-                headers += "}";
-                requestOptionsList.add(headers);
-            }
-            if (isRequestBodyDefined) {
-                requestOptionsList.add("body: JSON.stringify(" + requestBodyVar + ")");
-            }
-
-            requestOptions += String.join(", ", requestOptionsList);
+        List<String> requestOptionsList = new ArrayList<>();
+        if ("PUT".equals(httpMethod) || "POST".equals(httpMethod)) {
+            String headers = "headers: {";
+            headers += "'Content-Type': '" + consumesContentType[0] + "'";
+            headers += "}";
+            requestOptionsList.add(headers);
         }
+        if (isRequestBodyDefined) {
+            requestOptionsList.add("body: JSON.stringify(" + requestBodyVar + ")");
+        }
+
+        requestOptions += String.join(", ", requestOptionsList);
         return requestOptions;
     }
 
@@ -171,16 +165,14 @@ public class FetchAPIImplementationGenerator implements ImplementationGenerator 
 
     @Override
     public TSType mapReturnType(TSMethod tsMethod, TSType tsType) {
+        if (isRestClass(tsMethod.getOwner())) {
+            return new TSParameterisedType("", new TSInterface("Promise", null), tsType);
+        }
         return tsType;
     }
 
     @Override
     public SortedSet<TSField> getImplementationSpecificFields(TSComplexType tsComplexType) {
-        if (isRestClass(tsComplexType)) {
-            SortedSet<TSField> fieldsSet = new TreeSet<>();
-            fieldsSet.addAll(implementationSpecificFieldsSet);
-            return fieldsSet;
-        }
         return Collections.emptySortedSet();
     }
 
