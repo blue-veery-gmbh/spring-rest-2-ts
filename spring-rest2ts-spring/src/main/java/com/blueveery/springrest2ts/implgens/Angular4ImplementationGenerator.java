@@ -93,7 +93,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
     }
 
     protected void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, TSParameter tsParameter, String requestParamName) {
-        String tsParameterName = callToStringOnPArameterIfRequired(tsParameter);
+        String tsParameterName = callToStringOnParameterIfRequired(tsParameter);
         requestParamsBuilder
                 .append("\n")
                 .append(requestParamsVar)

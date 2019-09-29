@@ -31,7 +31,7 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
         pathStringBuilder.replace(start, end, replacement);
     }
 
-    protected String callToStringOnPArameterIfRequired(TSParameter tsParameter) {
+    protected String callToStringOnParameterIfRequired(TSParameter tsParameter) {
         String tsParameterName = tsParameter.getName();
         if (!tsParameter.getType().equals(TypeMapper.tsString)) {
             tsParameterName += ".toString()";
