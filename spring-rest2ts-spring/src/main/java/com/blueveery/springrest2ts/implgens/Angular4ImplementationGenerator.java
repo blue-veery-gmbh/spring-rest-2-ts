@@ -1,11 +1,7 @@
 package com.blueveery.springrest2ts.implgens;
 
-import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -14,7 +10,7 @@ import java.util.*;
 
 import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getRequestMapping;
 
-public class Angular4ImplementationGenerator implements ImplementationGenerator {
+public class Angular4ImplementationGenerator extends BaseImplementationGenerator {
     private static final String FIELD_NAME_HTTP_SERVICE = "httpService";
     private static final String FIELD_NAME_URL_SERVICE = "urlService";
 
@@ -36,7 +32,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         TSModule angularCoreModule = new TSModule("@angular/core", null, true);
         injectableDecorator = new TSDecorator("", new TSFunction("Injectable", angularCoreModule));
 
-        TSModule subjectModule = new TSModule("rxjs/Subject", null, true);
         TSModule observableModule = new TSModule("rxjs/Observable", null, true);
         observableClass = new TSClass("Observable", observableModule, this);
 
@@ -73,10 +68,9 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
             StringBuilder requestBodyBuilder = new StringBuilder();
             StringBuilder requestParamsBuilder = new StringBuilder();
 
-            readMethodParameters(writer, method, httpMethod, requestParamsVar, pathStringBuilder, requestBodyBuilder, requestParamsBuilder);
+            assignMethodParameters(method, requestParamsVar, pathStringBuilder, requestBodyBuilder, requestParamsBuilder);
 
             boolean isRequestBodyDefined = !isStringBuilderEmpty(requestBodyBuilder);
-
             boolean isRequestParamDefined = !isStringBuilderEmpty(requestParamsBuilder);
             writeRequestOption(writer, requestParamsVar, requestParamsBuilder.toString(), isRequestParamDefined);
 
@@ -96,66 +90,10 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                             + ");");
 
         }
-
     }
 
-    private void readMethodParameters(BufferedWriter writer, TSMethod method, String httpMethod, String requestParamsVar, StringBuilder pathStringBuilder, StringBuilder requestBodyBuilder, StringBuilder requestParamsBuilder) throws IOException {
-        for (TSParameter tsParameter : method.getParameterList()) {
-            String tsParameterName = tsParameter.getName();
-
-            if (tsParameter.findAnnotation(RequestBody.class) != null) {
-                requestBodyBuilder.append(tsParameterName);
-                continue;
-            }
-            PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
-            if (pathVariable != null) {
-                String variableName = pathVariable.value();
-                if ("".equals(variableName)) {
-                    variableName = tsParameterName;
-                }
-
-                String targetToReplace = "{" + variableName + "}";
-                if ("id".equals(variableName) && httpMethod.equals("PUT")) {
-                    replaceInStringBuilder(pathStringBuilder, targetToReplace, "' + " + tsParameterName + ".id");
-                } else {
-                    replaceInStringBuilder(pathStringBuilder, targetToReplace, "' + " + tsParameterName + " + '");
-                }
-
-                continue;
-            }
-            RequestParam requestParam = tsParameter.findAnnotation(RequestParam.class);
-            if (requestParam != null) {
-                String requestParamName = requestParam.value();
-                if ("".equals(requestParamName)) {
-                    requestParamName = tsParameter.getName();
-                }
-                if (isStringBuilderEmpty(requestParamsBuilder)) {
-                    requestParamsBuilder.append(" new HttpParams();");
-                }
-                boolean isNullableType = tsParameter.isNullable();
-                if (tsParameter.isOptional() || isNullableType) {
-                    requestParamsBuilder
-                            .append("\n")
-                            .append("if (")
-                            .append(tsParameterName)
-                            .append(" !== undefined && ")
-                            .append(tsParameterName)
-                            .append(" !== null) {");
-                    addRequestParameter(requestParamsBuilder, requestParamsVar, tsParameter, requestParamName);
-                    requestParamsBuilder.append("}");
-                } else {
-                    addRequestParameter(requestParamsBuilder, requestParamsVar, tsParameter, requestParamName);
-                }
-            }
-
-        }
-    }
-
-    private void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, TSParameter tsParameter, String requestParamName) {
-        String tsParameterName = tsParameter.getName();
-        if (!tsParameter.getType().equals(TypeMapper.tsString)) {
-            tsParameterName += ".toString()";
-        }
+    protected void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, TSParameter tsParameter, String requestParamName) {
+        String tsParameterName = callToStringOnPArameterIfRequired(tsParameter);
         requestParamsBuilder
                 .append("\n")
                 .append(requestParamsVar)
@@ -167,14 +105,11 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
                 .append(");");
     }
 
-    private boolean isStringBuilderEmpty(StringBuilder requestParamsBuilder) {
-        return requestParamsBuilder.length() == 0;
-    }
 
-    private void replaceInStringBuilder(StringBuilder pathStringBuilder, String targetToReplace, String replacement) {
-        int start = pathStringBuilder.lastIndexOf(targetToReplace);
-        int end = start + targetToReplace.length();
-        pathStringBuilder.replace(start, end, replacement);
+    protected void initializeHttpParams(StringBuilder requestParamsBuilder) {
+        if (isStringBuilderEmpty(requestParamsBuilder)) {
+            requestParamsBuilder.append(" new HttpParams();");
+        }
     }
 
     private void writeRequestOption(BufferedWriter writer, String requestOption, String requestOptionValue, boolean isOptionDefined) throws IOException {
@@ -207,17 +142,6 @@ public class Angular4ImplementationGenerator implements ImplementationGenerator 
         return requestOptions;
     }
 
-    private String getPathFromRequestMapping(RequestMapping requestMapping) {
-        if (requestMapping.path().length > 0) {
-            return requestMapping.path()[0];
-        }
-
-        if (requestMapping.value().length > 0) {
-            return requestMapping.value()[0];
-        }
-
-        return "";
-    }
 
     private String getConsumeContentTypeFromRequestMapping(RequestMapping requestMapping) {
         if (requestMapping.consumes().length > 0) {

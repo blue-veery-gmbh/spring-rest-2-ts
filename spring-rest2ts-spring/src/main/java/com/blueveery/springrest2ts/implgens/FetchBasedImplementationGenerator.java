@@ -1,11 +1,7 @@
 package com.blueveery.springrest2ts.implgens;
 
-import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -16,7 +12,7 @@ import java.util.SortedSet;
 
 import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getRequestMapping;
 
-public class FetchBasedImplementationGenerator implements ImplementationGenerator {
+public class FetchBasedImplementationGenerator extends BaseImplementationGenerator {
 
     @Override
     public void write(BufferedWriter writer, TSMethod method) throws IOException {
@@ -35,7 +31,7 @@ public class FetchBasedImplementationGenerator implements ImplementationGenerato
             StringBuilder requestBodyBuilder = new StringBuilder();
             StringBuilder requestParamsBuilder = new StringBuilder();
 
-            readMethodParameters(writer, method, httpMethod, requestParamsVar, pathStringBuilder, requestBodyBuilder, requestParamsBuilder);
+            assignMethodParameters(method, requestParamsVar, pathStringBuilder, requestBodyBuilder, requestParamsBuilder);
             tsPath = pathStringBuilder.toString();
             writer.write("const " + requestUrlVar + " = " + " new URL('" + tsPath + ");");
             writer.newLine();
@@ -64,57 +60,12 @@ public class FetchBasedImplementationGenerator implements ImplementationGenerato
         return methodBase + ".json()";
     }
 
-    private void readMethodParameters(BufferedWriter writer, TSMethod method, String httpMethod, String requestParamsVar, StringBuilder pathStringBuilder, StringBuilder requestBodyBuilder, StringBuilder requestParamsBuilder) throws IOException {
-        for (TSParameter tsParameter : method.getParameterList()) {
-            String tsParameterName = tsParameter.getName();
+    protected void initializeHttpParams(StringBuilder requestParamsBuilder) {
 
-            if (tsParameter.findAnnotation(RequestBody.class) != null) {
-                requestBodyBuilder.append(tsParameterName);
-                continue;
-            }
-            PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
-            if (pathVariable != null) {
-                String variableName = pathVariable.value();
-                if ("".equals(variableName)) {
-                    variableName = tsParameterName;
-                }
-
-                String targetToReplace = "{" + variableName + "}";
-                replaceInStringBuilder(pathStringBuilder, targetToReplace, "' + " + tsParameterName + " + '");
-
-                continue;
-            }
-            RequestParam requestParam = tsParameter.findAnnotation(RequestParam.class);
-            if (requestParam != null) {
-                String requestParamName = requestParam.value();
-                if ("".equals(requestParamName)) {
-                    requestParamName = tsParameter.getName();
-                }
-
-                boolean isNullableType = tsParameter.isNullable();
-                if (tsParameter.isOptional() || isNullableType) {
-                    requestParamsBuilder
-                            .append("\n")
-                            .append("if (")
-                            .append(tsParameterName)
-                            .append(" !== undefined && ")
-                            .append(tsParameterName)
-                            .append(" !== null) {");
-                    addRequestParameter(requestParamsBuilder, requestParamsVar, tsParameter, requestParamName);
-                    requestParamsBuilder.append("}");
-                } else {
-                    addRequestParameter(requestParamsBuilder, requestParamsVar, tsParameter, requestParamName);
-                }
-            }
-
-        }
     }
 
-    private void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, TSParameter tsParameter, String requestParamName) {
-        String tsParameterName = tsParameter.getName();
-        if (!tsParameter.getType().equals(TypeMapper.tsString)) {
-            tsParameterName += ".toString()";
-        }
+    protected void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, TSParameter tsParameter, String requestParamName) {
+        String tsParameterName = callToStringOnPArameterIfRequired(tsParameter);
         requestParamsBuilder
                 .append("\n")
                 .append(requestParamsVar)
@@ -124,15 +75,6 @@ public class FetchBasedImplementationGenerator implements ImplementationGenerato
                 .append(");");
     }
 
-    private boolean isStringBuilderEmpty(StringBuilder requestParamsBuilder) {
-        return requestParamsBuilder.length() == 0;
-    }
-
-    private void replaceInStringBuilder(StringBuilder pathStringBuilder, String targetToReplace, String replacement) {
-        int start = pathStringBuilder.lastIndexOf(targetToReplace);
-        int end = start + targetToReplace.length();
-        pathStringBuilder.replace(start, end, replacement);
-    }
 
     private String composeRequestOptions(String requestBodyVar, boolean isRequestBodyDefined, String httpMethod, String[] consumesContentType) {
         String requestOptions = "";
@@ -149,18 +91,6 @@ public class FetchBasedImplementationGenerator implements ImplementationGenerato
 
         requestOptions += String.join(", ", requestOptionsList);
         return requestOptions;
-    }
-
-    private String getPathFromRequestMapping(RequestMapping requestMapping) {
-        if (requestMapping.path().length > 0) {
-            return requestMapping.path()[0];
-        }
-
-        if (requestMapping.value().length > 0) {
-            return requestMapping.value()[0];
-        }
-
-        return "";
     }
 
     @Override
