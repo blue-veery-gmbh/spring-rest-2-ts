@@ -2,8 +2,9 @@
 spring-rest2ts-generator generates TypeScript code based on spring mvc REST controllers and object model used in HTTP requests and responses.
 From model classes there are generated TypeScript interfaces and from REST controllers full working Angular services based on Observable API
 or plain JavaScript services based on Promises API. The main idea is that Spring annotations describing REST endpoints have enough information
-to compose HTTP request and call REST endpoint so TypeScript code could be automatically generated. Such generated code reduce amount 
-of hand written code on frontend and gives type safe API to backend
+to compose HTTP request and call REST endpoints so TypeScript code could be automatically generated. Such generated code reduce amount 
+of hand written code on frontend and gives type safe API to backend, changes in URL path are hidden, if there is refactored REST endpoint, 
+generated code will reflect these changes which will cause compile time error which safes time on testing 
 
 # Basic Configuration
 ## Configuration example
@@ -70,7 +71,7 @@ interface fields are generated. From jackson there are supported following annot
    + JacksonInject - marks TS property as readonly
    + JsonRawValue - changes TS property type to any
    
-Java collections are converted into arrays, Java Map is converted into object where key has a string type and value is converted 
+Java collections are converted into JavaScript arrays, Java Map is converted into object where key has a string type and value is converted 
 Typescript Type
 
 ## Spring REST controllers converter
@@ -194,7 +195,7 @@ Generators support this by marking TS fields based on information taken from cor
 which marks types as nullable if
   + field or method parameter type is wrapped in Java `java.util.Optional`
   + field or method parameter is marked with annotation `javax.annotation.Nullable`
-  + field or method parameter has type which Java wrapper for primitive types
+  + field or method parameter has type which is Java wrapper for primitive types
 Marks mean that filed type is union of original field type and null; 
  
 `DefaultNullableTypesStrategy` has settings which allows to configure which of above option use, by default all they are used
@@ -218,6 +219,14 @@ In most cases such situation is just a bug but there could be situations in whic
 is an union of getter and setter type, in this order. Special case of this situation is when getter or setter is missing
 for missing setter field in TypeScript is marked as readonly for missing getter (for example we send password but do not read them from server)
 TypeScript field is union of `undefined | <setter type>` because after read from server such fields will have value of undefined
+
+### Java REST controllers overloaded methods
+Java allows for overloaded methods which is not supported by TypeScript/JavaScript, to solve this problems if overloaded methods are met
+in REST controller, generated method names in TypeScript are changed by appending in first round HTTP methods to TypeScript method name 
+if they differ, if not URL path is appended splitted on `/` and joined with `_`
+
+## Maven repository 
+  
 
  
 
