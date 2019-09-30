@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.implgens;
 
+import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -50,14 +51,27 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
                     "return fetch(" + requestUrlVar + ".toString(), {"
                             + "method: '" + httpMethod + (requestOptions.isEmpty() ? "'" : "',")
                             + requestOptions
-                            + "}).then(" + getContentFromResponseFunction() + ");");
+                            + "})" + getContentFromResponseFunction(method) + ";");
         }
 
     }
 
-    private String getContentFromResponseFunction() {
-        String methodBase = "res => res";
-        return methodBase + ".json()";
+    private String getContentFromResponseFunction(TSMethod method) {
+        TSType actualType = method.getType();
+
+        String parseFunction = "";
+        if (actualType == TypeMapper.tsNumber) {
+            parseFunction = "res.text()).then(res => Number(res)";
+        } else if (actualType == TypeMapper.tsBoolean) {
+            parseFunction = "res.text()).then(res => (res === 'true')";
+        } else if (actualType == TypeMapper.tsString) {
+            parseFunction = "res.text()";
+        } else if (actualType == TypeMapper.tsVoid) {
+            return "";
+        } else {
+            parseFunction = "res.json()";
+        }
+        return ".then(res =>  " + parseFunction + ")";
     }
 
     protected void initializeHttpParams(StringBuilder requestParamsBuilder) {
@@ -96,6 +110,9 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     @Override
     public TSType mapReturnType(TSMethod tsMethod, TSType tsType) {
         if (isRestClass(tsMethod.getOwner())) {
+            if (tsType == TypeMapper.tsVoid) {
+                return new TSParameterisedType("", new TSInterface("Promise", null), new TSInterface("Response", null));
+            }
             return new TSParameterisedType("", new TSInterface("Promise", null), tsType);
         }
         return tsType;
