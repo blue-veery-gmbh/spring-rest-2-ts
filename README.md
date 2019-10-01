@@ -2,14 +2,14 @@
 spring-rest2ts-generator generates TypeScript code based on spring mvc REST controllers and object model used in HTTP requests and responses.
 From model classes there are generated TypeScript interfaces and from REST controllers full working Angular services based on Observable API
 or plain JavaScript services based on Promises API. The main idea is that Spring annotations describing REST endpoints have enough information
-to compose HTTP request and call REST endpoints so TypeScript code could be automatically generated. Such generated code reduce amount 
-of hand written code on frontend and gives type safe API to backend, changes in URL path are hidden, if there is refactored REST endpoint, 
+to compose HTTP request and call REST endpoints so TypeScript code could be automatically generated. Such generated code reduces amount 
+of hand written code on frontend and gives type safe API to backend, changes in URL path are hidden, if there is a refactored REST endpoint, 
 generated code will reflect these changes which will cause compile time error which safes time on testing 
 
 # Basic Configuration
 ## Configuration example
-Due to greater flexibility spring-rest2ts-generator is configured by code, any configuration files are not needed. 
-This gives possibility to easily extends generator in places where it is needed
+Due to greater flexibility spring-rest2ts-generator is configured by code, no configuration files are needed. 
+This gives possibility to easily extend generator in places where it is needed
 Here is the simplest generator configurator:
 
 ```java
@@ -35,10 +35,10 @@ Here is the simplest generator configurator:
 ```
        
 ## Java Classes filtering 
-Generator need two filters to select java classes for which TypeScript types will be generated, these filters 
+Generator needs two filters to select java classes for which TypeScript types will be generated, these filters 
 allows to skip Java classes in given packages for which TypeScript generation is not needed. By default Rest2tsGenerator
-for model classes and rest controllers has RejectJavaTypeFilter which rejects all classes in given java packages,
-such filter could be used to skip generation for REST controllers when only Typescript types are need for Java model classes
+for model classes and rest controllers has RejectJavaTypeFilter which rejects all classes in a given java packages.
+Such filter could be used to skip generation for REST controllers when only Typescript types are needed for Java model classes.
 There are following filters which allows to build complex conditions:
    + ExtendsJavaTypeFilter
    + HasAnnotationJavaTypeFilter
@@ -52,9 +52,9 @@ There are following filters which allows to build complex conditions:
     
 ## Java model classes converter
 Java classes which describe payload model are generated to TypeScript interfaces. During model serialization to JSON, 
-object mapper is applying some mapping some of them are required for example in JSON there in type for Date so it must be
-represented as string or number, based on some default configuration or dedicated annotations. Currently Jackson Object
-mapper is supported. JacksonObjectMapper allows to set fields, getters and setters visibility based on this Typescript 
+object mapper is applying some mappings(some of them are required for example in JSON, where in type for Date it must be
+represented as string or number) based on some default configuration or dedicated annotations. Currently Jackson Object
+mapper is supported. JacksonObjectMapper allows to set fields, getters and setters visibility. Based on this Typescript 
 interface fields are generated. From jackson there are supported following annotations  :
    + JsonTypeInfo - TS property is added if type info is serialized to property
    + JsonAutoDetect - overrides default visibility 
@@ -101,7 +101,7 @@ to proper JavaScript type, for such REST endpoint required content type is text.
 
 ## Final step in generator configuration
 Generator takes as input set of java packages which should be scanned for java classes and output path where TypesScript 
-modules will be generated. There are required only root packages if there following packages:
+modules will be generated. There are required only root packages in case if following packages are present: 
  + com.blueveery.springrest2ts.examples.models
  + com.blueveery.springrest2ts.examples.ctrls
 it is is enough to list package `com.blueveery.springrest2ts.examples.ctrls`. Generator discovers also nested classes,
@@ -135,25 +135,25 @@ There are few tests in MochaJS for TypeScript services based on Observable as we
 # Advanced configuration
 
 ## Modules converters
-Modules converter defines in which TypeScript module should be placed generated TypeScript type for given Java class
-There two types of modules converters:
+Modules converter defines, in which TypeScript module, should be placed generated TypeScript type for given Java class
+There are two types of modules converters:
   + TsModuleCreatorConverter
   + ConfigurableTsModulesConverter
 ### TsModuleCreatorConverter
-By default generator is using TsModuleCreatorConverter, this converter takes few last subpackages from java package and joins
-them using hyphen. For java package `com.blueveery.springrest2ts.examples.ctrls` it will be create TS module `examples-ctrls`
+By default generator is using TsModuleCreatorConverter, this converter takes a few last subpackages from java package and joins
+them using hyphen. For java package `com.blueveery.springrest2ts.examples.ctrls` it will create TS module `examples-ctrls`
 if this converter is configured to use last two subpackages. This converter will create module for any found java class.
 ```java
     TsModuleCreatorConverter moduleConverter = new TsModuleCreatorConverter(3); // use three last subpackges
     tsGenerator.setJavaPackageToTsModuleConverter(moduleConverter); 
 ```
 
-Imports between generated types are using path from root so in tsconfig.json in web project iin which generated code 
-is used baseUrl must be defined as it is in examples.
+Imports between generated types are using path from root so in tsconfig.json, in the web project, in which generated code 
+is used, baseUrl must be defined as it is in examples.
 
 ### ConfigurableTsModulesConverter
-ConfigurableTsModulesConverter takes as an input maaping from java packages to typeScript module which allows to specify 
-name of each generated module. This generator takes optionally as input also  TsModuleCreatorConverter to generates modules
+ConfigurableTsModulesConverter takes as an input maping from java packages to typeScript module which allows to specify 
+name of each generated module. This generator optionally as an input takes also  TsModuleCreatorConverter to generate modules
 for packages which are missing in the mapping
 ```java
     HashMap<String, TSModule> packagesMap = new HashMap<>();
@@ -185,7 +185,7 @@ or
 ## Type names mapping
 Between Java and TypeScript there are different naming conventions for example model classes could end with postfix "DTO"
 which could be unwanted in generated Typescript model, REST controllers could have "Ctrl" postfix where generated 
-Angular services should have postfix "Service" to handle this situation type name mappers are provided. Currently there is 
+Angular services should have postfix "Service". To handle this situation type name mappers are provided. Currently there is 
 only one implementation `SubstringClassNameMapper` but any one could crete new one by implementing interface 'ClassNameMapper'
 Each class converter is using name mapper so they can be defined for enum, model and REST classes
 ```java
@@ -194,20 +194,20 @@ Each class converter is using name mapper so they can be defined for enum, model
 ```
 ## Custom type mapping
 During serialization some types are converted by default, such conversion does not depends on any annotations to learn how
-convert types. For example UUID could be converted to string, Date to number or string or array of numbers. To handle such 
-situation generator has map of custom mapping which allows to define new such mappings:
+convert types. For example UUID could be converted to string, Date to number or string/array of numbers. To handle such 
+situation generator has map of custom mapping which allows to define such new mappings:
 ```java
     tsGenerator.getCustomTypeMapping().put(UUID.class, TypeMapper.tsString);
     tsGenerator.getCustomTypeMapping().put(BigInteger.class, TypeMapper.tsNumber);
     tsGenerator.getCustomTypeMapping().put(LocalDateTime.class, TypeMapper.tsNumber);
     tsGenerator.getCustomTypeMapping().put(LocalDate.class, new TSArray(TypeMapper.tsNumber));
 ```
-Class TypeMapper has static fields for all base TypeScript types, and for others caseses types could be created using TS model
+Class TypeMapper has static fields for all base TypeScript types, and for other cases types could be created using TS model
 like for array of numbers `new TSArray(TypeMapper.tsNumber)`
 
 ## Nullable types
-TypeScript has great feature to warn about cases where value could be null to benefit from it TS compiler option must be set
-`strictNullChecks` and proper fields in model set as nullable or proper parameters in methods which makes REST calls. 
+TypeScript has s great feature to warn about cases where value could be null. To use it TS compiler option must be set
+`strictNullChecks` and proper fields in model set as nullable or proper parameters in methods which make REST calls. 
 Generators support this by marking TS fields based on information taken from corresponding java classes. Generator is using 
 `NullableTypesStrategy` with default implementation `DefaultNullableTypesStrategy`
 which marks types as nullable if
@@ -225,7 +225,7 @@ Marks mean that filed type is union of original field type and null;
 
 ## Conversion Listeners
 Each converter( enum, model classes, rest classes) allows for registering conversion listeners, such listeners 
-gives possibility to extend conversion with new functionality. Now there is provided one such listener `SwaggerConversionListener`
+give possibility to extend conversion with new functionality. Now there is one, such listener provided `SwaggerConversionListener`
 which adds comments to TypeScript types based on swagger 2.0 `io.swagger.oas.annotations.Operation` annotation 
 ```java
     restClassesConverter.getConversionListener().getConversionListenerSet().add(new SwaggerConversionListener());
@@ -233,35 +233,14 @@ which adds comments to TypeScript types based on swagger 2.0 `io.swagger.oas.ann
 
 ## Some special cases
 ### Model class getter and setter types differs
-In most cases such situation is just a bug but there could be situations in which this required to handle this TypeScript filed
-is an union of getter and setter type, in this order. Special case of this situation is when getter or setter is missing
-for missing setter field in TypeScript is marked as readonly for missing getter (for example we send password but do not read them from server)
+In most cases such situation is just a bug but there could be a situations in which this required to handle this TypeScript filed
+is an union of getter and setter type, in this order. Special case of this situation is when getter or setter is missing.
+For missing setter field in TypeScript it is marked as readonly. For missing getter (for example we send password but do not read them from server)
 TypeScript field is union of `undefined | <setter type>` because after read from server such fields will have value of undefined
 
 ### Java REST controllers overloaded methods
-Java allows for overloaded methods which is not supported by TypeScript/JavaScript, to solve this problems if overloaded methods are met
+Java allows for overloaded methods what is not supported by TypeScript/JavaScript. To solve this problems if overloaded methods are met
 in REST controller, generated method names in TypeScript are changed by appending in first round HTTP methods to TypeScript method name 
 if they differ, if not URL path is appended splitted on `/` and joined with `_`
 
-## Maven repository 
-  
-
- 
-
-
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-
-
-
-
-
+## Maven repository
