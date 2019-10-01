@@ -2,7 +2,8 @@ var path = require('path');
 module.exports = {
     entry: {
         services: "./src/app/sdk/services/services.ts",
-        test: "./src/tests/test.ts",
+        "observable-based-impl-tests": "./src/tests/observable-based-impl-tests.ts",
+        "promises-based-impl-tests": "./src/tests/promises-based-impl-tests.ts",
     },
     mode: "development",
     output: {
