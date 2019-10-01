@@ -80,7 +80,7 @@ HTTP request. Such implementation depends also used JavaScript framework, there 
 so SpringRestToTsConverter requires instance of ImplementationGenerator. There are available two such implementation generators
    + Angular4ImplementationGenerator - generates valid Angular services with methods which corresponds to REST endpoints, 
    they have wrapped return type into Observable  
-   + XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX - generates valid plain JavaScript classes with methods which corresponds to REST endpoints, 
+   + FetchBasedImplementationGenerator - generates valid plain JavaScript classes with methods which corresponds to REST endpoints, 
                                          they have wrapped return type into Promise  
 There are supported following Spring annotations:
    + RequestMapping
@@ -92,6 +92,11 @@ There are supported following Spring annotations:
    + PathVariable
    + RequestParam
    + RequestBody
+## Response content conversion
+ + If REST endpoint returns JSON and response code is 200 generated service method returns Observable or `Promise<<Mapped java type>>`
+ + If REST endpoint returns JSON and response code is 204 generated service method returns Observable or `Promise<Response>`
+ + If REST endpoint returns java primitive types like string, numbers or booleans and response type is 200 there is made conversion 
+to proper JavaScript type, for such endpoint required content type is text. 
 
 ## Final step in generator configuration
 Generator takes as input set of java packages which should be scanned for java classes and output path where TypesScript 
