@@ -93,10 +93,11 @@ There are supported following Spring annotations:
    + RequestParam
    + RequestBody
 ## Response content conversion
- + If REST endpoint returns JSON and response code is 200 generated service method returns Observable or `Promise<<Mapped java type>>`
- + If REST endpoint returns JSON and response code is 204 generated service method returns Observable or `Promise<Response>`
- + If REST endpoint returns java primitive types like string, numbers or booleans and response type is 200 there is made conversion 
-to proper JavaScript type, for such endpoint required content type is text. 
+ + If REST endpoint produces JSON generated service method returns Observable or `Promise<<Mapped java type>>`
+ + If REST endpoint dosen't produce response it should return response code 204(no content) 
+ generated service method returns Observable or `Promise<void>`
+ + If REST endpoint returns java primitive types like string, numbers or booleans there is made conversion 
+to proper JavaScript type, for such REST endpoint required content type is text. 
 
 ## Final step in generator configuration
 Generator takes as input set of java packages which should be scanned for java classes and output path where TypesScript 
