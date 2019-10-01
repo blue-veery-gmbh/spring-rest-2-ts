@@ -94,7 +94,7 @@ There are supported following Spring annotations:
    + RequestBody
 ## Response content conversion
  + If REST endpoint produces JSON generated service method returns Observable or `Promise<<Mapped java type>>`
- + If REST endpoint dosen't produce response it should return response code 204(no content) 
+ + If REST endpoint doesn't produce response it should return response code 204(no content) 
  generated service method returns Observable or `Promise<void>`
  + If REST endpoint returns java primitive types like string, numbers or booleans there is made conversion 
 to proper JavaScript type, for such REST endpoint required content type is text. 
