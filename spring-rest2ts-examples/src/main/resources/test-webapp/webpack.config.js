@@ -1,9 +1,13 @@
+var path = require('path');
 module.exports = {
-    entry: "./src/app/sdk/services/services.ts",
+    entry: {
+        services: "./src/app/sdk/services/services.ts",
+        test: "./src/tests/test.ts",
+    },
     mode: "development",
     output: {
-        filename: "services.js",
-        path: __dirname + "/build"
+        path: path.join(__dirname, "build"),
+        filename: "[name].js"
     },
 
 
