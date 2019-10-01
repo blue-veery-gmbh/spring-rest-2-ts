@@ -168,7 +168,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
                 String pathComponent = pathComponents[i];
                 if(!pathComponent.contains("{") && !"".equals(pathComponent)) {
                     methodName.append("_");
-                    methodName.append(pathComponent.toUpperCase());
+                    methodName.append(pathComponent.toUpperCase().replace("-", "_"));
                 }
             }
         }
