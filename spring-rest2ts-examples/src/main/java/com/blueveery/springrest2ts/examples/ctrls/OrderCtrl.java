@@ -43,7 +43,7 @@ public class OrderCtrl implements BaseCtrl<OrderDTO> {
 
     }
 
-    @RequestMapping(method = RequestMethod.GET, produces = {"application/json"})
+    @RequestMapping(path = "/for-customer", method = RequestMethod.GET, produces = {"application/json"})
     @ResponseBody
     public List<OrderDTO> getOrdersForCustomer(@RequestParam(value = "customer-id") UUID customerId,
                                                @RequestParam(value = "sortBy", required = false) String sortBy,

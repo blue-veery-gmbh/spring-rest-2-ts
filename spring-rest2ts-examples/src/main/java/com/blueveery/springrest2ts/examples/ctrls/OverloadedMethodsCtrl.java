@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("api/product")
+@RequestMapping("api/product-overloaded")
 public class OverloadedMethodsCtrl implements GetObjectCtrl<CategoryDTO.ProductDTO> {
 
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
@@ -16,7 +16,7 @@ public class OverloadedMethodsCtrl implements GetObjectCtrl<CategoryDTO.ProductD
         return entity;
     }
 
-    @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
+    @PostMapping(consumes = {"application/json"}, produces = {"application/json"}, path = "/product/create/{id}/with-update")
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryDTO.ProductDTO createProduct(@RequestBody CategoryDTO.ProductDTO entity, @RequestParam boolean update) {
         return entity;
