@@ -110,14 +110,26 @@ it is is enough to list package `com.blueveery.springrest2ts.examples.ctrls`. Ge
 Module spring-rest2ts-examples contains few model classes and REST controllers, class TsCodeGenerationsTest contains few 
 ready to run configuration examples (they are not unit tests, just examples), each example generates code to directory
 `target/classes/test-webapp/src`, its parent directory `target/classes/test-webapp` contains webpack and npm setup 
-which is valid for `configurableTsModulesConverter` example due to TypeScript module names entered as an entry points
-in webpack config, to compile generated TypeScript code just execute following commands in folder `target/classes/test-webapp`:
+which is valid for all generator configuration apart from `configurableTsModulesConverter` which has diffrent entry points due to changed module 
+names. To compile generated TypeScript code just execute following commands in folder `target/classes/test-webapp`:
 ```
     npm install
-    webpack
+    npm run build
     
 ```
 or just review generated code in Your favourite IDE which supports TypeScript
+
+To execute calls by use of generated code first start java backend and next execute command
+```
+    npm install
+    npm run build
+    npm test
+    
+```
+
+There are few tests in MochaJS for TypeScript services based on Observable as well as based on  Promises
+
+ 
 
 # Advanced configuration
 
