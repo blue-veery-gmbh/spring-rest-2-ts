@@ -93,7 +93,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     private String composeRequestOptions(String requestBodyVar, boolean isRequestBodyDefined, String httpMethod, String[] consumesContentType) {
         String requestOptions = "";
         List<String> requestOptionsList = new ArrayList<>();
-        if ("PUT".equals(httpMethod) || "POST".equals(httpMethod)) {
+        if (("PUT".equals(httpMethod) || "POST".equals(httpMethod)) && consumesContentType.length > 0) {
             String headers = "headers: {";
             headers += "'Content-Type': '" + consumesContentType[0] + "'";
             headers += "}";
