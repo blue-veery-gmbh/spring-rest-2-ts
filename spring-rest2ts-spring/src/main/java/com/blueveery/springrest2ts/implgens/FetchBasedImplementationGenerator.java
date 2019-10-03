@@ -6,18 +6,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.SortedSet;
+import java.util.*;
 
 import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getRequestMapping;
 
 public class FetchBasedImplementationGenerator extends BaseImplementationGenerator {
 
+    private SortedSet<TSField> implementationSpecificFieldsSet = new TreeSet<>();
+    private TSField baseUrlTsField;
+
     @Override
     public void write(BufferedWriter writer, TSMethod method) throws IOException {
-        if (!method.isConstructor()) {
+        if (method.isConstructor()) {
+            for (TSField field : implementationSpecificFieldsSet) {
+                writer.write("this." + field.getName() + " = " + field.getName() + ";");
+            }
+        } else {
             RequestMapping methodRequestMapping = getRequestMapping(method.getAnnotationList());
             RequestMapping classRequestMapping = getRequestMapping(method.getOwner().getAnnotationList());
 
@@ -33,9 +37,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
             StringBuilder requestParamsBuilder = new StringBuilder();
 
             assignMethodParameters(method, requestParamsVar, pathStringBuilder, requestBodyBuilder, requestParamsBuilder);
-            tsPath = pathStringBuilder.toString();
-            writer.write("const " + requestUrlVar + " = " + " new URL('" + tsPath + ");");
-            writer.newLine();
+            writeRequestUrl(writer, requestUrlVar, pathStringBuilder);
 
             boolean isRequestBodyDefined = !isStringBuilderEmpty(requestBodyBuilder);
             if (isRequestBodyDefined) {
@@ -54,6 +56,13 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
                             + "})" + getContentFromResponseFunction(method) + ";");
         }
 
+    }
+
+    private void writeRequestUrl(BufferedWriter writer, String requestUrlVar, StringBuilder pathStringBuilder) throws IOException {
+        String tsPath = pathStringBuilder.toString();
+        tsPath = tsPath.startsWith("/") ? tsPath : "/" + tsPath;
+        writer.write("const " + requestUrlVar + " = " + " new URL('" + tsPath + ", this." + this.baseUrlTsField.getName() + ");");
+        writer.newLine();
     }
 
     private String getContentFromResponseFunction(TSMethod method) {
@@ -120,11 +129,20 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
 
     @Override
     public SortedSet<TSField> getImplementationSpecificFields(TSComplexType tsComplexType) {
+        if (isRestClass(tsComplexType)) {
+            return implementationSpecificFieldsSet;
+        }
         return Collections.emptySortedSet();
     }
 
     @Override
     public List<TSParameter> getImplementationSpecificParameters(TSMethod method) {
+        if (method.isConstructor() && isRestClass(method.getOwner())) {
+            List<TSParameter> tsParameters = new ArrayList<>();
+            TSParameter newParameter = new TSParameter(baseUrlTsField.getName(), baseUrlTsField.getType(), this, "new URL(window.document.URL)");
+            tsParameters.add(newParameter);
+            return tsParameters;
+        }
         return Collections.emptyList();
     }
 
@@ -145,7 +163,8 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
 
     @Override
     public void addImplementationSpecificFields(TSComplexType tsComplexType) {
-
+        baseUrlTsField = new TSField("baseURL", tsComplexType, new TSInterface("URL", TypeMapper.systemModule));
+        implementationSpecificFieldsSet.add(baseUrlTsField);
     }
 
     private boolean isRestClass(TSComplexType tsComplexType) {
