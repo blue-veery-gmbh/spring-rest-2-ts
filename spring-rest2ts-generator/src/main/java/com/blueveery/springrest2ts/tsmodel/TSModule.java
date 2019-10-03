@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import com.blueveery.springrest2ts.converters.TypeMapper;
 import org.slf4j.Logger;
 
 import static com.blueveery.springrest2ts.tsmodel.ModuleExtensionType.implementation;
@@ -75,7 +76,7 @@ public class TSModule extends TSElement {
 
     public void scopedTypeUsage(TSScopedType tsScopedType) {
         TSModule module = tsScopedType.getModule();
-        if(module != this){
+        if(module != this && module != TypeMapper.systemModule){
             TSImport tsImport = importMap.get(module);
             if(tsImport == null){
                 tsImport = new TSImport(module);

@@ -4,6 +4,7 @@ import com.blueveery.springrest2ts.tsmodel.*;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -19,6 +20,7 @@ public class TypeMapper {
     public static TSType tsAny = new TSSimpleType("any");
     public static TSType tsNull = new TSSimpleType("null");
     public static TSType tsUndefined = new TSSimpleType("undefined");
+    public static TSModule systemModule = new TSModule("system", Paths.get(""), true);
 
     private static Map<Class, TSType> complexTypeMap = new HashMap<>();
 
