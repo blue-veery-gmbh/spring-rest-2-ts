@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 
 @Controller
@@ -26,7 +25,7 @@ public class OrderCtrl implements BaseCtrl<OrderDTO> {
 
     @RequestMapping(path = "/{id}", method = RequestMethod.GET, produces = {"application/json"})
     @ResponseBody
-    public OrderDTO getOrder(@PathVariable UUID id) {
+    public OrderDTO getOrder(@PathVariable int id) {
         return new OrderDTO();
     }
 
@@ -39,13 +38,13 @@ public class OrderCtrl implements BaseCtrl<OrderDTO> {
 
     @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteOrder(@PathVariable("id") UUID id) {
+    public void deleteOrder(@PathVariable("id") int id) {
 
     }
 
     @RequestMapping(path = "/for-customer", method = RequestMethod.GET, produces = {"application/json"})
     @ResponseBody
-    public List<OrderDTO> getOrdersForCustomer(@RequestParam(value = "customer-id") UUID customerId,
+    public List<OrderDTO> getOrdersForCustomer(@RequestParam(value = "customer-id") int customerId,
                                                @RequestParam(value = "sortBy", required = false) String sortBy,
                                                @RequestParam(value = "ascending") Boolean ascending,
                                                @RequestParam(value = "pageNumber") int pageNumber,
@@ -61,7 +60,7 @@ public class OrderCtrl implements BaseCtrl<OrderDTO> {
 
     @RequestMapping(path = "/count", method = RequestMethod.GET, produces = {"application/json"})
     @ResponseBody
-    public long countOrdersForCustomer(@RequestParam("customer-id") UUID customerId) {
+    public long countOrdersForCustomer(@RequestParam("customer-id") int customerId) {
         return 0;
     }
 }

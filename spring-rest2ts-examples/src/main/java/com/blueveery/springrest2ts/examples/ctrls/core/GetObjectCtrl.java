@@ -6,13 +6,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.UUID;
-
 public interface GetObjectCtrl<T extends BaseDTO> extends BaseCtrl<T> {
 
     @RequestMapping(path = "/{id}", method = RequestMethod.GET, produces = {"application/json"})
     @ResponseBody
-    default T getObject(@PathVariable("id") UUID id) {
+    default T getObject(@PathVariable("id") int id) {
         return null;
     }
 

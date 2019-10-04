@@ -7,7 +7,10 @@ import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class CategoryDTO extends BaseDTO {
 
@@ -70,7 +73,7 @@ public class CategoryDTO extends BaseDTO {
         public CategoryDTO categoryDTO;
 
         @JsonRawValue
-        public Map<UUID, String> translationsMap;
+        public Map<Integer, String> translationsMap;
 
         public String getBarcode() {
             return barcode;
