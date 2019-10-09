@@ -36,4 +36,9 @@ public class ProductCtrl implements GetObjectCtrl<CategoryDTO.ProductDTO> {
     public long countProducts() {
         return 0;
     }
+
+    @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<Void> deleteOrder(@PathVariable("id") int id) {
+        return ResponseEntity.noContent().build();
+    }
 }

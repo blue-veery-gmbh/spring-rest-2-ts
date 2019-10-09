@@ -79,8 +79,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
             writeRequestOption(writer, requestHeadersVar, consumeHeader, isRequestHeaderDefined);
 
             String requestOptions = "";
-            boolean isMethodProduceTextContent = Arrays.asList(methodRequestMapping.produces()).contains("text/plain");
-            requestOptions = composeRequestOptions(requestBodyBuilder.toString(), requestHeadersVar, requestParamsVar, isRequestBodyDefined, isRequestParamDefined, isRequestHeaderDefined, requestOptions, isMethodProduceTextContent);
+            requestOptions = composeRequestOptions(requestBodyBuilder.toString(), requestHeadersVar, requestParamsVar, isRequestBodyDefined, isRequestParamDefined, isRequestHeaderDefined, requestOptions);
 
             tsPath = pathStringBuilder.toString();
             writer.write(
@@ -119,20 +118,17 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
         }
     }
 
-    private String composeRequestOptions(String requestBody, String requestHeadersVar, String requestParamsVar, boolean isRequestBodyDefined, boolean isRequestParamDefined, boolean isRequestHeaderDefined, String requestOptions, boolean isMethodProduceTextContent) {
+    private String composeRequestOptions(String requestBody, String requestHeadersVar, String requestParamsVar, boolean isRequestBodyDefined, boolean isRequestParamDefined, boolean isRequestHeaderDefined, String requestOptions) {
         if (isRequestBodyDefined) {
             requestOptions += ", " + requestBody + " ";
         }
-        if (isRequestHeaderDefined || isRequestParamDefined || isMethodProduceTextContent) {
+        if (isRequestHeaderDefined || isRequestParamDefined) {
             List<String> requestOptionsList = new ArrayList<>();
             if (isRequestHeaderDefined) {
                 requestOptionsList.add(requestHeadersVar);
             }
             if (isRequestParamDefined) {
                 requestOptionsList.add(requestParamsVar);
-            }
-            if (isMethodProduceTextContent) {
-                requestOptionsList.add("responseType: 'text'");
             }
 
             requestOptions += ", {";
