@@ -92,4 +92,12 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
     protected boolean isStringBuilderEmpty(StringBuilder requestParamsBuilder) {
         return requestParamsBuilder.length() == 0;
     }
+
+    protected String getConsumesContentType(String[] consumesContentType) {
+        if (consumesContentType.length > 0) {
+            return consumesContentType[0];
+        } else {
+            return "application/json";
+        }
+    }
 }

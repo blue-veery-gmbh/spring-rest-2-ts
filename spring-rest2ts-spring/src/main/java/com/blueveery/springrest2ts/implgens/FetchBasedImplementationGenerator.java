@@ -102,18 +102,21 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     private String composeRequestOptions(String requestBodyVar, boolean isRequestBodyDefined, String httpMethod, String[] consumesContentType) {
         String requestOptions = "";
         List<String> requestOptionsList = new ArrayList<>();
-        if (("PUT".equals(httpMethod) || "POST".equals(httpMethod)) && consumesContentType.length > 0) {
-            String headers = "headers: {";
-            headers += "'Content-Type': '" + consumesContentType[0] + "'";
-            headers += "}";
-            requestOptionsList.add(headers);
-        }
-        if (isRequestBodyDefined) {
+        if (("PUT".equals(httpMethod) || "POST".equals(httpMethod)) && isRequestBodyDefined) {
+            addContentTypeHeader(consumesContentType, requestOptionsList);
             requestOptionsList.add("body: JSON.stringify(" + requestBodyVar + ")");
         }
 
         requestOptions += String.join(", ", requestOptionsList);
         return requestOptions;
+    }
+
+    private void addContentTypeHeader(String[] consumesContentType, List<String> requestOptionsList) {
+        String contentType = getConsumesContentType(consumesContentType);
+        String headers = "headers: {";
+        headers += "'Content-Type': '" + contentType + "'";
+        headers += "}";
+        requestOptionsList.add(headers);
     }
 
     @Override

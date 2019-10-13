@@ -18,7 +18,7 @@ public class ProductCtrl implements GetObjectCtrl<CategoryDTO.ProductDTO> {
 
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDTO.ProductDTO createOrder(@RequestBody CategoryDTO.ProductDTO entity) {
+    public CategoryDTO.ProductDTO createProduct(@RequestBody CategoryDTO.ProductDTO entity) {
         return entity;
     }
 

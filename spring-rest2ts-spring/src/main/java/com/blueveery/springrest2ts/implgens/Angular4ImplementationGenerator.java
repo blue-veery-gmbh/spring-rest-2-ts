@@ -74,9 +74,9 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
             boolean isRequestParamDefined = !isStringBuilderEmpty(requestParamsBuilder);
             writeRequestOption(writer, requestParamsVar, requestParamsBuilder.toString(), isRequestParamDefined);
 
-            String consumeHeader = getConsumeContentTypeFromRequestMapping(methodRequestMapping);
-            boolean isRequestHeaderDefined = !consumeHeader.isEmpty();
-            writeRequestOption(writer, requestHeadersVar, consumeHeader, isRequestHeaderDefined);
+            String contentTypeHeader = getContentTypeHeaderFromRequestMapping(httpMethod, methodRequestMapping, isRequestBodyDefined);
+            boolean isRequestHeaderDefined = !contentTypeHeader.isEmpty();
+            writeRequestOption(writer, requestHeadersVar, contentTypeHeader, isRequestHeaderDefined);
 
             String requestOptions = "";
             requestOptions = composeRequestOptions(requestBodyBuilder.toString(), requestHeadersVar, requestParamsVar, isRequestBodyDefined, isRequestParamDefined, isRequestHeaderDefined, requestOptions);
@@ -139,12 +139,14 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
     }
 
 
-    private String getConsumeContentTypeFromRequestMapping(RequestMapping requestMapping) {
-        if (requestMapping.consumes().length > 0) {
-            return " new HttpHeaders().set('Content-type'," + " '" + requestMapping.consumes()[0] + "');";
+    private String getContentTypeHeaderFromRequestMapping(String httpMethod, RequestMapping requestMapping, boolean isRequestBodyDefined) {
+        if (("PUT".equals(httpMethod) || "POST".equals(httpMethod)) && isRequestBodyDefined) {
+            String contentType = getConsumesContentType(requestMapping.consumes());
+            return " new HttpHeaders().set('Content-type'," + " '" + contentType + "');";
         }
         return "";
     }
+
 
     @Override
     public TSType mapReturnType(TSMethod tsMethod, TSType tsType) {

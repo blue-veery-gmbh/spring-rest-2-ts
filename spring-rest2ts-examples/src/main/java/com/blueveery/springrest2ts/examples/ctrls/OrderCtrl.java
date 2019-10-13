@@ -52,7 +52,7 @@ public class OrderCtrl implements BaseCtrl<OrderDTO> {
         return Collections.emptyList();
     }
 
-    @RequestMapping(method = RequestMethod.POST, produces = {"application/json"})
+    @RequestMapping(path = "/filter", method = RequestMethod.POST, produces = {"application/json"})
     @ResponseBody
     public List<OrderDTO> findOrders(@RequestBody(required = false) List<String>  conditions) {
         return Collections.emptyList();
