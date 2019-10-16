@@ -1,21 +1,17 @@
 {
-  "name": "spring-rest2rs-examples-verification",
+  "name": "spring-rest2rs-verification",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
-    "test": "mocha ./build/*tests.js "
+    "build": "webpack"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/assert": "^1.4.3",
-    "@types/mocha": "^5.2.7",
     "assert": "^2.0.0",
     "awesome-typescript-loader": "^5.2.1",
-    "mocha": "^6.2.1",
-    "mocha-junit-reporter": "^1.23.1",
     "source-map-loader": "^0.2.4",
     "tslint": "^5.12.1",
     "typescript": "^3.5.3",

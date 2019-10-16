@@ -120,18 +120,6 @@ due to changed module names. To compile generated TypeScript code just execute f
 ```
 or just review generated code in Your favourite IDE which supports TypeScript
 
-To execute calls by use of generated code first start java backend and next execute command
-```
-    npm install
-    npm run build
-    npm test
-    
-```
-
-There are few tests in MochaJS for TypeScript services based on Observable as well as based on  Promises
-
- 
-
 # Advanced configuration
 
 ## Modules converters
@@ -231,6 +219,24 @@ which adds comments to TypeScript types based on swagger 2.0 `io.swagger.oas.ann
     restClassesConverter.getConversionListener().getConversionListenerSet().add(new SwaggerConversionListener());
 ```
 
+## Java compiler setup
+Java compiler by default optimizes methods parameters names, to have readable parameters names in Typescript at least for 
+REST controllers modules this optimization should be switched off
+```xml
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.1</version>
+            <configuration>
+                <source>1.8</source>
+                <target>1.8</target>
+                <compilerArgs>
+                    <compilerArg>-parameters</compilerArg>
+                </compilerArgs>
+            </configuration>
+        </plugin>
+``` 
+
 ## Some special cases
 ### Model class getter and setter types differs
 In most cases such situation is just a bug but there could be a situations in which this required to handle this TypeScript filed
@@ -243,4 +249,9 @@ Java allows for overloaded methods what is not supported by TypeScript/JavaScrip
 in REST controller, generated method names in TypeScript are changed by appending in first round HTTP methods to TypeScript method name 
 if they differ, if not URL path is appended splitted on `/` and joined with `_`
 
+## Unsupported mappings, coming soon...
+  + multipart mapping `RequestPart`
+  + spring data Pageable and Page
+  + java generic types    
+ 
 ## Maven repository
