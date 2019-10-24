@@ -78,10 +78,10 @@ Typescript Type
 From REST classes there is generated working implementation in TypeScript which based on Spring annotations builds complete 
 HTTP request. Such implementation depends also used JavaScript framework, there is different approach to HTTP calls in Angular and React
 so SpringRestToTsConverter requires instance of ImplementationGenerator. There are available two such implementation generators
-   + Angular4ImplementationGenerator - generates valid Angular services with methods which corresponds to REST endpoints, 
+   + `Angular4ImplementationGenerator` - generates valid Angular services with methods which corresponds to REST endpoints, 
    they have wrapped return type into Observable  
-   + FetchBasedImplementationGenerator - generates valid plain JavaScript classes with methods which corresponds to REST endpoints, \
-   return types  are mapped into Promise where it generic type attribute is endpoint return type  
+   + `FetchBasedImplementationGenerator` - generates valid plain JavaScript classes with methods which corresponds to REST endpoints,
+   return types are mapped into Promise where it generic type attribute is endpoint return type  
                                          
 There are supported following Spring annotations:
    + RequestMapping
