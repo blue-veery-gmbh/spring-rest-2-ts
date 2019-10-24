@@ -1,10 +1,10 @@
 # Purpose
-spring-rest2ts-generator generates TypeScript code based on spring mvc REST controllers and object model used in HTTP requests and responses.
+spring-rest2ts-generator generates TypeScript code based on spring mvc REST controllers and data model for HTTP requests and responses.
 From model classes there are generated TypeScript interfaces and from REST controllers full working Angular services based on Observable API
 or plain JavaScript services based on Promises API. The main idea is that Spring annotations describing REST endpoints have enough information
 to compose HTTP request and call REST endpoints so TypeScript code could be automatically generated. Such generated code reduces amount 
-of hand written code on frontend and gives type safe API to backend, changes in URL path are hidden, if there is a refactored REST endpoint, 
-generated code will reflect these changes which will cause compile time error which safes time on testing 
+of hand written code on frontend and gives type safe API to backend, changes in URL path are hidden, in case of REST endpoint refactoring, 
+generated code will reflect these changes which will cause compile time error in web app which reduces time on testing 
 
 # Basic Configuration
 ## Configuration example
@@ -80,8 +80,9 @@ HTTP request. Such implementation depends also used JavaScript framework, there 
 so SpringRestToTsConverter requires instance of ImplementationGenerator. There are available two such implementation generators
    + Angular4ImplementationGenerator - generates valid Angular services with methods which corresponds to REST endpoints, 
    they have wrapped return type into Observable  
-   + FetchBasedImplementationGenerator - generates valid plain JavaScript classes with methods which corresponds to REST endpoints, 
-                                         they have wrapped return type into Promise  
+   + FetchBasedImplementationGenerator - generates valid plain JavaScript classes with methods which corresponds to REST endpoints, \
+   return types  are mapped into Promise where it generic type attribute is endpoint return type  
+                                         
 There are supported following Spring annotations:
    + RequestMapping
    + GetMapping 
