@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -171,22 +170,19 @@ public class Rest2tsGenerator {
 
     private List<Class> loadClasses(Set<String> packageSet) throws IOException {
         ClassLoader classLoader = this.getClass().getClassLoader();
-        if(!(classLoader instanceof URLClassLoader)){
-            throw new IllegalStateException("Generator must be run under URLClassLoader to scan classes, current ClassLoader is : " + classLoader.getClass().getSimpleName());
-        }
-        URLClassLoader currentClassLoader = (URLClassLoader) classLoader;
+
         List<Class> classList = new ArrayList<>();
         for (String packageName : packageSet) {
-            Enumeration<URL> urlEnumeration = currentClassLoader.findResources(packageName.replace(".", "/"));
+            Enumeration<URL> urlEnumeration = classLoader.getResources(packageName.replace(".", "/"));
             while (urlEnumeration.hasMoreElements()) {
                 URL url = urlEnumeration.nextElement();
-                scanPackagesRecursively(currentClassLoader, url, packageName, classList);
+                scanPackagesRecursively(classLoader, url, packageName, classList);
             }
         }
         return classList;
     }
 
-    private void scanPackagesRecursively(URLClassLoader classLoader, URL url, String packageName, List<Class> classList) throws IOException {
+    private void scanPackagesRecursively(ClassLoader classLoader, URL url, String packageName, List<Class> classList) throws IOException {
         try(InputStream inputStream = url.openStream()) {
             BufferedReader reader = null;
             try {
