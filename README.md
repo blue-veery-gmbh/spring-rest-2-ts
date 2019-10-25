@@ -52,10 +52,10 @@ There are following filters which allows to build complex conditions:
     
 ## Java model classes converter
 Java classes which describe payload model are generated to TypeScript interfaces. During model serialization to JSON, 
-object mapper is applying some mappings(some of them are required for example in JSON, where in type for Date it must be
+object mapper is applying some mappings(some of them are required for example in JSON, Date type must be
 represented as string or number) based on some default configuration or dedicated annotations. Currently Jackson Object
 mapper is supported. JacksonObjectMapper allows to set fields, getters and setters visibility. Based on this Typescript 
-interface fields are generated. From jackson there are supported following annotations  :
+interface fields are generated. There are supported following Jackson annotations  :
    + JsonTypeInfo - TS property is added if type info is serialized to property
    + JsonAutoDetect - overrides default visibility 
    + JsonIgnoreType - properties which have type marked as ignored are skipped 
