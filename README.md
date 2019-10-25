@@ -112,7 +112,7 @@ it is is enough to list package `com.blueveery.springrest2ts.examples.ctrls`. Ge
 Module spring-rest2ts-examples contains few model classes and REST controllers, class TsCodeGenerationsTest contains few 
 ready to run configuration examples (they are not unit tests, just examples), each example generates code to directory
 `target/classes/test-webapp/src`, its parent directory `target/classes/test-webapp` contains webpack and npm setup 
-which is valid for all generator configurations apart from `configurableTsModulesConverter` which has diffrent entry points 
+which is valid for all generator configurations apart from `configurableTsModulesConverter` which has different entry points 
 due to changed module names. To compile generated TypeScript code just execute following commands in folder `target/classes/test-webapp`:
 ```
     npm install
@@ -255,4 +255,3 @@ if they differ, if not URL path is appended splitted on `/` and joined with `_`
   + spring data Pageable and Page
   + java generic types    
  
-## Maven repository
