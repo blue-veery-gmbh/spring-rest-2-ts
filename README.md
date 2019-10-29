@@ -6,6 +6,23 @@ to compose HTTP request and call REST endpoints so TypeScript code could be auto
 of hand written code on frontend and gives type safe API to backend, changes in URL path are hidden, in case of REST endpoint refactoring, 
 generated code will reflect these changes which will cause compile time error in web app which reduces time on testing 
 
+supported features
+   + Java Beans convention for data model mapping
+   + FasterXML/Jackson annotations for data model mapping
+   + Custom type Mappings
+   + Java collections mapped into TS arrays     
+   + Java Map mapped into TS object
+   + Java packages to module conversion
+   + Java enums mapped as TS enums or union types   
+   + Inheritance mapping    
+   + Name mappings
+   + Imports between generated TS modules 
+   + Spring REST annotations based on which TS services are generated
+   + TS services for Angular framework
+   + TS services for ReactJS framework   
+   + Java class filtering for TS code generation                  
+           
+
 # Basic Configuration
 ## Configuration example
 Due to greater flexibility spring-rest2ts-generator is configured by code, no configuration files are needed. 
@@ -109,7 +126,7 @@ it is is enough to list package `com.blueveery.springrest2ts.examples.ctrls`. Ge
  if model classes or REST controllers are using such classes, adequate TypeScript classes/interfaces will be generated
  
 ## Examples
-Module spring-rest2ts-examples contains few model classes and REST controllers, class TsCodeGenerationsTest contains few 
+Module spring-rest2ts-examples contains few model classes and REST controllers, class TsCodeGenerationsTest and ExtendedTsCodeGenerationsTest contains few 
 ready to run configuration examples (they are not unit tests, just examples), each example generates code to directory
 `target/classes/test-webapp/src`, its parent directory `target/classes/test-webapp` contains webpack and npm setup 
 which is valid for all generator configurations apart from `configurableTsModulesConverter` which has different entry points 

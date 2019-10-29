@@ -26,16 +26,16 @@ import java.util.*;
 
 public class TsCodeGenerationsTest {
 
-    private static final Path OUTPUT_DIR_PATH = Paths.get("target/classes/test-webapp/src");
+    protected static final Path OUTPUT_DIR_PATH = Paths.get("target/classes/test-webapp/src");
 
-    private static Rest2tsGenerator tsGenerator;
-    private Set<String> javaPackageSet;
-    private ModelClassesToTsInterfacesConverter modelClassesConverter;
-    private SpringRestToTsConverter restClassesConverter;
+    protected static Rest2tsGenerator tsGenerator;
+    protected Set<String> javaPackageSet;
+    protected ModelClassesToTsInterfacesConverter modelClassesConverter;
+    protected SpringRestToTsConverter restClassesConverter;
 
     @Before
     public void setUp() throws IOException {
-        FileSystemUtils.deleteRecursively(OUTPUT_DIR_PATH.resolve("app/sdk").toFile());
+        FileSystemUtils.deleteRecursively(OUTPUT_DIR_PATH.resolve("OUTPUT_DIR_PATH").toFile());
 
         tsGenerator = new Rest2tsGenerator();
 
@@ -58,112 +58,11 @@ public class TsCodeGenerationsTest {
     }
 
     @Test
-    public void defaultSetup() throws IOException {
-       tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
-    }
-
-    @Test
     public void customTypeMapping() throws IOException {
         tsGenerator.getCustomTypeMapping().put(UUID.class, TypeMapper.tsString);
         tsGenerator.getCustomTypeMapping().put(BigInteger.class, TypeMapper.tsNumber);
         tsGenerator.getCustomTypeMapping().put(LocalDateTime.class, TypeMapper.tsNumber);
         tsGenerator.getCustomTypeMapping().put(LocalDate.class, new TSArray(TypeMapper.tsNumber));
-        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
-    }
-
-    @Test
-    public void tsModuleCreatorConverter() throws IOException {
-        TsModuleCreatorConverter moduleConverter = new TsModuleCreatorConverter(3);
-        tsGenerator.setJavaPackageToTsModuleConverter(moduleConverter);
-
-        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
-    }
-
-    @Test
-    public void configurableTsModulesConverter() throws IOException {
-        HashMap<String, TSModule> packagesMap = new HashMap<>();
-        packagesMap.put("com.blueveery.springrest2ts.examples.model.core", new TSModule("core", Paths.get("app/sdk/model"), false));
-        packagesMap.put("com.blueveery.springrest2ts.examples.model", new TSModule("model", Paths.get("app/sdk/model"), false));
-        packagesMap.put("com.blueveery.springrest2ts.examples.model.enums", new TSModule("model-enums", Paths.get("app/sdk/enums"), false));
-        TSModule servicesModule = new TSModule("services", Paths.get("app/sdk/services"), false);
-        packagesMap.put("com.blueveery.springrest2ts.examples.ctrls.core", servicesModule);
-        packagesMap.put("com.blueveery.springrest2ts.examples.ctrls", servicesModule);
-        ConfigurableTsModulesConverter moduleConverter = new ConfigurableTsModulesConverter(packagesMap);
-        tsGenerator.setJavaPackageToTsModuleConverter(moduleConverter);
-
-        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
-    }
-
-    @Test
-    public void nullableTypesConfig() throws IOException {
-        DefaultNullableTypesStrategy nullableTypesStrategy = new DefaultNullableTypesStrategy();
-        nullableTypesStrategy.setUsePrimitiveTypesWrappers(false);
-        tsGenerator.setNullableTypesStrategy(nullableTypesStrategy);
-        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
-    }
-
-    @Test
-    public void swaggerAnnotations() throws IOException {
-        restClassesConverter.getConversionListener().getConversionListenerSet().add(new SwaggerConversionListener());
-
-        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
-    }
-
-    @Test
-    public void jacksonAnnotationOnProductDTO() throws IOException {
-        tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("ProductDTO"));
-        tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
-
-        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
-    }
-
-    @Test
-    public void enumsToUnionsTest() throws IOException {
-        tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("DTO"));
-        tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
-        tsGenerator.setEnumConverter(new JavaEnumToTsUnionConverter());
-        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
-    }
-
-    @Test
-    public void javaEnumsToTsEnumTest() throws IOException {
-        tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("DTO"));
-        tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
-        tsGenerator.setEnumConverter(new JavaEnumToTsEnumConverter());
-
-        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
-    }
-
-
-    @Test
-    public void classNameMappingTest() throws IOException {
-        modelClassesConverter.setClassNameMapper(new SubstringClassNameMapper("DTO", ""));
-        restClassesConverter.setClassNameMapper(new SubstringClassNameMapper("Ctrl", "Service"));
-
-        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
-    }
-
-    @Test
-    public void containsSubStringClassCondition() throws IOException {
-        tsGenerator.setModelClassesCondition(new ContainsSubStringJavaTypeFilter("DTO"));
-        tsGenerator.setRestClassesCondition(new ContainsSubStringJavaTypeFilter("Ctrl"));
-        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
-    }
-
-    @Test
-    public void regexClassCondition() throws IOException {
-        tsGenerator.setModelClassesCondition(new RegexpJavaTypeFilter("\\w*DTO\\b"));
-        tsGenerator.setRestClassesCondition(new RegexpJavaTypeFilter("\\w*Ctrl\\b"));
-
-        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
-    }
-
-
-    @Test
-    public void complexRestClassCondition() throws IOException {
-        OrFilterOperator annotationConditions = new OrFilterOperator(Arrays.asList(new HasAnnotationJavaTypeFilter(Controller.class), new HasAnnotationJavaTypeFilter(RestController.class)));
-        tsGenerator.setRestClassesCondition(new AndFilterOperator(Arrays.asList(new ExtendsJavaTypeFilter(BaseCtrl.class), annotationConditions)));
-
         tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
 }
