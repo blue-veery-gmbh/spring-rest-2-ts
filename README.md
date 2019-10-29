@@ -1,12 +1,12 @@
-# Purpose
-spring-rest2ts-generator generates TypeScript code based on spring mvc REST controllers and data model for HTTP requests and responses.
+# Spring rest2ts generator 
+spring-rest2ts-generator generator generates TypeScript code based on spring mvc REST controllers and data model for HTTP requests and responses. 
 From model classes there are generated TypeScript interfaces and from REST controllers full working Angular services based on Observable API
-or plain JavaScript services based on Promises API. The main idea is that Spring annotations describing REST endpoints have enough information
-to compose HTTP request and call REST endpoints so TypeScript code could be automatically generated. Such generated code reduces amount 
-of hand written code on frontend and gives type safe API to backend, changes in URL path are hidden, in case of REST endpoint refactoring, 
-generated code will reflect these changes which will cause compile time error in web app which reduces time on testing 
+or plain JavaScript services based on Promises API. The main idea is that Spring annotations describing REST endpoints have enough information 
+to compose HTTP request and call REST endpoints so TypeScript code could be automatically generated. Such generated code reduces the amount 
+of handwritten code on the frontend and gives type-safe API to the backend, changes in URL path are hidden, in case of REST endpoint refactoring, 
+generated code will reflect these changes which will cause compile-time error in the web app which reduces time on testing
 
-supported features
+### Supported features:
    + Java Beans convention for data model mapping
    + FasterXML/Jackson annotations for data model mapping
    + Custom type Mappings
