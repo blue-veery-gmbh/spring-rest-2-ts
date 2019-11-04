@@ -1,30 +1,17 @@
 # Spring rest2ts generator 
-spring-rest2ts-generator generator generates TypeScript code based on spring mvc REST controllers and data model for HTTP requests and responses. 
-From model classes there are generated TypeScript interfaces and from REST controllers full working Angular services based on Observable API
-or plain JavaScript services based on Promises API. The main idea is that Spring annotations describing REST endpoints have enough information 
-to compose HTTP request and call REST endpoints so TypeScript code could be automatically generated. Such generated code reduces the amount 
-of handwritten code on the frontend and gives type-safe API to the backend, changes in URL path are hidden, in case of REST endpoint refactoring, 
-generated code will reflect these changes which will cause compile-time error in the web app which reduces time on testing
+spring-rest2ts-generator generates TypeScript code based on spring mvc REST controllers and data model for HTTP requests and responses. 
 
-### Supported features:
-   + Java Beans convention for data model mapping
-   + FasterXML/Jackson annotations for data model mapping
-   + Custom type Mappings
-   + Java collections mapped into TS arrays     
-   + Java Map mapped into TS object
-   + Java packages to module conversion
-   + Java enums mapped as TS enums or union types   
-   + Inheritance mapping    
-   + Name mappings
-   + Imports between generated TS modules 
-   + Spring REST annotations based on which TS services are generated
-   + TS services for Angular framework
-   + TS services for ReactJS framework   
-   + Java class filtering for TS code generation                  
+## Installation 
+To add a dependency on spring-rest2ts-generator using Maven, use the following:
+```xml
+<dependency>
+    <groupId>com.blue-veery</groupId>
+    <artifactId>spring-rest2ts-generator</artifactId>
+    <version>1.2.1</version>
+</dependency>
+```          
            
-
-# Basic Configuration
-## Configuration example
+## Configuration  
 Due to greater flexibility spring-rest2ts-generator is configured by code, no configuration files are needed. 
 This gives possibility to easily extend generator in places where it is needed
 Here is the simplest generator configurator:
@@ -50,7 +37,43 @@ Here is the simplest generator configurator:
     javaPackageSet = Collections.singleton("com.blueveery.springrest2ts.examples");
     tsGenerator.generate(javaPackageSet, Paths.get("../target/ts-code"));
 ```
-       
+## Examples
+Module spring-rest2ts-examples contains few model classes and REST controllers, class TsCodeGenerationsTest and ExtendedTsCodeGenerationsTest contains few 
+ready to run configuration examples (they are not unit tests, just examples), each example generates code to directory
+`target/classes/test-webapp/src`, its parent directory `target/classes/test-webapp` contains webpack and npm setup 
+which is valid for all generator configurations apart from `configurableTsModulesConverter` which has different entry points 
+due to changed module names. To compile generated TypeScript code just execute following commands in folder `target/classes/test-webapp`:
+```
+    npm install
+    npm run build
+    
+```
+or just review generated code in Your favourite IDE which supports TypeScript
+
+# Features
+From model classes there are generated TypeScript interfaces and from REST controllers full working Angular services based on Observable API
+or plain JavaScript services based on Promises API. The main idea is that Spring annotations describing REST endpoints have enough information 
+to compose HTTP request and call REST endpoints so TypeScript code could be automatically generated. Such generated code reduces the amount 
+of handwritten code on the frontend and gives type-safe API to the backend, changes in URL path are hidden, in case of REST endpoint refactoring, 
+generated code will reflect these changes which will cause compile-time error in the web app which reduces time on testing
+
+### Supported features:
+   + Java Beans convention for data model mapping
+   + FasterXML/Jackson annotations for data model mapping
+   + Custom type Mappings
+   + Java collections mapped into TS arrays     
+   + Java Map mapped into TS object
+   + Java packages to module conversion
+   + Java enums mapped as TS enums or union types   
+   + Inheritance mapping    
+   + Name mappings
+   + Imports between generated TS modules 
+   + Spring REST annotations based on which TS services are generated
+   + TS services for Angular framework
+   + TS services for ReactJS framework   
+   + Java class filtering for TS code generation   
+   
+# Basic Configuration
 ## Java Classes filtering 
 Generator needs two filters to select java classes for which TypeScript types will be generated, these filters 
 allows to skip Java classes in given packages for which TypeScript generation is not needed. By default Rest2tsGenerator
@@ -125,18 +148,6 @@ modules will be generated. There are required only root packages in case if foll
 it is is enough to list package `com.blueveery.springrest2ts.examples.ctrls`. Generator discovers also nested classes,
  if model classes or REST controllers are using such classes, adequate TypeScript classes/interfaces will be generated
  
-## Examples
-Module spring-rest2ts-examples contains few model classes and REST controllers, class TsCodeGenerationsTest and ExtendedTsCodeGenerationsTest contains few 
-ready to run configuration examples (they are not unit tests, just examples), each example generates code to directory
-`target/classes/test-webapp/src`, its parent directory `target/classes/test-webapp` contains webpack and npm setup 
-which is valid for all generator configurations apart from `configurableTsModulesConverter` which has different entry points 
-due to changed module names. To compile generated TypeScript code just execute following commands in folder `target/classes/test-webapp`:
-```
-    npm install
-    npm run build
-    
-```
-or just review generated code in Your favourite IDE which supports TypeScript
 
 # Advanced configuration
 
