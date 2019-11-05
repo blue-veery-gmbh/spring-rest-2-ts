@@ -1,5 +1,5 @@
 # Spring rest2ts generator 
-spring-rest2ts-generator generates TypeScript code based on spring mvc REST controllers and data model for HTTP requests and responses. 
+spring-rest2ts-generator generates TypeScript code based on Spring MVC REST controllers and data model for HTTP requests and responses. 
 
 ## Installation 
 To add a dependency on spring-rest2ts-generator using Maven, use the following:
@@ -9,10 +9,20 @@ To add a dependency on spring-rest2ts-generator using Maven, use the following:
     <artifactId>spring-rest2ts-generator</artifactId>
     <version>1.2.1</version>
 </dependency>
+<dependency>
+  <groupId>com.blue-veery</groupId>
+  <artifactId>spring-rest2ts-spring</artifactId>
+  <version>1.2.1</version>
+</dependency>
+<dependency>
+  <groupId>com.blue-veery</groupId>
+  <artifactId>spring-rest2ts-jackson</artifactId>
+  <version>1.2.1</version>
+</dependency>
 ```          
            
 ## Configuration  
-Due to greater flexibility spring-rest2ts-generator is configured by code, no configuration files are needed. 
+Due to greater flexibility typescript generator is configured by code, no configuration files are needed. 
 This gives possibility to easily extend generator in places where it is needed
 Here is the simplest generator configurator:
 
@@ -53,7 +63,7 @@ or just review generated code in Your favourite IDE which supports TypeScript
 # Features
 From model classes there are generated TypeScript interfaces and from REST controllers full working Angular services based on Observable API
 or plain JavaScript services based on Promises API. The main idea is that Spring annotations describing REST endpoints have enough information 
-to compose HTTP request and call REST endpoints so TypeScript code could be automatically generated. Such generated code reduces the amount 
+to compose HTTP request and call REST endpoints so TypeScript code could be automatically generated. Code created by typescript generator reduces the amount 
 of handwritten code on the frontend and gives type-safe API to the backend, changes in URL path are hidden, in case of REST endpoint refactoring, 
 generated code will reflect these changes which will cause compile-time error in the web app which reduces time on testing
 
