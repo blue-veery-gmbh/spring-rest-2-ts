@@ -7,17 +7,17 @@
     <parent>
         <groupId>com.blue-veery</groupId>
         <artifactId>spring-rest2ts</artifactId>
-        <version>1.2.0</version>
+        <version>1.2.1</version>
     </parent>
 
     <artifactId>spring-rest2ts-swagger</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
 
     <dependencies>
         <dependency>
             <groupId>com.blue-veery</groupId>
             <artifactId>spring-rest2ts-generator</artifactId>
-            <version>1.2.0</version>
+            <version>1.2.1</version>
         </dependency>
 
         <dependency>
