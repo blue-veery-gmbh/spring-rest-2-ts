@@ -65,7 +65,7 @@ From model classes there are generated TypeScript interfaces and from REST contr
 or plain JavaScript services based on Promises API. The main idea is that Spring annotations describing REST endpoints have enough information 
 to compose HTTP request and call REST endpoints so TypeScript code could be automatically generated. Code created by typescript generator reduces the amount 
 of handwritten code on the frontend and gives type-safe API to the backend, changes in URL path are hidden, in case of REST endpoint refactoring, 
-generated code will reflect these changes which will cause compile-time error in the web app which reduces time on testing
+generated code will reflect these changes which will avoid compile-time error in the web app which reduces time on testing
 
 ### Supported features:
    + Java Beans convention for data model mapping
