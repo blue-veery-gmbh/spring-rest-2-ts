@@ -48,6 +48,114 @@ Here is the simplest generator configurator:
     tsGenerator.generate(javaPackageSet, Paths.get("../target/ts-code"));
 ```
 ## Examples
+##### Model classes:
+```java
+public class BaseDTO {
+    private int id;
+    private Date updateTimeStamp;
+ }
+
+public class OrderDTO extends BaseDTO {
+    private PersonDTO buyer;
+    private AddressDTO deliveryAddressDTO;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
+    private LocalDateTime orderTimestamp;
+}
+```
+
+##### Spring REST controller:
+```java
+@Controller
+@RequestMapping("api/order")
+public class OrderCtrl {
+
+    @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CREATED)
+    public OrderDTO createOrder(@RequestBody OrderDTO entity) {
+        return entity;
+    }
+
+    @RequestMapping(path = "/{id}", method = RequestMethod.GET, produces = {"application/json"})
+    @ResponseBody
+    public OrderDTO getOrder(@PathVariable int id) {
+        return new OrderDTO();
+    }
+
+}
+```
+#### Output
+##### Typescript model class:
+```typescript
+
+export interface Base {
+    id: number;
+    updateTimeStamp: Date;
+}
+
+
+export interface Order extends Base {
+    buyer: Person;
+    deliveryAddressDTO: Address;
+    /**
+     *    pattern : dd-MM-yyyy hh:mm:ss
+     */
+    orderTimestamp: string;
+}
+```
+
+##### Observable based service:
+```typescript
+@Injectable()
+export class OrderService {
+    httpService: HttpClient;
+
+
+    public constructor(httpService: HttpClient) {
+        this.httpService = httpService;
+    }
+
+    public createOrder(entity: Order): Observable<Order> {
+        let headers = new HttpHeaders().set('Content-type', 'application/json');
+        return this.httpService.post<Order>('api/order', entity, {headers});
+    }
+
+    public getOrder(id: number): Observable<Order> {
+        return this.httpService.get<Order>('api/order/' + id + '');
+    }
+    
+}
+```
+
+##### Promise based service:
+```typescript
+export class OrderService {
+    baseURL: URL;
+
+
+    public constructor(baseURL: URL = new URL(window.document.URL)) {
+        this.baseURL = baseURL;
+    }
+
+    public createOrder(entity: Order): Promise<Order> {
+        const url = new URL('/api/order', this.baseURL);
+
+        return fetch(url.toString(), {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(entity)
+        }).then(res => res.json());
+    }
+
+    public getOrder(id: number): Promise<Order> {
+        const url = new URL('/api/order/' + id + '', this.baseURL);
+
+        return fetch(url.toString(), {method: 'GET'}).then(res => res.json());
+    }
+
+}
+```
+
 Module spring-rest2ts-examples contains few model classes and REST controllers, class TsCodeGenerationsTest and ExtendedTsCodeGenerationsTest contains few 
 ready to run configuration examples (they are not unit tests, just examples), each example generates code to directory
 `target/classes/test-webapp/src`, its parent directory `target/classes/test-webapp` contains webpack and npm setup 
