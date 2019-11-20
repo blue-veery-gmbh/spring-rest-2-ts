@@ -6,7 +6,7 @@ job but after some time they finally reflected what we had on backend but their 
 in software development... a CHANGE due to some changes in business requirements backend services had been changed which caused that 
 frontend developers were forced to reanalyse backend service to find a change and make refactoring in frontend application.
 
-After some time I started my adventure with web development and I in this moment I came with idea that all this stuff 
+After some time I started my adventure with web development and I at this moment I came with an idea that all this stuff 
 could be generated from type information in java. I started research for TypeScript generator which will be able to 
 generate model and services in TypeScript based on REST interfaces. It turned out that there are few libraries which 
 are doing such thing but none of them covered all of our needs, in short available generic solution doesn't covered our special needs
@@ -17,8 +17,8 @@ which were
   + generated services aligned with Angular and ReactJS specific requirements (Observable or Promises API)      
 
 At blue veery gmbh  we decided to launch small off hours project which gives us functionality which we wanted. 
-Project succeed, we tested it in few our projects were web application was based on Angular and React,
- average generated code was on level of 20% percent of web application code base but in terms of saved work on changes and tests
+Project succeed, we tested it in few of our projects were web application was based on Angular and React,
+ average generated code was on level of 20% percent of web application codebase but in terms of saved work on changes and tests
  it is much more and hard to estimate. Having such promising results our company has decided to open it to the open source.
  In this short article I would like to introduce how You can REST with our spring-rest-2-ts TypeScript generator if Your development setup
   is close to ours:  Spring framework on backend, on fronted Angular Or React    
@@ -78,11 +78,11 @@ export interface Order extends Base {
     orderTimestamp: string;
 }
 ```
-as we see if field has Jackson annotation it is taken into account if not transformation is based on Jva types to TypeScript
+as we see if field has Jackson annotation it is taken into account if not transformation is based on Java types to TypeScript
 mapping. There is support for Type names mapping In Java we see that there is `OrderDTO` by providing proper name mapper which 
 cuts off postfix `DTO` and we get type `Order`
 ##### Observable based service:
-Mapping of model classes is quite easy, more interesting is mapping of Spring REST controllers for which in TypeScript there is 
+Mapping of model classes is quite easy, more interesting is a mapping of Spring REST controllers for which in TypeScript there is 
 generated implementation to call endpoints, such approach hides under method names paths and parameters names so code will 
 be resistant to changes on the backend. What is more important we transform return types to selected web frameworks, 
 for Angular 2+ there is generated valid Angular service ready to use for injection:
