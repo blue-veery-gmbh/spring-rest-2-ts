@@ -52,12 +52,11 @@ Here is the simplest generator configurator:
 ```java
 public class BaseDTO {
     private int id;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     private Date updateTimeStamp;
- }
+}
 
 public class OrderDTO extends BaseDTO {
-    private PersonDTO buyer;
-    private AddressDTO deliveryAddressDTO;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private LocalDateTime orderTimestamp;
 }
@@ -90,13 +89,11 @@ public class OrderCtrl {
 
 export interface Base {
     id: number;
-    updateTimeStamp: Date;
+    updateTimeStamp: number;
 }
 
 
 export interface Order extends Base {
-    buyer: Person;
-    deliveryAddressDTO: Address;
     /**
      *    pattern : dd-MM-yyyy hh:mm:ss
      */
