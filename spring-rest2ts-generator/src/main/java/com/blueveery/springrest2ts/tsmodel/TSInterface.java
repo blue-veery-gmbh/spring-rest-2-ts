@@ -28,7 +28,7 @@ public class TSInterface extends TSComplexType {
     public void write(BufferedWriter writer) throws IOException {
         tsComment.write(writer);
         writer.write("export interface " + getName() + " ");
-
+        writer.write(typeParametersToString());
         if(!extendsInterfaces.isEmpty()){
             writer.write("extends  ");
             Iterator<TSInterface> iterator = extendsInterfaces.iterator();

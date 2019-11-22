@@ -2,6 +2,7 @@ package com.blueveery.springrest2ts.tsmodel;
 
 
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
+import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -54,7 +55,7 @@ public class TSClass extends TSComplexType {
         if(extendsClass!=null){
             writer.write("extends " + extendsClass.getName() + " ");
         }
-
+        writer.write(typeParametersToString());
         if(!implementsInterfaces.isEmpty()){
             writer.write("implements ");
             Iterator<TSInterface> iterator = implementsInterfaces.iterator();
