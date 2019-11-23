@@ -6,8 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class TSParameterizedTypeReference<T extends IParameterizedWithFormalTypes> extends TSType implements IParameterizedWithActualTypes {
-    public T referencedType;
+    private T referencedType;
     private List<TSType> actualParameterList = new ArrayList<>();
+
+    public T getReferencedType() {
+        return referencedType;
+    }
 
     public TSParameterizedTypeReference(T referencedType) {
         super(referencedType.getName());

@@ -2,6 +2,7 @@ package com.blueveery.springrest2ts.tsmodel;
 
 
 import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
+import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -19,8 +20,8 @@ public class TSInterface extends TSComplexType {
         super(name, module, new EmptyImplementationGenerator());
     }
 
-    public void addExtendsInterfaces(TSInterface tsInterface) {
-        getModule().scopedTypeUsage(tsInterface);
+    public void addExtendsInterfaces(TSClassReference tsInterface) {
+        getModule().scopedTypeUsage(tsInterface.getReferencedType());
         extendsInterfaces.add(tsInterface);
     }
 

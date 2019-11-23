@@ -15,7 +15,7 @@ import java.util.TreeSet;
  * Created by tomaszw on 31.07.2017.
  */
 public class TSClass extends TSComplexType {
-    private TSClass extendsClass;
+    private TSClassReference extendsClass;
     private SortedSet<TSInterface> implementsInterfaces = new TreeSet<>();
     private boolean isAbstract;
 
@@ -25,13 +25,13 @@ public class TSClass extends TSComplexType {
     }
 
 
-    public TSClass getExtendsClass() {
+    public TSClassReference getExtendsClass() {
         return extendsClass;
     }
 
-    public void setExtendsClass(TSClass extendsClass) {
+    public void setExtendsClass(TSClassReference extendsClass) {
         if(extendsClass!=null){
-            module.scopedTypeUsage(extendsClass);
+            module.scopedTypeUsage(extendsClass.getReferencedType());
         }
         this.extendsClass = extendsClass;
     }

@@ -2,7 +2,9 @@ package com.blueveery.springrest2ts.tsmodel;
 
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.generics.IParameterizedWithFormalTypes;
+import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import com.blueveery.springrest2ts.tsmodel.generics.TSFormalTypeParameter;
+import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -55,10 +57,11 @@ public abstract class TSComplexType extends TSScopedType implements IDecorated, 
     public void addScopedTypeUsage(TSType tsType) {
         if (tsType instanceof TSArray) {
             TSArray tsArray = (TSArray) tsType;
-            if (tsArray.getElementType() instanceof TSScopedType) {
-                TSScopedType tsScopedType = (TSScopedType) tsArray.getElementType();
-                module.scopedTypeUsage(tsScopedType);
-            }
+            addScopedTypeUsage(tsArray.getElementType());
+        }
+        if (tsType instanceof TSParameterizedTypeReference){
+            TSType referencedType = (TSType) ((TSParameterizedTypeReference) tsType).getReferencedType();
+            addScopedTypeUsage(referencedType);
         }
         if (tsType instanceof TSScopedType) {
             TSScopedType tsScopedType = (TSScopedType) tsType;
