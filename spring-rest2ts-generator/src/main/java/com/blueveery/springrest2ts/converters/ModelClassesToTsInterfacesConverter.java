@@ -6,6 +6,7 @@ import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.blueveery.springrest2ts.tsmodel.TSInterface;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
+import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -49,8 +50,10 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
             tsInterface.setConverted(true);
             if (javaClass.getSuperclass() != Object.class) {
                 TSType superClass = TypeMapper.map(javaClass.getSuperclass());
-                if (superClass != TypeMapper.tsAny) {
-                    tsInterface.addExtendsInterfaces((TSInterface) superClass);
+                if (superClass instanceof TSInterfaceReference) {
+                    //todo add actual parameters
+                    TSInterfaceReference tsInterfaceReference = (TSInterfaceReference) superClass;
+                    tsInterface.addExtendsInterfaces(tsInterfaceReference);
                 }
             }
 

@@ -1,6 +1,8 @@
 package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
+import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -30,7 +32,16 @@ public class TypeMapper {
 
     public static TSType map(Type javaType, TSType fallbackType){
         if(complexTypeMap.containsKey(javaType)){
-            return complexTypeMap.get(javaType);
+            TSType tsType = complexTypeMap.get(javaType);
+            if (tsType instanceof TSInterface) {
+                TSInterface tsInterface = (TSInterface) tsType;
+                return new TSInterfaceReference(tsInterface);
+            }
+            if (tsType instanceof TSClass) {
+                TSClass tsClass = (TSClass) tsType;
+                return new TSClassReference(tsClass);
+            }
+            return tsType;
         }
 
         if(Object.class == javaType){

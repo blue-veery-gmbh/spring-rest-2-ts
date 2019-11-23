@@ -4,6 +4,7 @@ import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getReques
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -248,8 +249,9 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
 
     private void setSupperClass(Class javaType, TSClass tsClass) {
         TSType tsSupperClass = TypeMapper.map(javaType.getSuperclass());
-        if(tsSupperClass instanceof TSClass){
-            tsClass.setExtendsClass((TSClass) tsSupperClass);
+        if(tsSupperClass instanceof TSClassReference){
+            //todo add actual parameters
+            tsClass.setExtendsClass((TSClassReference) tsSupperClass);
         }
     }
 }

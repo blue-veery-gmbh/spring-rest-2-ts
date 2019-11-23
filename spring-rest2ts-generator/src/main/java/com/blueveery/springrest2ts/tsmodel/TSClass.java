@@ -3,6 +3,7 @@ package com.blueveery.springrest2ts.tsmodel;
 
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
+import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -16,7 +17,7 @@ import java.util.TreeSet;
  */
 public class TSClass extends TSComplexType {
     private TSClassReference extendsClass;
-    private SortedSet<TSInterface> implementsInterfaces = new TreeSet<>();
+    private SortedSet<TSInterfaceReference> implementsInterfaces = new TreeSet<TSInterfaceReference>();
     private boolean isAbstract;
 
     public TSClass(String name, TSModule module, ImplementationGenerator implementationGenerator) {
@@ -36,7 +37,7 @@ public class TSClass extends TSComplexType {
         this.extendsClass = extendsClass;
     }
 
-    public SortedSet<TSInterface> getImplementsInterfaces() {
+    public SortedSet<TSInterfaceReference> getImplementsInterfaces() {
         return implementsInterfaces;
     }
 
@@ -58,7 +59,7 @@ public class TSClass extends TSComplexType {
         writer.write(typeParametersToString());
         if(!implementsInterfaces.isEmpty()){
             writer.write("implements ");
-            Iterator<TSInterface> iterator = implementsInterfaces.iterator();
+            Iterator<TSInterfaceReference> iterator = implementsInterfaces.iterator();
             while (iterator.hasNext()){
                 writer.write(iterator.next().getName());
                 if(iterator.hasNext()){
