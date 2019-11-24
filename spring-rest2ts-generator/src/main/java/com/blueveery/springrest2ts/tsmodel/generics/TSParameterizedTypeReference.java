@@ -2,20 +2,20 @@ package com.blueveery.springrest2ts.tsmodel.generics;
 
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import java.io.BufferedWriter;
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class TSParameterizedTypeReference<T extends IParameterizedWithFormalTypes> extends TSType implements IParameterizedWithActualTypes {
     private T referencedType;
-    private List<TSType> actualParameterList = new ArrayList<>();
+    private List<TSType> actualParameterList;
 
     public T getReferencedType() {
         return referencedType;
     }
 
-    public TSParameterizedTypeReference(T referencedType) {
+    public TSParameterizedTypeReference(T referencedType, List<TSType> actualParameterList) {
         super(referencedType.getName());
         this.referencedType = referencedType;
+        this.actualParameterList = actualParameterList;
     }
 
 

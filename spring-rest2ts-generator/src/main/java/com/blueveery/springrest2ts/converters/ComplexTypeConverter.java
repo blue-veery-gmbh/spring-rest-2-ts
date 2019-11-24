@@ -3,9 +3,15 @@ package com.blueveery.springrest2ts.converters;
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.naming.NoChangeClassNameMapper;
+import com.blueveery.springrest2ts.tsmodel.TSComplexType;
+import com.blueveery.springrest2ts.tsmodel.TSType;
+import com.blueveery.springrest2ts.tsmodel.generics.IParameterizedWithFormalTypes;
+import com.blueveery.springrest2ts.tsmodel.generics.TSFormalTypeParameter;
+import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -52,5 +58,19 @@ public abstract class ComplexTypeConverter {
         Collections.reverse(classNameComponentList);
 
         return String.join("$", classNameComponentList);
+    }
+
+    protected void convertFormalTypeParameters(TypeVariable<Class>[] typeVariables, IParameterizedWithFormalTypes parameterizedWithFormalTypes){
+        for (TypeVariable<Class> typeVariable : typeVariables) {
+            TSFormalTypeParameter tsFormalTypeParameter = new TSFormalTypeParameter(typeVariable.getName());
+            if (typeVariable.getBounds().length>0) {
+                TSType boundToType = TypeMapper.map(typeVariable.getBounds()[0]);
+                if (boundToType != TypeMapper.tsObject && boundToType instanceof TSParameterizedTypeReference) {
+                    tsFormalTypeParameter.setBoundTo(boundToType);
+                }
+            }
+            parameterizedWithFormalTypes.getTsTypeParameterList().add(tsFormalTypeParameter);
+        }
+
     }
 }

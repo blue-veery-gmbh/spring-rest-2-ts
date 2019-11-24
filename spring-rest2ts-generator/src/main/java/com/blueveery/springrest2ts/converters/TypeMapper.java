@@ -2,10 +2,12 @@ package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.tsmodel.*;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
+import com.blueveery.springrest2ts.tsmodel.generics.TSFormalTypeParameter;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -31,33 +33,45 @@ public class TypeMapper {
     }
 
     public static TSType map(Type javaType, TSType fallbackType){
-        if(complexTypeMap.containsKey(javaType)){
-            TSType tsType = complexTypeMap.get(javaType);
+        if (javaType instanceof TypeVariable) {
+            TypeVariable typeVariable = (TypeVariable) javaType;
+            return new TSFormalTypeParameter(typeVariable.getName());
+        }
+        Type javaRawType = javaType;
+        List<TSType> actualParameterList = Collections.emptyList();
+        if(javaType instanceof ParameterizedType){
+            ParameterizedType parameterizedType = (ParameterizedType) javaType;
+            javaRawType = parameterizedType.getRawType();
+            actualParameterList = mapActualTypeArguments(actualParameterList, parameterizedType);
+        }
+
+        if(complexTypeMap.containsKey(javaRawType)){
+            TSType tsType = complexTypeMap.get(javaRawType);
             if (tsType instanceof TSInterface) {
                 TSInterface tsInterface = (TSInterface) tsType;
-                return new TSInterfaceReference(tsInterface);
+                return new TSInterfaceReference(tsInterface, actualParameterList);
             }
             if (tsType instanceof TSClass) {
                 TSClass tsClass = (TSClass) tsType;
-                return new TSClassReference(tsClass);
+                return new TSClassReference(tsClass, actualParameterList);
             }
             return tsType;
         }
 
-        if(Object.class == javaType){
+        if(Object.class == javaRawType){
             return tsObject;
         }
-        if (void.class == javaType || Void.class == javaType) {
+        if (void.class == javaRawType || Void.class == javaRawType) {
             return tsVoid;
         }
-        if(String.class == javaType || char.class == javaType || Character.class == javaType){
+        if(String.class == javaRawType || char.class == javaRawType || Character.class == javaRawType){
             return tsString;
         }
-        if(boolean.class == javaType || Boolean.class == javaType){
+        if(boolean.class == javaRawType || Boolean.class == javaRawType){
             return tsBoolean;
         }
-        if(javaType instanceof Class){
-            Class javaClass = (Class) javaType;
+        if(javaRawType instanceof Class){
+            Class javaClass = (Class) javaRawType;
             if(Number.class.isAssignableFrom(javaClass)){
                 return tsNumber;
             }
@@ -73,8 +87,8 @@ public class TypeMapper {
             }
         }
 
-        if(javaType instanceof ParameterizedType){
-            ParameterizedType javaParameterizedType = (ParameterizedType) javaType;
+        if(javaRawType instanceof ParameterizedType){
+            ParameterizedType javaParameterizedType = (ParameterizedType) javaRawType;
             if(Collection.class.isAssignableFrom((Class<?>) javaParameterizedType.getRawType())){
                 return new TSArray(TypeMapper.map(javaParameterizedType.getActualTypeArguments()[0], fallbackType));
             }
@@ -89,6 +103,17 @@ public class TypeMapper {
         }
 
         return fallbackType;
+    }
+
+    private static List<TSType> mapActualTypeArguments(List<TSType> actualParameterList, ParameterizedType parameterizedType) {
+        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+        if (actualTypeArguments.length > 0) {
+            actualParameterList = new ArrayList<>();
+            for (Type actualTypeArgument : actualTypeArguments) {
+                actualParameterList.add(map(actualTypeArgument));
+            }
+        }
+        return actualParameterList;
     }
 
     public static void registerTsType(Class javaType, TSType tsType){

@@ -2,6 +2,7 @@ package com.blueveery.springrest2ts.examples.test;
 
 import com.blueveery.springrest2ts.Rest2tsGenerator;
 import com.blueveery.springrest2ts.converters.*;
+import com.blueveery.springrest2ts.examples.model.core.ParametrizedBaseDTO;
 import com.blueveery.springrest2ts.naming.SubstringClassNameMapper;
 import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrl;
 import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
@@ -40,7 +41,7 @@ public class TsCodeGenerationsTest {
         tsGenerator = new Rest2tsGenerator();
 
         //set java type filters
-        tsGenerator.setModelClassesCondition(new ExtendsJavaTypeFilter(BaseDTO.class));
+        tsGenerator.setModelClassesCondition(new ExtendsJavaTypeFilter(ParametrizedBaseDTO.class));
         tsGenerator.setRestClassesCondition(new ExtendsJavaTypeFilter(BaseCtrl.class));
 
         //set model class converter

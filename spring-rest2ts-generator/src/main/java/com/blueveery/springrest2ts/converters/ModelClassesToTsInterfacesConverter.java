@@ -45,22 +45,23 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
 
     @Override
     public void convert(Class javaClass, NullableTypesStrategy nullableTypesStrategy) {
-        TSInterface tsInterface = (TSInterface) TypeMapper.map(javaClass);
+        TSInterfaceReference tsInterfaceReference = (TSInterfaceReference) TypeMapper.map(javaClass);
+        TSInterface tsInterface = tsInterfaceReference.getReferencedType();
         if (!tsInterface.isConverted()) {
             tsInterface.setConverted(true);
+            convertFormalTypeParameters(javaClass.getTypeParameters(), tsInterface);
             if (javaClass.getSuperclass() != Object.class) {
-                TSType superClass = TypeMapper.map(javaClass.getSuperclass());
+                TSType superClass = TypeMapper.map(javaClass.getAnnotatedSuperclass().getType());
                 if (superClass instanceof TSInterfaceReference) {
-                    //todo add actual parameters
-                    TSInterfaceReference tsInterfaceReference = (TSInterfaceReference) superClass;
-                    tsInterface.addExtendsInterfaces(tsInterfaceReference);
+                    TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) superClass;
+                    tsInterface.addExtendsInterfaces(tsSuperClassInterface);
                 }
             }
 
             SortedSet<Property> propertySet = getClassProperties(javaClass);
 
             for (Property property : propertySet) {
-                List<TSField> tsFieldList = objectMapper.mapJavaPropertyToField(property, tsInterface, this,implementationGenerator, nullableTypesStrategy);
+                List<TSField> tsFieldList = objectMapper.mapJavaPropertyToField(property, tsInterface, this, implementationGenerator, nullableTypesStrategy);
                 if (tsFieldList.size() == 1) {
                     setAsNullableType(property, tsFieldList.get(0), nullableTypesStrategy);
                 }

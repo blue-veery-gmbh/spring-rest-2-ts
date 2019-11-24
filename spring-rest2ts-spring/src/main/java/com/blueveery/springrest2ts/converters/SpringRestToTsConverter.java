@@ -41,8 +41,10 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
 
     @Override
     public void convert(Class javaClass, NullableTypesStrategy nullableTypesStrategy) {
-        TSClass tsClass = (TSClass) TypeMapper.map(javaClass);
+        TSClassReference tsClassReference = (TSClassReference) TypeMapper.map(javaClass);
+        TSClass tsClass = tsClassReference.getReferencedType();
 
+        convertFormalTypeParameters(javaClass.getTypeParameters(), tsClass);
         setSupperClass(javaClass, tsClass);
         tsClass.addAllAnnotations(javaClass.getAnnotations());
 
