@@ -9,10 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,32 +45,32 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
         setSupperClass(javaClass, tsClass);
         tsClass.addAllAnnotations(javaClass.getAnnotations());
 
-        Map<String, TSType> typeParametersMap = new HashMap<>();
-        typeParametersMap.putAll(createTypeParametersMap(javaClass.getGenericInterfaces()));
-        typeParametersMap.putAll(createTypeParametersMap(javaClass.getGenericSuperclass()));
-
         TSMethod tsConstructorMethod = new TSMethod("constructor", tsClass, null, implementationGenerator, false, true);
         tsClass.addTsMethod(tsConstructorMethod);
         List<Method> restMethodList = filterRestMethods(javaClass);
         Map<Method, StringBuilder> methodNamesMap = new HashMap<>();
 
         for (Method method: restMethodList) {
-            TSType fallbackTSType = TypeMapper.tsAny;
-            if(typeParametersMap.get(method.getDeclaringClass().getName()) != null){
-                fallbackTSType = typeParametersMap.get(method.getDeclaringClass().getName());
+
+            Map<String, Type> variableNameToJavaType = new HashMap<>();
+            Class<?> declaringClass = method.getDeclaringClass();
+            if(declaringClass != javaClass && method.getDeclaringClass().isInterface()){
+                variableNameToJavaType = fillVariableNameToJavaType(javaClass, declaringClass);
             }
 
             Type genericReturnType = method.getGenericReturnType();
-            if (genericReturnType instanceof ParameterizedType) {
+            if (genericReturnType instanceof ParameterizedType) {// handling ResponseEntity
                 ParameterizedType parameterizedType = (ParameterizedType) genericReturnType;
                 if (parameterizedType.getRawType() == ResponseEntity.class) {
                     genericReturnType = parameterizedType.getActualTypeArguments()[0];
                 }
             }
             String methodName = mapMethodName(restMethodList, methodNamesMap,  method);
-            TSMethod tsMethod = new TSMethod(methodName, tsClass, TypeMapper.map(genericReturnType, fallbackTSType), implementationGenerator, false, false);
+            TSType methodReturnType = TypeMapper.map(resolveTypeVariable(genericReturnType, variableNameToJavaType));
+            TSMethod tsMethod = new TSMethod(methodName, tsClass, methodReturnType, implementationGenerator, false, false);
             for (Parameter parameter:method.getParameters()) {
-                TSParameter tsParameter = new TSParameter(parameter.getName(), TypeMapper.map(parameter.getParameterizedType(), fallbackTSType), implementationGenerator);
+                Type parameterType = resolveTypeVariable(parameter.getParameterizedType(), variableNameToJavaType);
+                TSParameter tsParameter = new TSParameter(parameter.getName(), TypeMapper.map(parameterType), implementationGenerator);
                 tsParameter.addAllAnnotations(parameter.getAnnotations());
                 if (parameterIsMapped(tsParameter.getAnnotationList())) {
                     setOptional(tsParameter);
@@ -90,10 +87,45 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
         conversionListener.tsScopedTypeCreated(javaClass, tsClass);
     }
 
+    private Type resolveTypeVariable(Type type, Map<String, Type> variableNameToJavaType) {
+        if (type instanceof TypeVariable) {
+            TypeVariable typeVariable = (TypeVariable) type;
+            Type resolvedType = variableNameToJavaType.get(typeVariable.getName());
+            if (resolvedType != null) {
+                return resolvedType;
+            }
+        }
+        return type;
+    }
+
+    private Map<String, Type> fillVariableNameToJavaType(Class javaClass, Class<?> declaringClass) {
+        Map<String, Type> typeParametersMap = new HashMap<>();
+        for (Type type:javaClass.getGenericInterfaces()){
+            if (type instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) type;
+                if (parameterizedType.getRawType() == declaringClass) {
+                    for (int i = 0; i < parameterizedType.getActualTypeArguments().length; i++) {
+                        TypeVariable typeParameter = declaringClass.getTypeParameters()[i];
+                        Type actualTypeArgument = parameterizedType.getActualTypeArguments()[i];
+                        typeParametersMap.put(typeParameter.getName(), actualTypeArgument);
+                    }
+                    return typeParametersMap;
+                }
+                return fillVariableNameToJavaType((Class) type, declaringClass);
+            }
+        }
+        return typeParametersMap;
+    }
+
     private List<Method> filterRestMethods(Class javaClass) {
         List<Method> restMethodList = new ArrayList<>();
         for (Method method : javaClass.getMethods()) {
             if(method.getDeclaringClass() == javaClass || method.getDeclaringClass().isInterface()) {
+                for (Method nextMethod : javaClass.getSuperclass().getMethods()) {
+                    if(nextMethod.equals(method)){
+                        continue; // parent class contains method from interface
+                    }
+                }
                 if (isRestMethod(method)) {
                     restMethodList.add(method);
                 }
@@ -224,17 +256,6 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
             }
         }
         return false;
-    }
-
-    private Map<String,TSType> createTypeParametersMap(Type... genericInterfaces) {
-        Map<String, TSType> typeParametersMap = new HashMap<>();
-        for (Type type:genericInterfaces){
-            if(type instanceof ParameterizedType) {
-                ParameterizedType parameterizedType = (ParameterizedType) type;
-                typeParametersMap.put(parameterizedType.getRawType().getTypeName(), TypeMapper.map(parameterizedType.getActualTypeArguments()[0]));
-            }
-        }
-        return typeParametersMap;
     }
 
     private boolean isRestMethod(Method method) {
