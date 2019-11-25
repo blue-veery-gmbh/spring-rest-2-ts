@@ -346,7 +346,7 @@ which marks types as nullable if
   + field or method parameter type is wrapped in Java `java.util.Optional`
   + field or method parameter is marked with annotation `javax.annotation.Nullable`
   + field or method parameter has type which is Java wrapper for primitive types
-Marks mean that filed type is union of original field type and null; 
+Marks mean that field type is union of original field type and null; 
  
 `DefaultNullableTypesStrategy` has settings which allows to configure which of above option use, by default all they are used
 ```java
@@ -383,8 +383,8 @@ REST controllers modules this optimization should be switched off
 
 ## Some special cases
 ### Model class getter and setter types differs
-In most cases such situation is just a bug but there could be a situations in which this required to handle this TypeScript filed
-is an union of getter and setter type, in this order. Special case of this situation is when getter or setter is missing.
+In most cases such situation is just a bug but there could be a situations in which this is required to handle TypeScript field
+as an union of getter and setter type, in this order. Special case of this situation is when getter or setter is missing.
 For missing setter field in TypeScript it is marked as readonly. For missing getter (for example we send password but do not read them from server)
 TypeScript field is union of `undefined | <setter type>` because after read from server such fields will have value of undefined
 
