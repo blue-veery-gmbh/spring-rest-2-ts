@@ -120,6 +120,10 @@ public class TypeMapper {
         if(!complexTypeMap.containsKey(javaType)){
             complexTypeMap.put(javaType, tsType);
         }
+        if (tsType instanceof TSScopedType) {
+            TSScopedType tsScopedType = (TSScopedType) tsType;
+            tsScopedType.getMappedFromSet().add(javaType);
+        }
     }
 }
 
