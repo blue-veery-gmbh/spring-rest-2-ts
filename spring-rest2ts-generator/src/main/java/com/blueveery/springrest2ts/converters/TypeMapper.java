@@ -122,7 +122,7 @@ public class TypeMapper {
         }
         if (tsType instanceof TSScopedType) {
             TSScopedType tsScopedType = (TSScopedType) tsType;
-            tsScopedType.getMappedFromSet().add(javaType);
+            tsScopedType.getMappedFromJavaTypeSet().add(javaType);
         }
     }
 }

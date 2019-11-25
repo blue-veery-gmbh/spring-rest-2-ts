@@ -13,7 +13,7 @@ public abstract class TSScopedType extends TSType implements ICommentedElement, 
     protected TSModule module;
     protected TSComment tsComment = new TSComment("ComplexTypeComment");
     private List<Annotation> annotationList = new ArrayList<>();
-    private Set<Class> mappedFromSet = new HashSet<>();
+    private Set<Class> mappedFromJavaTypeSet = new HashSet<>();
 
     protected TSScopedType(String name, TSModule module) {
         super(name);
@@ -33,7 +33,7 @@ public abstract class TSScopedType extends TSType implements ICommentedElement, 
         return annotationList;
     }
 
-    public Set<Class> getMappedFromSet() {
-        return mappedFromSet;
+    public Set<Class> getMappedFromJavaTypeSet() {
+        return mappedFromJavaTypeSet;
     }
 }
