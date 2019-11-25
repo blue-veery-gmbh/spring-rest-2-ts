@@ -271,10 +271,11 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
     }
 
     private void setSupperClass(Class javaType, TSClass tsClass) {
-        TSType tsSupperClass = TypeMapper.map(javaType.getSuperclass());
+        TSType tsSupperClass = TypeMapper.map(javaType.getAnnotatedSuperclass().getType());
         if(tsSupperClass instanceof TSClassReference){
-            //todo add actual parameters
-            tsClass.setExtendsClass((TSClassReference) tsSupperClass);
+            TSClassReference tsClassReference = (TSClassReference) tsSupperClass;
+            convertFormalTypeParameters(javaType.getTypeParameters(), tsClassReference.getReferencedType());
+            tsClass.setExtendsClass(tsClassReference);
         }
     }
 }

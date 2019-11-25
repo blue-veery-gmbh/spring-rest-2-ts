@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.examples.ctrls;
 
+import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrlImpl;
 import com.blueveery.springrest2ts.examples.ctrls.core.GetObjectCtrl;
 import com.blueveery.springrest2ts.examples.model.CategoryDTO;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("api/product")
-public class ProductCtrl implements GetObjectCtrl<CategoryDTO.ProductDTO> {
+public class ProductCtrl extends BaseCtrlImpl<CategoryDTO.ProductDTO> implements GetObjectCtrl<CategoryDTO.ProductDTO> {
 
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"})
     @ResponseStatus(HttpStatus.CREATED)
