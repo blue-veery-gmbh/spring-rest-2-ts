@@ -4,6 +4,7 @@ import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrl;
 import com.blueveery.springrest2ts.examples.model.OrderDTO;
 import io.swagger.oas.annotations.Operation;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,7 +55,7 @@ public class OrderCtrl implements BaseCtrl<OrderDTO> {
 
     @RequestMapping(path = "/filter", method = RequestMethod.POST, produces = {"application/json"})
     @ResponseBody
-    public List<OrderDTO> findOrders(@RequestBody(required = false) List<String>  conditions) {
+    public List<OrderDTO> findOrders(@RequestBody(required = false) List<String> conditions) {
         return Collections.emptyList();
     }
 
@@ -62,5 +63,11 @@ public class OrderCtrl implements BaseCtrl<OrderDTO> {
     @ResponseBody
     public long countOrdersForCustomer(@RequestParam("customer-id") int customerId) {
         return 0;
+    }
+
+    @RequestMapping(path = "/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<Void> changeOrderStatus(@PathVariable("id") int id,
+                                                @RequestParam(value = "new-status") String status) {
+        return ResponseEntity.ok().build();
     }
 }

@@ -32,7 +32,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
         TSModule angularCoreModule = new TSModule("@angular/core", null, true);
         injectableDecorator = new TSDecorator("", new TSFunction("Injectable", angularCoreModule));
 
-        TSModule observableModule = new TSModule("rxjs/Observable", null, true);
+        TSModule observableModule = new TSModule("rxjs", null, true);
         observableClass = new TSClass("Observable", observableModule, this);
 
         TSModule angularHttpModule = new TSModule("@angular/common/http", null, true);
@@ -79,7 +79,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
             writeRequestOption(writer, requestHeadersVar, contentTypeHeader, isRequestHeaderDefined);
 
             String requestOptions = "";
-            requestOptions = composeRequestOptions(requestBodyBuilder.toString(), requestHeadersVar, requestParamsVar, isRequestBodyDefined, isRequestParamDefined, isRequestHeaderDefined, requestOptions);
+            requestOptions = composeRequestOptions(requestBodyBuilder.toString(), requestHeadersVar, requestParamsVar, isRequestBodyDefined, isRequestParamDefined, isRequestHeaderDefined, requestOptions, httpMethod);
 
             tsPath = pathStringBuilder.toString();
             writer.write(
@@ -118,9 +118,13 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
         }
     }
 
-    private String composeRequestOptions(String requestBody, String requestHeadersVar, String requestParamsVar, boolean isRequestBodyDefined, boolean isRequestParamDefined, boolean isRequestHeaderDefined, String requestOptions) {
-        if (isRequestBodyDefined) {
-            requestOptions += ", " + requestBody + " ";
+    private String composeRequestOptions(String requestBody, String requestHeadersVar, String requestParamsVar, boolean isRequestBodyDefined, boolean isRequestParamDefined, boolean isRequestHeaderDefined, String requestOptions, String httpMethod) {
+        if (isPutOrPostMethod(httpMethod)) {
+            if (isRequestBodyDefined) {
+                requestOptions += ", " + requestBody + " ";
+            } else {
+                requestOptions += ", null ";
+            }
         }
         if (isRequestHeaderDefined || isRequestParamDefined) {
             List<String> requestOptionsList = new ArrayList<>();
@@ -140,13 +144,16 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
 
 
     private String getContentTypeHeaderFromRequestMapping(String httpMethod, RequestMapping requestMapping, boolean isRequestBodyDefined) {
-        if (("PUT".equals(httpMethod) || "POST".equals(httpMethod)) && isRequestBodyDefined) {
+        if (isPutOrPostMethod(httpMethod) && isRequestBodyDefined) {
             String contentType = getConsumesContentType(requestMapping.consumes());
             return " new HttpHeaders().set('Content-type'," + " '" + contentType + "');";
         }
         return "";
     }
 
+    private boolean isPutOrPostMethod(String httpMethod) {
+        return "PUT".equals(httpMethod) || "POST".equals(httpMethod);
+    }
 
     @Override
     public TSType mapReturnType(TSMethod tsMethod, TSType tsType) {
