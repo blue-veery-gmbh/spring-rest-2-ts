@@ -346,6 +346,7 @@ which marks types as nullable if
   + field or method parameter type is wrapped in Java `java.util.Optional`
   + field or method parameter is marked with annotation `javax.annotation.Nullable`
   + field or method parameter has type which is Java wrapper for primitive types
+
 Marks mean that field type is union of original field type and null; 
  
 `DefaultNullableTypesStrategy` has settings which allows to configure which of above option use, by default all they are used
