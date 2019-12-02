@@ -87,8 +87,8 @@ public class TypeMapper {
             }
         }
 
-        if(javaRawType instanceof ParameterizedType){
-            ParameterizedType javaParameterizedType = (ParameterizedType) javaRawType;
+        if(javaType instanceof ParameterizedType){
+            ParameterizedType javaParameterizedType = (ParameterizedType) javaType;
             if(Collection.class.isAssignableFrom((Class<?>) javaParameterizedType.getRawType())){
                 return new TSArray(TypeMapper.map(javaParameterizedType.getActualTypeArguments()[0], fallbackType));
             }

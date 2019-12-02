@@ -1,28 +1,21 @@
 package com.blueveery.springrest2ts.examples.test;
 
-import com.blueveery.springrest2ts.Rest2tsGenerator;
 import com.blueveery.springrest2ts.converters.*;
 import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrl;
+import com.blueveery.springrest2ts.examples.model.Named;
 import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
 import com.blueveery.springrest2ts.filters.*;
-import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.SubstringClassNameMapper;
-import com.blueveery.springrest2ts.tsmodel.TSArray;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.FileSystemUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 
 public class ExtendedTsCodeGenerationsTest extends TsCodeGenerationsTest{
 
@@ -118,6 +111,14 @@ public class ExtendedTsCodeGenerationsTest extends TsCodeGenerationsTest{
     public void complexRestClassCondition() throws IOException {
         OrFilterOperator annotationConditions = new OrFilterOperator(Arrays.asList(new HasAnnotationJavaTypeFilter(Controller.class), new HasAnnotationJavaTypeFilter(RestController.class)));
         tsGenerator.setRestClassesCondition(new AndFilterOperator(Arrays.asList(new ExtendsJavaTypeFilter(BaseCtrl.class), annotationConditions)));
+
+        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
+    }
+
+    @Test
+    public void interfaceInModelClassesCondition() throws IOException {
+        JavaTypeFilter namedInterfacesIncluded = new JavaTypeSetFilter(Collections.singleton(Named.class));
+        tsGenerator.setModelClassesCondition(new OrFilterOperator(Arrays.asList(new ExtendsJavaTypeFilter(BaseDTO.class), namedInterfacesIncluded)));
 
         tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }

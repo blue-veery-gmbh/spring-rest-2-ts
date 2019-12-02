@@ -8,6 +8,7 @@ import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -50,13 +51,24 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
         if (!tsInterface.isConverted()) {
             tsInterface.setConverted(true);
             convertFormalTypeParameters(javaClass.getTypeParameters(), tsInterface);
-            if (javaClass.getSuperclass() != Object.class) {
-                TSType superClass = TypeMapper.map(javaClass.getAnnotatedSuperclass().getType());
+            if (!javaClass.isInterface()) {
+                if (javaClass.getSuperclass() != Object.class) {
+                    TSType superClass = TypeMapper.map(javaClass.getAnnotatedSuperclass().getType());
+                    if (superClass instanceof TSInterfaceReference) {
+                        TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) superClass;
+                        tsInterface.addExtendsInterfaces(tsSuperClassInterface);
+                    }
+                }
+            }
+
+            for (AnnotatedType annotatedInterface : javaClass.getAnnotatedInterfaces()) {
+                TSType superClass = TypeMapper.map(annotatedInterface.getType());
                 if (superClass instanceof TSInterfaceReference) {
                     TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) superClass;
                     tsInterface.addExtendsInterfaces(tsSuperClassInterface);
                 }
             }
+
 
             SortedSet<Property> propertySet = getClassProperties(javaClass);
 

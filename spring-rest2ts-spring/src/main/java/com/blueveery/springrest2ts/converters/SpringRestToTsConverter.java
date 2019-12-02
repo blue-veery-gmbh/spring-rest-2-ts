@@ -5,6 +5,8 @@ import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
+import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -72,7 +74,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
                 Type parameterType = resolveTypeVariable(parameter.getParameterizedType(), variableNameToJavaType);
                 TSParameter tsParameter = new TSParameter(parameter.getName(), TypeMapper.map(parameterType), implementationGenerator);
                 tsParameter.addAllAnnotations(parameter.getAnnotations());
-                if (parameterIsMapped(tsParameter.getAnnotationList())) {
+                if (parameterIsMapped(tsParameter)) {
                     setOptional(tsParameter);
                     nullableTypesStrategy.setAsNullableType(parameter.getParameterizedType(), parameter.getDeclaredAnnotations(), tsParameter);
                     tsMethod.getParameterList().add(tsParameter);
@@ -243,8 +245,8 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
        }
     }
 
-    private boolean parameterIsMapped(List<Annotation> annotations) {
-        for (Annotation annotation : annotations) {
+    private boolean parameterIsMapped(TSParameter tsParameter) {
+        for (Annotation annotation : tsParameter.getAnnotationList()) {
             if(annotation instanceof PathVariable){
                 return true;
             }
@@ -253,6 +255,15 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
             }
             if(annotation instanceof RequestBody) {
                 return true;
+            }
+        }
+
+        if (tsParameter.getType() instanceof TSInterfaceReference) {
+            TSInterfaceReference tsInterfaceReference = (TSInterfaceReference) tsParameter.getType();
+            for (Class nextClass : tsInterfaceReference.getReferencedType().getMappedFromJavaTypeSet()) {
+                if (nextClass.isAssignableFrom(Pageable.class)) {
+                    return true;
+                }
             }
         }
         return false;

@@ -12,8 +12,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.*;
 
 /**
@@ -176,37 +178,37 @@ public class Rest2tsGenerator {
             Enumeration<URL> urlEnumeration = classLoader.getResources(packageName.replace(".", "/"));
             while (urlEnumeration.hasMoreElements()) {
                 URL url = urlEnumeration.nextElement();
-                scanPackagesRecursively(classLoader, url, packageName, classList);
+                URI uri = null;
+                try {
+                    uri = url.toURI();
+                } catch (URISyntaxException e) {
+                    throw new IllegalStateException(e);
+                }
+                try {
+                    FileSystems.newFileSystem(uri, Collections.emptyMap());} catch (Exception ignore) {}
+                    Path path = Paths.get(uri);
+                    scanPackagesRecursively(classLoader, path, packageName, classList);
             }
         }
         return classList;
     }
 
-    private void scanPackagesRecursively(ClassLoader classLoader, URL url, String packageName, List<Class> classList) throws IOException {
-        try(InputStream inputStream = url.openStream()) {
-            BufferedReader reader = null;
-            try {
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-            } catch (Exception e) {
-                System.out.println("Failed to open package : " + packageName);
-                return;
-            }
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (!line.contains(".")) {
-                    String newPackageName = packageName + "/" + line;
-                    scanPackagesRecursively(classLoader, new URL(url.toString() + "/" + line), newPackageName, classList);                } else {
-                    if (line.endsWith(".class")) {
-                        String className = (packageName + "/" + line).replace(".class", "").replace("/", ".");
-                        try {
-                            Class<?> loadedClass = classLoader.loadClass(className);
-                            if (!loadedClass.isAnnotation()) {
-                                addNestedClasses(loadedClass.getDeclaredClasses(), classList);
-                                classList.add(loadedClass);
-                            }
-                        } catch (Exception e) {
-                            System.out.println(String.format("Failed to lad class %s due to error %s:%s", className, e.getClass().getSimpleName(), e.getMessage()));
+    private void scanPackagesRecursively(ClassLoader classLoader, Path currentPath, String packageName, List<Class> classList) throws IOException {
+        for (Path nextPath : Files.newDirectoryStream(currentPath)) {
+            if (Files.isDirectory(nextPath)) {
+                scanPackagesRecursively(classLoader, nextPath, packageName+"."+nextPath.getFileName(), classList);
+            } else {
+                if (nextPath.toString().endsWith(".class")) {
+                    String className = (packageName + "/" + nextPath.getFileName().toString()).replace(".class", "").replace("/", ".");
+                    try {
+                        Class<?> loadedClass = classLoader.loadClass(className);
+                        loadedClass.getSimpleName();
+                        if (!loadedClass.isAnnotation()) {
+                            addNestedClasses(loadedClass.getDeclaredClasses(), classList);
+                            classList.add(loadedClass);
                         }
+                    } catch (Error | Exception e) {
+                        System.out.println(String.format("Failed to load class %s due to error %s:%s", className, e.getClass().getSimpleName(), e.getMessage()));
                     }
                 }
             }
