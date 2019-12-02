@@ -1,6 +1,9 @@
 package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.converters.TypeMapper;
+import com.blueveery.springrest2ts.tsmodel.TSClass;
+import com.blueveery.springrest2ts.tsmodel.TSComplexType;
+import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.blueveery.springrest2ts.tsmodel.TSMethod;
 import com.blueveery.springrest2ts.tsmodel.TSParameter;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,9 +11,27 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.SortedSet;
+
 public abstract class BaseImplementationGenerator implements ImplementationGenerator {
 
     protected abstract void initializeHttpParams(StringBuilder requestParamsBuilder);
+
+    protected void writeConstructorImplementation(BufferedWriter writer, TSClass tsClass) throws IOException {
+
+        if (tsClass.getExtendsClass() == null) {
+            for (String name : getImplementationSpecificFieldNames()) {
+                writer.write("this." + name + " = " + name + ";");
+            }
+        }else{
+            writer.write("super(");
+            writer.write(String.join(",", getImplementationSpecificFieldNames()));
+            writer.write(");");
+        }
+    }
 
     protected abstract void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, TSParameter tsParameter, String requestParamName);
 
@@ -100,4 +121,11 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
             return "application/json";
         }
     }
+
+    protected boolean isRestClass(TSComplexType tsComplexType) {
+        return tsComplexType.findAnnotation(RequestMapping.class) != null;
+    }
+
+
+    protected abstract String[] getImplementationSpecificFieldNames();
 }

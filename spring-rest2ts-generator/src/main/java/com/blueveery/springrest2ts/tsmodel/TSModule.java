@@ -11,6 +11,7 @@ import java.util.*;
 import com.blueveery.springrest2ts.converters.TypeMapper;
 
 import com.blueveery.springrest2ts.tsmodel.generics.IParameterizedWithFormalTypes;
+import com.blueveery.springrest2ts.tsmodel.generics.TSFormalTypeParameter;
 import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference;
 import org.slf4j.Logger;
 
@@ -90,6 +91,10 @@ public class TSModule extends TSElement {
         if (referencedType instanceof TSScopedType) {
             TSScopedType referencedScopedType = (TSScopedType) referencedType;
             scopedTypeUsage(referencedScopedType);
+        }
+        if (referencedType instanceof TSFormalTypeParameter) {
+            TSFormalTypeParameter formalTypeParameter = (TSFormalTypeParameter) referencedType;
+            scopedTypeUsage(formalTypeParameter.getBoundTo());
         }
         for (TSType tsType : typeReference.getTsTypeParameterList()) {
             if (tsType instanceof TSParameterizedTypeReference) {

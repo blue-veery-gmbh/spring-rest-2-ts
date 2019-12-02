@@ -13,7 +13,6 @@ import java.util.SortedSet;
 public interface ImplementationGenerator {
     void write(BufferedWriter writer, TSMethod method) throws IOException;
     TSType mapReturnType(TSMethod tsMethod, TSType tsType);
-    SortedSet<TSField> getImplementationSpecificFields(TSComplexType tsComplexType);
     List<TSParameter> getImplementationSpecificParameters(TSMethod method);
 
     List<TSDecorator> getDecorators(TSMethod tsMethod);

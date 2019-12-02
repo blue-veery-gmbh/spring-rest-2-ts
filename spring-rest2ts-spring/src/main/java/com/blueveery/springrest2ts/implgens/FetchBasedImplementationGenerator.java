@@ -12,15 +12,19 @@ import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getReques
 
 public class FetchBasedImplementationGenerator extends BaseImplementationGenerator {
 
-    private SortedSet<TSField> implementationSpecificFieldsSet = new TreeSet<>();
+    private String[] implementationSpecificFieldsSet = {"baseURL"};
     private TSField baseUrlTsField;
 
     @Override
+    protected String[] getImplementationSpecificFieldNames() {
+        return implementationSpecificFieldsSet;
+    }
+
+    @Override
     public void write(BufferedWriter writer, TSMethod method) throws IOException {
+        TSClass tsClass = (TSClass) method.getOwner();
         if (method.isConstructor()) {
-            for (TSField field : implementationSpecificFieldsSet) {
-                writer.write("this." + field.getName() + " = " + field.getName() + ";");
-            }
+            writeConstructorImplementation(writer, tsClass);
         } else {
             RequestMapping methodRequestMapping = getRequestMapping(method.getAnnotationList());
             RequestMapping classRequestMapping = getRequestMapping(method.getOwner().getAnnotationList());
@@ -131,14 +135,6 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     }
 
     @Override
-    public SortedSet<TSField> getImplementationSpecificFields(TSComplexType tsComplexType) {
-        if (isRestClass(tsComplexType)) {
-            return implementationSpecificFieldsSet;
-        }
-        return Collections.emptySortedSet();
-    }
-
-    @Override
     public List<TSParameter> getImplementationSpecificParameters(TSMethod method) {
         if (method.isConstructor() && isRestClass(method.getOwner())) {
             List<TSParameter> tsParameters = new ArrayList<>();
@@ -166,12 +162,10 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
 
     @Override
     public void addImplementationSpecificFields(TSComplexType tsComplexType) {
-        baseUrlTsField = new TSField("baseURL", tsComplexType, new TSInterface("URL", TypeMapper.systemModule));
-        implementationSpecificFieldsSet.add(baseUrlTsField);
+        TSClass tsClass = (TSClass) tsComplexType;
+        if (tsClass.getExtendsClass() == null) {
+            baseUrlTsField = new TSField("baseURL", tsComplexType, new TSInterface("URL", TypeMapper.systemModule));
+            tsClass.getTsFields().add(baseUrlTsField);
+        }
     }
-
-    private boolean isRestClass(TSComplexType tsComplexType) {
-        return tsComplexType.findAnnotation(RequestMapping.class) != null;
-    }
-
 }

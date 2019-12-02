@@ -17,6 +17,10 @@ public class TSFormalTypeParameter extends TSType {
         return super.getName() + (boundTo != null ?  " extends " + boundTo.getName() : "");
     }
 
+    public TSType getBoundTo() {
+        return boundTo;
+    }
+
     public void setBoundTo(TSType boundTo) {
         this.boundTo = boundTo;
     }

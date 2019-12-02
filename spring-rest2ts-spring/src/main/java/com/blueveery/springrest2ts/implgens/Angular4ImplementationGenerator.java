@@ -20,7 +20,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
     private TSClass httpParamsClass;
     private TSClass httpHeadersClass;
     private TSClass urlServiceClass;
-    private Set<TSField> implementationSpecificFieldsSet;
+    private String[] implementationSpecificFieldNames;
 
     private boolean useUrlService;
 
@@ -42,20 +42,27 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
 
         useUrlService = urlServicePath != null;
         if (useUrlService) {
+            implementationSpecificFieldNames = new String[]{FIELD_NAME_HTTP_SERVICE, FIELD_NAME_URL_SERVICE};
             TSModule urlServiceModule = new TSModule("url.service", urlServicePath, false);
             urlServiceClass = new TSClass("UrlService", urlServiceModule, this);
+        }else{
+            implementationSpecificFieldNames = new String[]{FIELD_NAME_HTTP_SERVICE};
         }
     }
 
     @Override
+    protected String[] getImplementationSpecificFieldNames() {
+        return implementationSpecificFieldNames;
+    }
+
+    @Override
     public void write(BufferedWriter writer, TSMethod method) throws IOException {
+        TSClass tsClass = (TSClass) method.getOwner();
         if (method.isConstructor()) {
-            for (TSField field : implementationSpecificFieldsSet) {
-                writer.write("this." + field.getName() + " = " + field.getName() + ";");
-            }
+            writeConstructorImplementation(writer, tsClass);
         } else {
             RequestMapping methodRequestMapping = getRequestMapping(method.getAnnotationList());
-            RequestMapping classRequestMapping = getRequestMapping(method.getOwner().getAnnotationList());
+            RequestMapping classRequestMapping = getRequestMapping(tsClass.getAnnotationList());
 
             String tsPath = useUrlService ? "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" : "'";
             tsPath += getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "'";
@@ -160,36 +167,27 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
         if (isRestClass(tsMethod.getOwner())) {
             return new TSParameterisedType("", observableClass, tsType);
         }
-
         return tsType;
     }
 
-    @Override
-    public SortedSet<TSField> getImplementationSpecificFields(TSComplexType tsComplexType) {
-        if (isRestClass(tsComplexType)) {
-            SortedSet<TSField> fieldsSet = new TreeSet<>();
-            fieldsSet.addAll(implementationSpecificFieldsSet);
-            return fieldsSet;
-        }
-        return Collections.emptySortedSet();
-    }
+
 
     @Override
     public List<TSParameter> getImplementationSpecificParameters(TSMethod method) {
-        if (method.isConstructor() && isRestClass(method.getOwner())) {
+        if (method.isConstructor()) {
             List<TSParameter> tsParameters = new ArrayList<>();
-            for (TSField field : implementationSpecificFieldsSet) {
-                TSParameter newParameter = new TSParameter(field.getName(), field.getType(), this);
-                tsParameters.add(newParameter);
+            TSParameter httpServiceParameter = new TSParameter(FIELD_NAME_HTTP_SERVICE, httpClass, this);
+            tsParameters.add(httpServiceParameter);
+            if (useUrlService) {
+                TSParameter urlServiceParameter = new TSParameter(FIELD_NAME_URL_SERVICE, urlServiceClass, this);
+                tsParameters.add(urlServiceParameter);
             }
             return tsParameters;
         }
         return Collections.emptyList();
     }
 
-    private boolean isRestClass(TSComplexType tsComplexType) {
-        return tsComplexType.findAnnotation(RequestMapping.class) != null;
-    }
+
 
     @Override
     public List<TSDecorator> getDecorators(TSMethod tsMethod) {
@@ -203,24 +201,24 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
 
     @Override
     public void addComplexTypeUsage(TSClass tsClass) {
-        if (isRestClass(tsClass)) {
-            tsClass.addScopedTypeUsage(observableClass);
-            tsClass.addScopedTypeUsage(httpClass);
-            tsClass.addScopedTypeUsage(httpParamsClass);
-            tsClass.addScopedTypeUsage(httpHeadersClass);
-            tsClass.addScopedTypeUsage(injectableDecorator.getTsFunction());
-            if (useUrlService) {
-                tsClass.addScopedTypeUsage(urlServiceClass);
-            }
+        tsClass.addScopedTypeUsage(observableClass);
+        tsClass.addScopedTypeUsage(httpClass);
+        tsClass.addScopedTypeUsage(httpParamsClass);
+        tsClass.addScopedTypeUsage(httpHeadersClass);
+        tsClass.addScopedTypeUsage(injectableDecorator.getTsFunction());
+        if (useUrlService) {
+            tsClass.addScopedTypeUsage(urlServiceClass);
         }
     }
 
     @Override
     public void addImplementationSpecificFields(TSComplexType tsComplexType) {
-        implementationSpecificFieldsSet = new HashSet<>();
-        implementationSpecificFieldsSet.add(new TSField(FIELD_NAME_HTTP_SERVICE, tsComplexType, httpClass));
-        if (useUrlService) {
-            implementationSpecificFieldsSet.add(new TSField(FIELD_NAME_URL_SERVICE, tsComplexType, urlServiceClass));
+        TSClass tsClass = (TSClass) tsComplexType;
+        if (tsClass.getExtendsClass() == null) {
+            tsClass.getTsFields().add(new TSField(FIELD_NAME_HTTP_SERVICE, tsComplexType, httpClass));
+            if (useUrlService) {
+                tsClass.getTsFields().add(new TSField(FIELD_NAME_URL_SERVICE, tsComplexType, urlServiceClass));
+            }
         }
     }
 }

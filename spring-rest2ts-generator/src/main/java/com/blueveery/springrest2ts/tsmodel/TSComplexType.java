@@ -59,21 +59,19 @@ public abstract class TSComplexType extends TSScopedType implements IDecorated, 
             TSArray tsArray = (TSArray) tsType;
             addScopedTypeUsage(tsArray.getElementType());
         }
-        if (tsType instanceof TSParameterizedTypeReference){
-            TSType referencedType = (TSType) ((TSParameterizedTypeReference) tsType).getReferencedType();
-            addScopedTypeUsage(referencedType);
-        }
         if (tsType instanceof TSScopedType) {
             TSScopedType tsScopedType = (TSScopedType) tsType;
             module.scopedTypeUsage(tsScopedType);
+        }
+        if(tsType instanceof TSParameterizedTypeReference){
+            TSParameterizedTypeReference typeReference = (TSParameterizedTypeReference) tsType;
+            module.scopedTypeUsage(typeReference);
         }
     }
 
     protected void writeMembers(BufferedWriter writer) throws IOException {
         implementationGenerator.addImplementationSpecificFields(this);
         writeFields(writer, tsFields);
-        SortedSet<TSField> implementationSpecificFields = implementationGenerator.getImplementationSpecificFields(this);
-        writeFields(writer, implementationSpecificFields);
 
         if (!tsMethods.isEmpty()) {
             writer.newLine();

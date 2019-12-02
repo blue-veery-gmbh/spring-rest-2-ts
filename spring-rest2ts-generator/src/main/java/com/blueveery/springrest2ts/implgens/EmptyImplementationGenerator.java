@@ -15,11 +15,6 @@ public class EmptyImplementationGenerator implements ImplementationGenerator {
     }
 
     @Override
-    public SortedSet<TSField> getImplementationSpecificFields(TSComplexType tsComplexType) {
-        return Collections.emptySortedSet();
-    }
-
-    @Override
     public List<TSParameter> getImplementationSpecificParameters(TSMethod method) {
         return Collections.emptyList();
     }

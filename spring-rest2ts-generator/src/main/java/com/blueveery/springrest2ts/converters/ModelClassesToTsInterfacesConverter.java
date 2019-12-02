@@ -57,7 +57,7 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
         TSInterface tsInterface = tsInterfaceReference.getReferencedType();
         if (!tsInterface.isConverted()) {
             tsInterface.setConverted(true);
-            convertFormalTypeParameters(javaClass.getTypeParameters(), tsInterface);
+            convertFormalTypeParameters(javaClass.getTypeParameters(), tsInterfaceReference);
             if (!javaClass.isInterface()) {
                 if (javaClass.getSuperclass() != Object.class) {
                     TSType superClass = TypeMapper.map(javaClass.getAnnotatedSuperclass().getType());

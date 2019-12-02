@@ -38,7 +38,7 @@ public class TypeMapper {
             return new TSFormalTypeParameter(typeVariable.getName());
         }
         Type javaRawType = javaType;
-        List<TSType> actualParameterList = Collections.emptyList();
+        List<TSType> actualParameterList = new ArrayList<>();
         if(javaType instanceof ParameterizedType){
             ParameterizedType parameterizedType = (ParameterizedType) javaType;
             javaRawType = parameterizedType.getRawType();
