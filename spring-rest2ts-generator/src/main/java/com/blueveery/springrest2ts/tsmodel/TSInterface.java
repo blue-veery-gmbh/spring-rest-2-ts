@@ -21,7 +21,7 @@ public class TSInterface extends TSComplexType {
     }
 
     public void addExtendsInterfaces(TSInterfaceReference tsInterface) {
-        getModule().scopedTypeUsage(tsInterface.getReferencedType());
+        getModule().scopedTypeUsage(tsInterface);
         extendsInterfaces.add(tsInterface);
     }
 

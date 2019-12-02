@@ -69,12 +69,14 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
             }
             String methodName = mapMethodName(restMethodList, methodNamesMap,  method);
             TSType methodReturnType = TypeMapper.map(resolveTypeVariable(genericReturnType, variableNameToJavaType));
+            tsClass.getModule().scopedTypeUsage(methodReturnType);
             TSMethod tsMethod = new TSMethod(methodName, tsClass, methodReturnType, implementationGenerator, false, false);
             for (Parameter parameter:method.getParameters()) {
                 Type parameterType = resolveTypeVariable(parameter.getParameterizedType(), variableNameToJavaType);
                 TSParameter tsParameter = new TSParameter(parameter.getName(), TypeMapper.map(parameterType), implementationGenerator);
                 tsParameter.addAllAnnotations(parameter.getAnnotations());
                 if (parameterIsMapped(tsParameter)) {
+                    tsClass.getModule().scopedTypeUsage(tsParameter.getType());
                     setOptional(tsParameter);
                     nullableTypesStrategy.setAsNullableType(parameter.getParameterizedType(), parameter.getDeclaredAnnotations(), tsParameter);
                     tsMethod.getParameterList().add(tsParameter);

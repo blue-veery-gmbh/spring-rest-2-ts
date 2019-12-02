@@ -32,7 +32,7 @@ public class TSClass extends TSComplexType {
 
     public void setExtendsClass(TSClassReference extendsClass) {
         if(extendsClass!=null){
-            module.scopedTypeUsage(extendsClass.getReferencedType());
+            module.scopedTypeUsage(extendsClass);
         }
         this.extendsClass = extendsClass;
     }
