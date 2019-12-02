@@ -18,21 +18,27 @@ import java.util.*;
  * Created by tomaszw on 03.08.2017.
  */
 public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
-    private ObjectMapper objectMapper;
+    private ObjectMapper defaultObjectMapper;
+    private Map<String, ObjectMapper> objectMapperMap = new HashMap<>();
 
     public ModelClassesToTsInterfacesConverter(ObjectMapper objectMapper) {
         super(new EmptyImplementationGenerator());
-        this.objectMapper = objectMapper;
+        this.defaultObjectMapper = objectMapper;
     }
 
     public ModelClassesToTsInterfacesConverter(ClassNameMapper classNameMapper, ObjectMapper objectMapper) {
         super(new EmptyImplementationGenerator(), classNameMapper);
-        this.objectMapper = objectMapper;
+        this.defaultObjectMapper = objectMapper;
+    }
+
+    public Map<String, ObjectMapper> getObjectMapperMap() {
+        return objectMapperMap;
     }
 
     @Override
     public boolean preConverted(JavaPackageToTsModuleConverter javaPackageToTsModuleConverter, Class javaClass) {
         if (TypeMapper.map(javaClass) == TypeMapper.tsAny) {
+            ObjectMapper objectMapper = selectObjectMapper(javaClass);
             if (objectMapper.filterClass(javaClass)) {
                 TSModule tsModule = javaPackageToTsModuleConverter.getTsModule(javaClass);
                 TSInterface tsInterface = new TSInterface(createTsClassName(javaClass), tsModule);
@@ -46,6 +52,7 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
 
     @Override
     public void convert(Class javaClass, NullableTypesStrategy nullableTypesStrategy) {
+        ObjectMapper objectMapper = selectObjectMapper(javaClass);
         TSInterfaceReference tsInterfaceReference = (TSInterfaceReference) TypeMapper.map(javaClass);
         TSInterface tsInterface = tsInterfaceReference.getReferencedType();
         if (!tsInterface.isConverted()) {
@@ -70,7 +77,7 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
             }
 
 
-            SortedSet<Property> propertySet = getClassProperties(javaClass);
+            SortedSet<Property> propertySet = getClassProperties(javaClass, objectMapper);
 
             for (Property property : propertySet) {
                 List<TSField> tsFieldList = objectMapper.mapJavaPropertyToField(property, tsInterface, this, implementationGenerator, nullableTypesStrategy);
@@ -90,6 +97,18 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
 
     }
 
+    private ObjectMapper selectObjectMapper(Class javaClass) {
+        String packageName = javaClass.getPackage().getName();
+        do{
+            ObjectMapper objectMapper = objectMapperMap.get(packageName);
+            if (objectMapper != null) {
+                return objectMapper;
+            }
+            packageName = packageName.substring(0, packageName.lastIndexOf("."));
+        }while (packageName.contains("."));
+        return defaultObjectMapper;
+    }
+
     private void setAsNullableType(Property property, TSField tsField, NullableTypesStrategy nullableTypesStrategy) {
         if (property.getGetterType() != null) {
             nullableTypesStrategy.setAsNullableType(property.getGetterType(), property.getDeclaredAnnotations(), tsField);
@@ -101,7 +120,7 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
         }
     }
 
-    private SortedSet<Property> getClassProperties(Class javaClass) {
+    private SortedSet<Property> getClassProperties(Class javaClass, ObjectMapper objectMapper) {
         Map<String, Property> propertyMap = new HashMap<>();
         int currentIndex = 0;
 
@@ -136,11 +155,11 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
         return new TreeSet<>(propertyMap.values());
     }
 
-    public boolean couldBeGetter(Method method) {
+    private boolean couldBeGetter(Method method) {
         return method.getParameterCount() == 0 && method.getReturnType() != void.class;
     }
 
-    public boolean couldBeSetter(Method method) {
+    private boolean couldBeSetter(Method method) {
         return method.getParameterCount() == 1 && method.getReturnType() == void.class;
     }
 

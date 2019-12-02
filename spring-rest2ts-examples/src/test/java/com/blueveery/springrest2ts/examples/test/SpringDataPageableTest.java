@@ -1,15 +1,15 @@
 package com.blueveery.springrest2ts.examples.test;
 
+import com.blueveery.springrest2ts.converters.JacksonObjectMapper;
+import com.blueveery.springrest2ts.converters.ModelClassesToTsInterfacesConverter;
 import com.blueveery.springrest2ts.examples.model.core.ParametrizedBaseDTO;
 import com.blueveery.springrest2ts.filters.ExtendsJavaTypeFilter;
 import com.blueveery.springrest2ts.filters.JavaTypeFilter;
 import com.blueveery.springrest2ts.filters.JavaTypeSetFilter;
 import com.blueveery.springrest2ts.filters.OrFilterOperator;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.junit.Test;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -24,6 +24,7 @@ public class SpringDataPageableTest extends TsCodeGenerationsTest {
         JavaTypeFilter modelClassFilter = new ExtendsJavaTypeFilter(ParametrizedBaseDTO.class);
         Set<Class> springDataTypes = new HashSet<>();
         springDataTypes.add(Page.class);
+        springDataTypes.add(PageImpl.class);
         springDataTypes.add(Pageable.class);
         springDataTypes.add(PageRequest.class);
         springDataTypes.add(Sort.class);
@@ -33,6 +34,17 @@ public class SpringDataPageableTest extends TsCodeGenerationsTest {
         tsGenerator.setModelClassesCondition(modelClassesCondition);
         javaPackageSet = new HashSet<>();
         Collections.addAll(javaPackageSet,"com.blueveery.springrest2ts.examples", "org.springframework.data.domain");
+
+        JacksonObjectMapper jacksonObjectMapperForSpringData = new JacksonObjectMapper();
+        jacksonObjectMapperForSpringData.setFieldsVisibility(JsonAutoDetect.Visibility.ANY);
+        jacksonObjectMapperForSpringData.setGettersVisibility(JsonAutoDetect.Visibility.NONE);
+        jacksonObjectMapperForSpringData.setSettersVisibility(JsonAutoDetect.Visibility.NONE);
+        jacksonObjectMapperForSpringData.setIsGetterVisibility(JsonAutoDetect.Visibility.NONE);
+        JacksonObjectMapper jacksonObjectMapper = new JacksonObjectMapper();
+        jacksonObjectMapper.setFieldsVisibility(JsonAutoDetect.Visibility.ANY);
+        modelClassesConverter = new ModelClassesToTsInterfacesConverter(jacksonObjectMapper);
+        modelClassesConverter.getObjectMapperMap().put("org.springframework.data", jacksonObjectMapperForSpringData);
+        tsGenerator.setModelClassesConverter(modelClassesConverter);
 
         tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }
