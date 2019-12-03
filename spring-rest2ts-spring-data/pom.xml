@@ -9,7 +9,7 @@
         <version>1.2.2</version>
     </parent>
 
-    <artifactId>spring-rest2ts-spring</artifactId>
+    <artifactId>spring-rest2ts-spring-data</artifactId>
     <version>1.2.2</version>
 
     <dependencies>
@@ -19,10 +19,16 @@
             <version>1.2.2</version>
         </dependency>
 
+         <dependency>
+            <groupId>org.springframework.data</groupId>
+             <artifactId>spring-data-commons</artifactId>
+             <version>2.1.9.RELEASE</version>
+        </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>4.3.9.RELEASE</version>
+            <groupId>com.blue-veery</groupId>
+            <artifactId>spring-rest2ts-jackson</artifactId>
+            <version>1.2.2</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

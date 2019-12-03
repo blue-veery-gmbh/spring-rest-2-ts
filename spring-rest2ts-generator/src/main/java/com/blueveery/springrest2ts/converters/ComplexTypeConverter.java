@@ -25,6 +25,7 @@ public abstract class ComplexTypeConverter {
     protected DispatcherConversionListener conversionListener = new DispatcherConversionListener();
     protected ImplementationGenerator implementationGenerator;
     protected ClassNameMapper classNameMapper = new NoChangeClassNameMapper();
+    protected List<ConversionExtension> conversionExtensionList = new ArrayList<>();
 
     protected ComplexTypeConverter(ImplementationGenerator implementationGenerator) {
         this.implementationGenerator = implementationGenerator;
@@ -48,6 +49,10 @@ public abstract class ComplexTypeConverter {
 
     public void setClassNameMapper(ClassNameMapper classNameMapper) {
         this.classNameMapper = classNameMapper;
+    }
+
+    public List<ConversionExtension> getConversionExtensionList() {
+        return conversionExtensionList;
     }
 
     protected String createTsClassName(Class javaClass) {

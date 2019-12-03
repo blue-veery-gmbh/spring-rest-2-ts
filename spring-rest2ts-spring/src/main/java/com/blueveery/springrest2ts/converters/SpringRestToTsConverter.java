@@ -6,7 +6,6 @@ import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -263,8 +262,10 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
         if (tsParameter.getType() instanceof TSInterfaceReference) {
             TSInterfaceReference tsInterfaceReference = (TSInterfaceReference) tsParameter.getType();
             for (Class nextClass : tsInterfaceReference.getReferencedType().getMappedFromJavaTypeSet()) {
-                if (nextClass.isAssignableFrom(Pageable.class)) {
-                    return true;
+                for (ConversionExtension extension : getConversionExtensionList()) {
+                    if (extension.isMappedRestParam(nextClass)) {
+                        return true;
+                    }
                 }
             }
         }

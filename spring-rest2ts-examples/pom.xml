@@ -83,6 +83,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.blue-veery</groupId>
+            <artifactId>spring-rest2ts-spring-data</artifactId>
+            <version>1.2.2</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 

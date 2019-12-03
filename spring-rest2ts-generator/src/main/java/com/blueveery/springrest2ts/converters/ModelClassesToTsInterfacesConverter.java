@@ -17,22 +17,14 @@ import java.util.*;
 /**
  * Created by tomaszw on 03.08.2017.
  */
-public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
-    private ObjectMapper defaultObjectMapper;
-    private Map<String, ObjectMapper> objectMapperMap = new HashMap<>();
+public class ModelClassesToTsInterfacesConverter extends ModelClassesAbstractConverter {
 
     public ModelClassesToTsInterfacesConverter(ObjectMapper objectMapper) {
-        super(new EmptyImplementationGenerator());
-        this.defaultObjectMapper = objectMapper;
+        super(new EmptyImplementationGenerator(), objectMapper);
     }
 
     public ModelClassesToTsInterfacesConverter(ClassNameMapper classNameMapper, ObjectMapper objectMapper) {
-        super(new EmptyImplementationGenerator(), classNameMapper);
-        this.defaultObjectMapper = objectMapper;
-    }
-
-    public Map<String, ObjectMapper> getObjectMapperMap() {
-        return objectMapperMap;
+        super(new EmptyImplementationGenerator(), classNameMapper, objectMapper);
     }
 
     @Override
@@ -95,18 +87,6 @@ public class ModelClassesToTsInterfacesConverter extends ComplexTypeConverter {
             conversionListener.tsScopedTypeCreated(javaClass, tsInterface);
         }
 
-    }
-
-    private ObjectMapper selectObjectMapper(Class javaClass) {
-        String packageName = javaClass.getPackage().getName();
-        do{
-            ObjectMapper objectMapper = objectMapperMap.get(packageName);
-            if (objectMapper != null) {
-                return objectMapper;
-            }
-            packageName = packageName.substring(0, packageName.lastIndexOf("."));
-        }while (packageName.contains("."));
-        return defaultObjectMapper;
     }
 
     private void setAsNullableType(Property property, TSField tsField, NullableTypesStrategy nullableTypesStrategy) {

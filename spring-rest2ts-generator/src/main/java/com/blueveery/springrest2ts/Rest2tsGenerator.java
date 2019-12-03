@@ -2,6 +2,7 @@ package com.blueveery.springrest2ts;
 
 import com.blueveery.springrest2ts.converters.*;
 import com.blueveery.springrest2ts.filters.JavaTypeFilter;
+import com.blueveery.springrest2ts.filters.OrFilterOperator;
 import com.blueveery.springrest2ts.filters.RejectJavaTypeFilter;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
@@ -33,7 +34,7 @@ public class Rest2tsGenerator {
 
     private JavaPackageToTsModuleConverter javaPackageToTsModuleConverter = new TsModuleCreatorConverter(2);
     private ComplexTypeConverter enumConverter = new JavaEnumToTsEnumConverter();;
-    private ComplexTypeConverter modelClassesConverter;
+    private ModelClassesAbstractConverter modelClassesConverter;
     private ComplexTypeConverter restClassesConverter;
 
     public Map<Class, TSType> getCustomTypeMapping() {
@@ -56,7 +57,7 @@ public class Rest2tsGenerator {
         this.enumConverter = enumConverter;
     }
 
-    public void setModelClassesConverter(ComplexTypeConverter modelClassesConverter) {
+    public void setModelClassesConverter(ModelClassesAbstractConverter modelClassesConverter) {
         this.modelClassesConverter = modelClassesConverter;
     }
 
@@ -68,10 +69,20 @@ public class Rest2tsGenerator {
         this.nullableTypesStrategy = nullableTypesStrategy;
     }
 
-    public SortedSet<TSModule> generate(Set<String> packagesNames, Path outputDir) throws IOException {
+    public SortedSet<TSModule> generate(Set<String> inputPackagesNames, Path outputDir) throws IOException {
         Set<Class> modelClasses = new HashSet<>();
         Set<Class> restClasses = new HashSet<>();
         Set<Class> enumClasses = new HashSet<>();
+        Set<String> packagesNames = new HashSet<>(inputPackagesNames);
+        List<ConversionExtension> conversionExtensionList = new ArrayList<>();
+        if (modelClassesConverter != null) {
+            conversionExtensionList.addAll(modelClassesConverter.getConversionExtensionList());
+        }
+        if (restClassesConverter != null) {
+            conversionExtensionList.addAll(restClassesConverter.getConversionExtensionList());
+        }
+
+        applyConversionExtension(conversionExtensionList, packagesNames);
 
         logger.info("Scanning model classes");
         List<Class> loadedClasses= loadClasses(packagesNames);
@@ -108,6 +119,50 @@ public class Rest2tsGenerator {
         writeTSModules(javaPackageToTsModuleConverter.getTsModules(), outputDir, logger);
 
         return javaPackageToTsModuleConverter.getTsModules();
+    }
+
+    private void applyConversionExtension(List<ConversionExtension> conversionExtensionList, Set<String> packagesNames) {
+        List<JavaTypeFilter> modelClassFilterList = new ArrayList<>();
+        List<JavaTypeFilter> restClassFilterList = new ArrayList<>();
+        for (ConversionExtension extension : conversionExtensionList) {
+            if (extension.getModelClassesJavaTypeFilter() != null) {
+                modelClassFilterList.add(extension.getModelClassesJavaTypeFilter());
+            }
+            if (extension.getRestClassesJavaTypeFilter() != null) {
+                restClassFilterList.add(extension.getRestClassesJavaTypeFilter());
+            }
+            packagesNames.addAll(extension.getAdditionalJavaPackages());
+            if (!extension.getObjectMapperMap().isEmpty()) {
+                if (modelClassesConverter == null) {
+                    throw new IllegalStateException("There is installed extension which requires model classes converter");
+                }
+                modelClassesConverter.getObjectMapperMap().putAll(extension.getObjectMapperMap());
+            }
+            if (modelClassesConverter != null){
+                modelClassesConverter.getConversionListener().getConversionListenerSet().add(extension);
+            }
+            if (restClassesConverter != null){
+                restClassesConverter.getConversionListener().getConversionListenerSet().add(extension);
+            }
+        }
+
+        if (!modelClassFilterList.isEmpty()) {
+            if (modelClassesConverter == null) {
+                throw new IllegalStateException("There is installed extension which requires model classes converter");
+            }
+            modelClassFilterList.add(modelClassesCondition);
+            OrFilterOperator orFilterOperator = new OrFilterOperator(modelClassFilterList);
+            modelClassesCondition = orFilterOperator;
+        }
+        if (!restClassFilterList.isEmpty()) {
+            if (restClassesConverter == null) {
+                throw new IllegalStateException("There is installed extension which requires REST classes converter");
+            }
+            restClassFilterList.add(restClassesCondition);
+            OrFilterOperator orFilterOperator = new OrFilterOperator(restClassFilterList);
+            restClassesCondition = orFilterOperator;
+        }
+
     }
 
     private void registerCustomTypesMapping(Map<Class, TSType> customTypeMapping) {
