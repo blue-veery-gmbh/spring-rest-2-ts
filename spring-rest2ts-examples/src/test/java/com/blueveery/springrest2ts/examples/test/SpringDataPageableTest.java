@@ -23,10 +23,9 @@ public class SpringDataPageableTest extends TsCodeGenerationsTest {
     public void controllerWithPageableParam() throws IOException {
         JavaTypeFilter modelClassFilter = new ExtendsJavaTypeFilter(ParametrizedBaseDTO.class);
         Set<Class> springDataTypes = new HashSet<>();
+        springDataTypes.add(Slice.class);
         springDataTypes.add(Page.class);
-        springDataTypes.add(PageImpl.class);
         springDataTypes.add(Pageable.class);
-        springDataTypes.add(PageRequest.class);
         springDataTypes.add(Sort.class);
         springDataTypes.add(Sort.Order.class);
         JavaTypeFilter springDataTypesFilter = new JavaTypeSetFilter(springDataTypes);
@@ -36,10 +35,6 @@ public class SpringDataPageableTest extends TsCodeGenerationsTest {
         Collections.addAll(javaPackageSet,"com.blueveery.springrest2ts.examples", "org.springframework.data.domain");
 
         JacksonObjectMapper jacksonObjectMapperForSpringData = new JacksonObjectMapper();
-        jacksonObjectMapperForSpringData.setFieldsVisibility(JsonAutoDetect.Visibility.ANY);
-        jacksonObjectMapperForSpringData.setGettersVisibility(JsonAutoDetect.Visibility.NONE);
-        jacksonObjectMapperForSpringData.setSettersVisibility(JsonAutoDetect.Visibility.NONE);
-        jacksonObjectMapperForSpringData.setIsGetterVisibility(JsonAutoDetect.Visibility.NONE);
         JacksonObjectMapper jacksonObjectMapper = new JacksonObjectMapper();
         jacksonObjectMapper.setFieldsVisibility(JsonAutoDetect.Visibility.ANY);
         modelClassesConverter = new ModelClassesToTsInterfacesConverter(jacksonObjectMapper);
