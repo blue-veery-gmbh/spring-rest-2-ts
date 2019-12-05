@@ -1,12 +1,13 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.extensions.ModelConversionExtension;
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class ModelClassesAbstractConverter extends ComplexTypeConverter{
+public abstract class ModelClassesAbstractConverter extends ClassConverter<ModelConversionExtension>{
     protected ObjectMapper defaultObjectMapper;
     private Map<String, ObjectMapper> objectMapperMap = new HashMap<>();
 

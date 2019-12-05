@@ -1,6 +1,9 @@
 package com.blueveery.springrest2ts;
 
 import com.blueveery.springrest2ts.converters.*;
+import com.blueveery.springrest2ts.extensions.ConversionExtension;
+import com.blueveery.springrest2ts.extensions.ModelConversionExtension;
+import com.blueveery.springrest2ts.extensions.RestConversionExtension;
 import com.blueveery.springrest2ts.filters.JavaTypeFilter;
 import com.blueveery.springrest2ts.filters.OrFilterOperator;
 import com.blueveery.springrest2ts.filters.RejectJavaTypeFilter;
@@ -9,10 +12,7 @@ import com.blueveery.springrest2ts.tsmodel.TSType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -35,7 +35,7 @@ public class Rest2tsGenerator {
     private JavaPackageToTsModuleConverter javaPackageToTsModuleConverter = new TsModuleCreatorConverter(2);
     private ComplexTypeConverter enumConverter = new JavaEnumToTsEnumConverter();;
     private ModelClassesAbstractConverter modelClassesConverter;
-    private ComplexTypeConverter restClassesConverter;
+    private RestClassConverter restClassesConverter;
 
     public Map<Class, TSType> getCustomTypeMapping() {
         return customTypeMapping;
@@ -61,7 +61,7 @@ public class Rest2tsGenerator {
         this.modelClassesConverter = modelClassesConverter;
     }
 
-    public void setRestClassesConverter(ComplexTypeConverter restClassesConverter) {
+    public void setRestClassesConverter(RestClassConverter restClassesConverter) {
         this.restClassesConverter = restClassesConverter;
     }
 
@@ -75,14 +75,8 @@ public class Rest2tsGenerator {
         Set<Class> enumClasses = new HashSet<>();
         Set<String> packagesNames = new HashSet<>(inputPackagesNames);
         List<ConversionExtension> conversionExtensionList = new ArrayList<>();
-        if (modelClassesConverter != null) {
-            conversionExtensionList.addAll(modelClassesConverter.getConversionExtensionList());
-        }
-        if (restClassesConverter != null) {
-            conversionExtensionList.addAll(restClassesConverter.getConversionExtensionList());
-        }
 
-        applyConversionExtension(conversionExtensionList, packagesNames);
+        applyConversionExtension(packagesNames);
 
         logger.info("Scanning model classes");
         List<Class> loadedClasses= loadClasses(packagesNames);
@@ -121,30 +115,29 @@ public class Rest2tsGenerator {
         return javaPackageToTsModuleConverter.getTsModules();
     }
 
-    private void applyConversionExtension(List<ConversionExtension> conversionExtensionList, Set<String> packagesNames) {
+    private void applyConversionExtension(Set<String> packagesNames) {
         List<JavaTypeFilter> modelClassFilterList = new ArrayList<>();
-        List<JavaTypeFilter> restClassFilterList = new ArrayList<>();
-        for (ConversionExtension extension : conversionExtensionList) {
-            if (extension.getModelClassesJavaTypeFilter() != null) {
-                modelClassFilterList.add(extension.getModelClassesJavaTypeFilter());
-            }
-            if (extension.getRestClassesJavaTypeFilter() != null) {
-                restClassFilterList.add(extension.getRestClassesJavaTypeFilter());
+        List<ModelConversionExtension> modelConversionExtensionList = getModelConversionExtensions();
+        for (ModelConversionExtension extension : modelConversionExtensionList) {
+            if (extension.getJavaTypeFilter() != null) {
+                modelClassFilterList.add(extension.getJavaTypeFilter());
             }
             packagesNames.addAll(extension.getAdditionalJavaPackages());
-            if (!extension.getObjectMapperMap().isEmpty()) {
-                if (modelClassesConverter == null) {
-                    throw new IllegalStateException("There is installed extension which requires model classes converter");
+            modelClassesConverter.getObjectMapperMap().putAll(extension.getObjectMapperMap());
+            modelClassesConverter.getConversionListener().getConversionListenerSet().add(extension);
+        }
+
+        List<JavaTypeFilter> restClassFilterList = new ArrayList<>();
+        if (restClassesConverter != null) {
+            for (RestConversionExtension extension : restClassesConverter.getConversionExtensionList()) {
+                if (extension.getJavaTypeFilter() != null) {
+                    restClassFilterList.add(extension.getJavaTypeFilter());
                 }
-                modelClassesConverter.getObjectMapperMap().putAll(extension.getObjectMapperMap());
-            }
-            if (modelClassesConverter != null){
-                modelClassesConverter.getConversionListener().getConversionListenerSet().add(extension);
-            }
-            if (restClassesConverter != null){
+                packagesNames.addAll(extension.getAdditionalJavaPackages());
                 restClassesConverter.getConversionListener().getConversionListenerSet().add(extension);
             }
         }
+
 
         if (!modelClassFilterList.isEmpty()) {
             if (modelClassesConverter == null) {
@@ -163,6 +156,22 @@ public class Rest2tsGenerator {
             restClassesCondition = orFilterOperator;
         }
 
+    }
+
+    private List<ModelConversionExtension> getModelConversionExtensions() {
+        List<ModelConversionExtension> modelConversionExtensionList = new ArrayList<>();
+        if (restClassesConverter != null) {
+            for (RestConversionExtension restConversionExtension : restClassesConverter.getConversionExtensionList()) {
+                ModelConversionExtension modelConversionExtension = restConversionExtension.getModelConversionExtension();
+                if (modelConversionExtension != null) {
+                    modelConversionExtensionList.add(modelConversionExtension);
+                }
+            }
+        }
+        if (modelClassesConverter != null) {
+            modelConversionExtensionList.addAll(modelClassesConverter.getConversionExtensionList());
+        }
+        return modelConversionExtensionList;
     }
 
     private void registerCustomTypesMapping(Map<Class, TSType> customTypeMapping) {

@@ -1,19 +1,19 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.extensions.ModelConversionExtension;
 import com.blueveery.springrest2ts.filters.JavaTypeFilter;
 import com.blueveery.springrest2ts.filters.JavaTypeSetFilter;
 import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 
 import java.util.*;
 
-public class SpringDataConversionExtension implements ConversionExtension {
-    @Override
-    public JavaTypeFilter getModelClassesJavaTypeFilter() {
+public class SpringDataModelConversionExtension implements ModelConversionExtension {
+    public JavaTypeFilter getJavaTypeFilter() {
         Set<Class> springDataTypes = new HashSet<>();
         springDataTypes.add(Slice.class);
         springDataTypes.add(Page.class);
@@ -22,11 +22,6 @@ public class SpringDataConversionExtension implements ConversionExtension {
         springDataTypes.add(Sort.Order.class);
         JavaTypeFilter springDataTypesFilter = new JavaTypeSetFilter(springDataTypes);
         return springDataTypesFilter;
-    }
-
-    @Override
-    public JavaTypeFilter getRestClassesJavaTypeFilter() {
-        return null;
     }
 
     @Override
@@ -41,11 +36,6 @@ public class SpringDataConversionExtension implements ConversionExtension {
         Map<String, ObjectMapper> objectMapperMap = new HashMap<>();
         objectMapperMap.put("org.springframework.data", jacksonObjectMapperForSpringData);
         return objectMapperMap;
-    }
-
-    @Override
-    public boolean isMappedRestParam(Class aClass) {
-        return aClass.isAssignableFrom(Pageable.class);
     }
 
     @Override

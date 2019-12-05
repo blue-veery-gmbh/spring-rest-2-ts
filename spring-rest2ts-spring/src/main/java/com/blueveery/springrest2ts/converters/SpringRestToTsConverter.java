@@ -1,6 +1,8 @@
 package com.blueveery.springrest2ts.converters;
 
 import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getRequestMapping;
+
+import com.blueveery.springrest2ts.extensions.RestConversionExtension;
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
@@ -14,7 +16,7 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SpringRestToTsConverter extends ComplexTypeConverter{
+public class SpringRestToTsConverter extends RestClassConverter{
 
     public SpringRestToTsConverter(ImplementationGenerator implementationGenerator) {
         super(implementationGenerator);
@@ -262,7 +264,7 @@ public class SpringRestToTsConverter extends ComplexTypeConverter{
         if (tsParameter.getType() instanceof TSInterfaceReference) {
             TSInterfaceReference tsInterfaceReference = (TSInterfaceReference) tsParameter.getType();
             for (Class nextClass : tsInterfaceReference.getReferencedType().getMappedFromJavaTypeSet()) {
-                for (ConversionExtension extension : getConversionExtensionList()) {
+                for (RestConversionExtension extension : getConversionExtensionList()) {
                     if (extension.isMappedRestParam(nextClass)) {
                         return true;
                     }
