@@ -25,22 +25,48 @@ public class SpringDataRestConversionExtension implements RestConversionExtensio
     }
 
     @Override
-    public void tsMethodCreated(Method method, TSMethod tsMethod) {
-        for (TSParameter tsParameter : tsMethod.getParameterList()) {
-            if (tsParameter.getType() instanceof TSParameterizedTypeReference<?>) {
-                TSParameterizedTypeReference<?> typeReference = (TSParameterizedTypeReference<?>) tsParameter.getType();
-                TSScopedType tsScopedType = (TSScopedType) typeReference.getReferencedType();
-                for (Class aClass : tsScopedType.getMappedFromJavaTypeSet()) {
-                    if (aClass.isAssignableFrom(Pageable.class)) {
-                        for (Annotation annotation : tsParameter.getAnnotationList()) {
-                            if (annotation.annotationType() == PageableDefault.class) {
-                                tsParameter.setOptional(true);
-                                return;
-                            }
+    public boolean isMappedRestParam(TSParameter tsParameter) {
+        if (tsParameter.getType() instanceof TSParameterizedTypeReference<?>) {
+            TSParameterizedTypeReference<?> typeReference = (TSParameterizedTypeReference<?>) tsParameter.getType();
+            TSScopedType tsScopedType = (TSScopedType) typeReference.getReferencedType();
+            for (Class aClass : tsScopedType.getMappedFromJavaTypeSet()) {
+                if (aClass.isAssignableFrom(Pageable.class)) {
+                    for (Annotation annotation : tsParameter.getAnnotationList()) {
+                        if (annotation.annotationType() == PageableDefault.class) {
+                            return true;
                         }
                     }
                 }
             }
         }
+        return false;
+    }
+
+    @Override
+    public void tsMethodCreated(Method method, TSMethod tsMethod) {
+        for (TSParameter tsParameter : tsMethod.getParameterList()) {
+            if (isMappedRestParam(tsParameter)) {
+                tsParameter.setOptional(true);
+            }
+        }
+    }
+
+
+    @Override
+    public String generateImplementation(TSParameter tsParameter, String pathParamsMap, String queryParamsMap) {
+        String mapAssignment = "%s['%s'] = %s;";
+
+        String forOfTemplate = "for(const %s of %s) {%s}";
+        StringBuilder code = new StringBuilder();
+        code.append(String.format(mapAssignment, queryParamsMap, "number", tsParameter.getName() + ".pageNumber+''"));
+        code.append(String.format(mapAssignment, queryParamsMap, "size", tsParameter.getName() + ".pageSize+''"));
+
+        String sortField = tsParameter.getName() + ".sort";
+        String sortValue = "sortOrder.property + (!sortOrder.ascending ? ',DESC' : ''); ";
+        String sortMapAssignment =  String.format(mapAssignment, queryParamsMap, "sort", sortValue);
+        String sortSerializationFor = String.format(forOfTemplate, "sortOrder", sortField, sortMapAssignment);
+        code.append(String.format("if(%s) {%s}", sortField, sortSerializationFor));
+
+        return String.format("if(%s) {%s}", tsParameter.getName(), code.toString());
     }
 }

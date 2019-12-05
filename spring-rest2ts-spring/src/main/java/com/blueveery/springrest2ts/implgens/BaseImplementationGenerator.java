@@ -1,9 +1,10 @@
 package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.converters.TypeMapper;
+import com.blueveery.springrest2ts.extensions.ConversionExtension;
+import com.blueveery.springrest2ts.extensions.RestConversionExtension;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
 import com.blueveery.springrest2ts.tsmodel.TSComplexType;
-import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.blueveery.springrest2ts.tsmodel.TSMethod;
 import com.blueveery.springrest2ts.tsmodel.TSParameter;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,10 +14,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.SortedSet;
+import java.util.List;
 
 public abstract class BaseImplementationGenerator implements ImplementationGenerator {
+
+    protected List<? extends ConversionExtension> extensionSet;
+
+    @Override
+    public void setExtensions(List<? extends ConversionExtension> conversionExtensionSet) {
+        this.extensionSet = conversionExtensionSet;
+    }
 
     protected abstract void initializeHttpParams(StringBuilder requestParamsBuilder);
 
@@ -95,6 +102,15 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
                 } else {
                     addRequestParameter(requestParamsBuilder, requestParamsVar, tsParameter, requestParamName);
                 }
+            }
+            for (ConversionExtension conversionExtension : extensionSet) {
+                RestConversionExtension restConversionExtension = (RestConversionExtension) conversionExtension;
+                if (restConversionExtension.isMappedRestParam(tsParameter)) {
+                    //todo
+                    System.out.println(restConversionExtension.generateImplementation(tsParameter, "pathParamsMap", "queryParamsMap"));
+                    continue;
+                }
+
             }
 
         }

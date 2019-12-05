@@ -51,6 +51,10 @@ public abstract class ComplexTypeConverter {
         this.classNameMapper = classNameMapper;
     }
 
+    public ImplementationGenerator getImplementationGenerator() {
+        return implementationGenerator;
+    }
+
     protected String createTsClassName(Class javaClass) {
         List<String> classNameComponentList = new ArrayList<>();
         do {

@@ -7,6 +7,7 @@ import com.blueveery.springrest2ts.extensions.RestConversionExtension;
 import com.blueveery.springrest2ts.filters.JavaTypeFilter;
 import com.blueveery.springrest2ts.filters.OrFilterOperator;
 import com.blueveery.springrest2ts.filters.RejectJavaTypeFilter;
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import org.slf4j.Logger;
@@ -74,8 +75,6 @@ public class Rest2tsGenerator {
         Set<Class> restClasses = new HashSet<>();
         Set<Class> enumClasses = new HashSet<>();
         Set<String> packagesNames = new HashSet<>(inputPackagesNames);
-        List<ConversionExtension> conversionExtensionList = new ArrayList<>();
-
         applyConversionExtension(packagesNames);
 
         logger.info("Scanning model classes");
@@ -136,6 +135,8 @@ public class Rest2tsGenerator {
                 packagesNames.addAll(extension.getAdditionalJavaPackages());
                 restClassesConverter.getConversionListener().getConversionListenerSet().add(extension);
             }
+            ImplementationGenerator implementationGenerator = restClassesConverter.getImplementationGenerator();
+            implementationGenerator.setExtensions(restClassesConverter.getConversionExtensionList());
         }
 
 
