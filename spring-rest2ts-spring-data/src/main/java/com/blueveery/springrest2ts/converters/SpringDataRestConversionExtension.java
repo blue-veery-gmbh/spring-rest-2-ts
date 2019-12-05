@@ -2,8 +2,13 @@ package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.extensions.ModelConversionExtension;
 import com.blueveery.springrest2ts.extensions.RestConversionExtension;
-import com.blueveery.springrest2ts.tsmodel.TSField;
+import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 public class SpringDataRestConversionExtension implements RestConversionExtension {
 
@@ -20,18 +25,21 @@ public class SpringDataRestConversionExtension implements RestConversionExtensio
     }
 
     @Override
-    public void tsFieldCreated(Property property, TSField tsField) {
-        boolean containsPage = tsField.getOwner().getMappedFromJavaTypeSet().contains(Pageable.class);
-        if (containsPage) {
-            if (tsField.getName().equals("pageNumber") || tsField.getName().equals("pageSize")) {
-                tsField.setReadOnly(false);
-            } else {
-                tsField.setOptional(true);
-            }
-
-            if (tsField.getName().equals("sort")){
-                tsField.setReadOnly(false);
-                tsField.setOptional(true);
+    public void tsMethodCreated(Method method, TSMethod tsMethod) {
+        for (TSParameter tsParameter : tsMethod.getParameterList()) {
+            if (tsParameter.getType() instanceof TSParameterizedTypeReference<?>) {
+                TSParameterizedTypeReference<?> typeReference = (TSParameterizedTypeReference<?>) tsParameter.getType();
+                TSScopedType tsScopedType = (TSScopedType) typeReference.getReferencedType();
+                for (Class aClass : tsScopedType.getMappedFromJavaTypeSet()) {
+                    if (aClass.isAssignableFrom(Pageable.class)) {
+                        for (Annotation annotation : tsParameter.getAnnotationList()) {
+                            if (annotation.annotationType() == PageableDefault.class) {
+                                tsParameter.setOptional(true);
+                                return;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
