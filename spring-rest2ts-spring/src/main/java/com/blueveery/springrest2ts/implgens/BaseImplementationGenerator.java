@@ -107,7 +107,7 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
                 RestConversionExtension restConversionExtension = (RestConversionExtension) conversionExtension;
                 if (restConversionExtension.isMappedRestParam(tsParameter)) {
                     //todo
-                    System.out.println(restConversionExtension.generateImplementation(tsParameter, "pathParamsMap", "queryParamsMap"));
+                    System.out.println(restConversionExtension.generateImplementation(tsParameter, "pathParamsList", "queryParamsList"));
                     continue;
                 }
 

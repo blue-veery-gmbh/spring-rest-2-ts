@@ -53,17 +53,17 @@ public class SpringDataRestConversionExtension implements RestConversionExtensio
 
 
     @Override
-    public String generateImplementation(TSParameter tsParameter, String pathParamsMap, String queryParamsMap) {
-        String mapAssignment = "%s['%s'] = %s;";
+    public String generateImplementation(TSParameter tsParameter, String pathParamsList, String queryParamsList) {
+        String arrayAssignment = "%s.push({name: '%s', value: %s }";
 
         String forOfTemplate = "for(const %s of %s) {%s}";
         StringBuilder code = new StringBuilder();
-        code.append(String.format(mapAssignment, queryParamsMap, "number", tsParameter.getName() + ".pageNumber+''"));
-        code.append(String.format(mapAssignment, queryParamsMap, "size", tsParameter.getName() + ".pageSize+''"));
+        code.append(String.format(arrayAssignment, queryParamsList, "number", tsParameter.getName() + ".pageNumber+''"));
+        code.append(String.format(arrayAssignment, queryParamsList, "size", tsParameter.getName() + ".pageSize+''"));
 
         String sortField = tsParameter.getName() + ".sort";
         String sortValue = "sortOrder.property + (!sortOrder.ascending ? ',DESC' : ''); ";
-        String sortMapAssignment =  String.format(mapAssignment, queryParamsMap, "sort", sortValue);
+        String sortMapAssignment =  String.format(arrayAssignment, queryParamsList, "sort", sortValue);
         String sortSerializationFor = String.format(forOfTemplate, "sortOrder", sortField, sortMapAssignment);
         code.append(String.format("if(%s) {%s}", sortField, sortSerializationFor));
 

@@ -11,5 +11,5 @@ public interface RestConversionExtension extends ConversionExtension{
         return null;
     }
 
-    String generateImplementation(TSParameter tsParameter, String pathParamsMap, String queryParamsMap);
+    String generateImplementation(TSParameter tsParameter, String pathParamsList, String queryParamsList);
 }
