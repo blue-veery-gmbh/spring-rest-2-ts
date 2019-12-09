@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getRequestMapping;
 
@@ -45,7 +47,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
             implementationSpecificFieldNames = new String[]{FIELD_NAME_HTTP_SERVICE, FIELD_NAME_URL_SERVICE};
             TSModule urlServiceModule = new TSModule("url.service", urlServicePath, false);
             urlServiceClass = new TSClass("UrlService", urlServiceModule, this);
-        }else{
+        } else {
             implementationSpecificFieldNames = new String[]{FIELD_NAME_HTTP_SERVICE};
         }
     }
@@ -79,7 +81,8 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
 
             boolean isRequestBodyDefined = !isStringBuilderEmpty(requestBodyBuilder);
             boolean isRequestParamDefined = !isStringBuilderEmpty(requestParamsBuilder);
-            writeRequestOption(writer, requestParamsVar, requestParamsBuilder.toString(), isRequestParamDefined);
+            writer.write(requestParamsBuilder.toString());
+            writer.newLine();
 
             String contentTypeHeader = getContentTypeHeaderFromRequestMapping(httpMethod, methodRequestMapping, isRequestBodyDefined);
             boolean isRequestHeaderDefined = !contentTypeHeader.isEmpty();
@@ -98,24 +101,24 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
         }
     }
 
-    protected void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, TSParameter tsParameter, String requestParamName) {
-        String tsParameterName = callToStringOnParameterIfRequired(tsParameter);
+
+    protected void initializeHttpParams(StringBuilder requestParamsBuilder, String requestParamsVar) {
+        requestParamsBuilder
+                .append("let ")
+                .append(requestParamsVar)
+                .append(" = new HttpParams();");
+    }
+
+    @Override
+    protected void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, String queryParamVar) {
         requestParamsBuilder
                 .append("\n")
                 .append(requestParamsVar)
                 .append(" = ")
                 .append(requestParamsVar)
-                .append(".set('")
-                .append(requestParamName)
-                .append("',").append(tsParameterName)
+                .append(".append(").append(queryParamVar).append(".name")
+                .append(",").append(queryParamVar).append(".value")
                 .append(");");
-    }
-
-
-    protected void initializeHttpParams(StringBuilder requestParamsBuilder) {
-        if (isStringBuilderEmpty(requestParamsBuilder)) {
-            requestParamsBuilder.append(" new HttpParams();");
-        }
     }
 
     private void writeRequestOption(BufferedWriter writer, String requestOption, String requestOptionValue, boolean isOptionDefined) throws IOException {
@@ -171,7 +174,6 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
     }
 
 
-
     @Override
     public List<TSParameter> getImplementationSpecificParameters(TSMethod method) {
         if (method.isConstructor()) {
@@ -186,7 +188,6 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
         }
         return Collections.emptyList();
     }
-
 
 
     @Override

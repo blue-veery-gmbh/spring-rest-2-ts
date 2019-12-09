@@ -2,7 +2,9 @@ package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.extensions.ModelConversionExtension;
 import com.blueveery.springrest2ts.extensions.RestConversionExtension;
-import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.tsmodel.TSMethod;
+import com.blueveery.springrest2ts.tsmodel.TSParameter;
+import com.blueveery.springrest2ts.tsmodel.TSScopedType;
 import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -54,7 +56,7 @@ public class SpringDataRestConversionExtension implements RestConversionExtensio
 
     @Override
     public String generateImplementation(TSParameter tsParameter, String pathParamsList, String queryParamsList) {
-        String arrayAssignment = "%s.push({name: '%s', value: %s }";
+        String arrayAssignment = "%s.push({name: '%s', value: %s });";
 
         String forOfTemplate = "for(const %s of %s) {%s}";
         StringBuilder code = new StringBuilder();
@@ -62,7 +64,7 @@ public class SpringDataRestConversionExtension implements RestConversionExtensio
         code.append(String.format(arrayAssignment, queryParamsList, "size", tsParameter.getName() + ".pageSize+''"));
 
         String sortField = tsParameter.getName() + ".sort";
-        String sortValue = "sortOrder.property + (!sortOrder.ascending ? ',DESC' : ''); ";
+        String sortValue = "sortOrder.property + (!sortOrder.ascending ? ',DESC' : '') ";
         String sortMapAssignment =  String.format(arrayAssignment, queryParamsList, "sort", sortValue);
         String sortSerializationFor = String.format(forOfTemplate, "sortOrder", sortField, sortMapAssignment);
         code.append(String.format("if(%s) {%s}", sortField, sortSerializationFor));

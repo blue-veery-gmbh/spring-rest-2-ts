@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getRequestMapping;
 
@@ -87,21 +89,19 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
         return ".then(res =>  " + parseFunction + ")";
     }
 
-    protected void initializeHttpParams(StringBuilder requestParamsBuilder) {
+    protected void initializeHttpParams(StringBuilder requestParamsBuilder, String requestParamsVar) {
 
     }
 
-    protected void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, TSParameter tsParameter, String requestParamName) {
-        String tsParameterName = callToStringOnParameterIfRequired(tsParameter);
+    @Override
+    protected void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, String queryParamVar) {
         requestParamsBuilder
                 .append("\n")
                 .append(requestParamsVar)
-                .append(".append('")
-                .append(requestParamName)
-                .append("',").append(tsParameterName)
+                .append(".append(").append(queryParamVar).append(".name")
+                .append(",").append(queryParamVar).append(".value")
                 .append(");");
     }
-
 
     private String composeRequestOptions(String requestBodyVar, boolean isRequestBodyDefined, String httpMethod, String[] consumesContentType) {
         String requestOptions = "";
