@@ -104,23 +104,23 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
             for (ConversionExtension conversionExtension : extensionSet) {
                 RestConversionExtension restConversionExtension = (RestConversionExtension) conversionExtension;
                 if (restConversionExtension.isMappedRestParam(tsParameter)) {
-                    queryParamsListBuilder.append(restConversionExtension.generateImplementation(tsParameter, "pathParamsList", queryParamsListVar));
+                    queryParamsListBuilder.append(restConversionExtension.generateImplementation(tsParameter, "pathParamsList", queryParamsListVar, "headerParamsList"));
                 }
             }
         }
-        fillUpRequestParamsBuilder(requestParamsVar, requestParamsBuilder, queryParamsListBuilder, queryParamsListVar);
+        if (!isStringBuilderEmpty(queryParamsListBuilder)) {
+            fillUpRequestParamsBuilder(requestParamsVar, requestParamsBuilder, queryParamsListBuilder, queryParamsListVar);
+        }
     }
 
     private void fillUpRequestParamsBuilder(String requestParamsVar, StringBuilder requestParamsBuilder, StringBuilder queryParamsListBuilder, String queryParamsListVar) {
-        if (!isStringBuilderEmpty(queryParamsListBuilder)) {
-            queryParamsListBuilder.insert(0, "const " + queryParamsListVar + " : { [name: string]: string }[] = [];");
-            requestParamsBuilder.append(queryParamsListBuilder);
-            initializeHttpParams(requestParamsBuilder, requestParamsVar);
-            String queryParamVar = "queryParam";
-            requestParamsBuilder.append(String.format("for(const %s of %s) {", queryParamVar, queryParamsListVar));
-            addRequestParameter(requestParamsBuilder, requestParamsVar, queryParamVar);
-            requestParamsBuilder.append("}");
-        }
+        queryParamsListBuilder.insert(0, "const " + queryParamsListVar + " : { name: string, value: string }[] = [];");
+        requestParamsBuilder.append(queryParamsListBuilder);
+        initializeHttpParams(requestParamsBuilder, requestParamsVar);
+        String queryParamVar = "queryParam";
+        requestParamsBuilder.append(String.format("for(const %s of %s) {", queryParamVar, queryParamsListVar));
+        addRequestParameter(requestParamsBuilder, requestParamsVar, queryParamVar);
+        requestParamsBuilder.append("}");
     }
 
     private String getRequestParamName(TSParameter tsParameter, RequestParam requestParam) {

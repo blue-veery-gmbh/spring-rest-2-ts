@@ -3,7 +3,6 @@ package com.blueveery.springrest2ts.examples.ctrls;
 
 import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrl;
 import com.blueveery.springrest2ts.examples.model.ManufacturerDTO;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -23,9 +22,9 @@ public class ManufacturerCtrl implements BaseCtrl<ManufacturerDTO> {
 
     @RequestMapping(method = RequestMethod.GET, produces = {"application/json"})
     @ResponseBody
-    public Page<ManufacturerDTO> findManufacturers(@PageableDefault(page = 0, size = 10, sort = "name",direction = Sort.Direction.ASC) Pageable pageable){
+    public Page<ManufacturerDTO> findManufacturers(@PageableDefault(page = 0, size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
         List<ManufacturerDTO> manufacturerDTOS = new ArrayList<>();
         manufacturerDTOS.add(new ManufacturerDTO());
-        return new PageImpl<>(manufacturerDTOS);
+        return new PageImpl<>(manufacturerDTOS, pageable, 100);
     }
 }

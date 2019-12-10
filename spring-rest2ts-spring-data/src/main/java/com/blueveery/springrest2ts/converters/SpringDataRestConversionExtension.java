@@ -55,7 +55,7 @@ public class SpringDataRestConversionExtension implements RestConversionExtensio
 
 
     @Override
-    public String generateImplementation(TSParameter tsParameter, String pathParamsList, String queryParamsList) {
+    public String generateImplementation(TSParameter tsParameter, String pathParamsList, String queryParamsList, String headerParamsList) {
         String arrayAssignment = "%s.push({name: '%s', value: %s });";
 
         String forOfTemplate = "for(const %s of %s) {%s}";
