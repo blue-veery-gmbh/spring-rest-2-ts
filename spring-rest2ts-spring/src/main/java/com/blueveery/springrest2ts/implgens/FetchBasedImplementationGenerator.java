@@ -138,7 +138,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     public List<TSParameter> getImplementationSpecificParameters(TSMethod method) {
         if (method.isConstructor() && isRestClass(method.getOwner())) {
             List<TSParameter> tsParameters = new ArrayList<>();
-            TSParameter newParameter = new TSParameter(baseUrlTsField.getName(), baseUrlTsField.getType(), this, "new URL(window.document.URL)");
+            TSParameter newParameter = new TSParameter(baseUrlTsField.getName(), baseUrlTsField.getType(), method,this, "new URL(window.document.URL)");
             tsParameters.add(newParameter);
             return tsParameters;
         }

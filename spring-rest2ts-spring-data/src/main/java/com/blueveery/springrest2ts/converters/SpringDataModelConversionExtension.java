@@ -3,9 +3,7 @@ package com.blueveery.springrest2ts.converters;
 import com.blueveery.springrest2ts.extensions.ModelConversionExtension;
 import com.blueveery.springrest2ts.filters.JavaTypeFilter;
 import com.blueveery.springrest2ts.filters.JavaTypeSetFilter;
-import com.blueveery.springrest2ts.tsmodel.TSArray;
-import com.blueveery.springrest2ts.tsmodel.TSField;
-import com.blueveery.springrest2ts.tsmodel.TSType;
+import com.blueveery.springrest2ts.tsmodel.*;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,19 +39,44 @@ public class SpringDataModelConversionExtension implements ModelConversionExtens
     }
 
     @Override
+    public void tsScopedTypeCreated(Class javaType, TSScopedType tsScopedType) {
+        if (javaType.isAssignableFrom(Sort.class)) {
+            TSType sortOrderType = TypeMapper.map(Sort.Order.class);
+            TSComplexType tsSortInterface = (TSComplexType) tsScopedType;
+            TSUnion orderPropertiesFieldType = new TSUnion(TypeMapper.tsUndefined, new TSArray(sortOrderType));
+            TSField ordersField = new TSField("sortOrders", tsSortInterface, orderPropertiesFieldType);
+            tsSortInterface.addScopedTypeUsage(sortOrderType);
+            tsSortInterface.addTsField(ordersField);
+        }
+        if (javaType.isAssignableFrom(Sort.Order.class)) {
+            TSComplexType tsSortOrderInterface = (TSComplexType) tsScopedType;
+            for (TSField tsField : tsSortOrderInterface.getTsFields()) {
+                if ("descending".equals(tsField.getName())) {
+                    continue;
+                }
+
+                if ("ascending".equals(tsField.getName())) {
+                    continue;
+                }
+                tsField.setReadOnly(false);
+                if (!"property".equals(tsField.getName())) {
+                    tsField.setOptional(true);
+                }
+            }
+
+        }
+    }
+
+    @Override
     public void tsFieldCreated(Property property, TSField tsField) {
-        boolean containsPage = tsField.getOwner().getMappedFromJavaTypeSet().contains(Pageable.class);
-        if (containsPage) {
+        boolean containsPageable = tsField.getOwner().getMappedFromJavaTypeSet().contains(Pageable.class);
+        if (containsPageable) {
             if (tsField.getName().equals("pageNumber") || tsField.getName().equals("pageSize")) {
                 tsField.setReadOnly(false);
             } else {
                 tsField.setOptional(true);
             }
-
             if (tsField.getName().equals("sort")){
-                TSType sortOrderType = TypeMapper.map(Sort.Order.class);
-                tsField.setType(new TSArray(sortOrderType));
-                tsField.getOwner().addScopedTypeUsage(sortOrderType);
                 tsField.setReadOnly(false);
                 tsField.setOptional(true);
             }

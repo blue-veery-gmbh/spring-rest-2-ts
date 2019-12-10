@@ -19,22 +19,27 @@ public class TSParameter extends TSElement implements INullableElement, IAnnotat
     private boolean optional;
     private List<TSDecorator> tsDecoratorList = new ArrayList<>();
     private List<Annotation> annotationList = new ArrayList<>();
+    private final TSMethod tsMethod;
     private ImplementationGenerator implementationGenerator;
 
-    public TSParameter(String name, TSType type, ImplementationGenerator implementationGenerator) {
+    public TSParameter(String name, TSType type, TSMethod tsMethod, ImplementationGenerator implementationGenerator) {
         super(name);
         this.type = type;
+        this.tsMethod = tsMethod;
         this.implementationGenerator = implementationGenerator;
         this.defaultValue = null;
         this.optional = false;
     }
 
-    public TSParameter(String name, TSType type, ImplementationGenerator implementationGenerator, String defaultValue) {
-        this(name, type, implementationGenerator);
+    public TSParameter(String name, TSType type, TSMethod tsMethod, ImplementationGenerator implementationGenerator, String defaultValue) {
+        this(name, type, tsMethod, implementationGenerator);
         this.defaultValue = defaultValue;
         this.optional = true;
     }
 
+    public TSMethod getTsMethod() {
+        return tsMethod;
+    }
 
     @Override
     public TSType getType() {

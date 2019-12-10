@@ -74,7 +74,7 @@ public class SpringRestToTsConverter extends RestClassConverter{
             TSMethod tsMethod = new TSMethod(methodName, tsClass, methodReturnType, implementationGenerator, false, false);
             for (Parameter parameter:method.getParameters()) {
                 Type parameterType = resolveTypeVariable(parameter.getParameterizedType(), variableNameToJavaType);
-                TSParameter tsParameter = new TSParameter(parameter.getName(), TypeMapper.map(parameterType), implementationGenerator);
+                TSParameter tsParameter = new TSParameter(parameter.getName(), TypeMapper.map(parameterType), tsMethod, implementationGenerator);
                 tsParameter.addAllAnnotations(parameter.getAnnotations());
                 if (parameterIsMapped(tsParameter)) {
                     tsClass.getModule().scopedTypeUsage(tsParameter.getType());
@@ -82,6 +82,7 @@ public class SpringRestToTsConverter extends RestClassConverter{
                     nullableTypesStrategy.setAsNullableType(parameter.getParameterizedType(), parameter.getDeclaredAnnotations(), tsParameter);
                     tsMethod.getParameterList().add(tsParameter);
                 }
+                conversionListener.tsParameterCreated(parameter, tsParameter);
             }
             tsMethod.addAllAnnotations(method.getAnnotations());
             tsClass.addTsMethod(tsMethod);

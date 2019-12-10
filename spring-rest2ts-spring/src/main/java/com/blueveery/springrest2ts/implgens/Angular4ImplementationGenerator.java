@@ -178,10 +178,10 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
     public List<TSParameter> getImplementationSpecificParameters(TSMethod method) {
         if (method.isConstructor()) {
             List<TSParameter> tsParameters = new ArrayList<>();
-            TSParameter httpServiceParameter = new TSParameter(FIELD_NAME_HTTP_SERVICE, httpClass, this);
+            TSParameter httpServiceParameter = new TSParameter(FIELD_NAME_HTTP_SERVICE, httpClass, method, this);
             tsParameters.add(httpServiceParameter);
             if (useUrlService) {
-                TSParameter urlServiceParameter = new TSParameter(FIELD_NAME_URL_SERVICE, urlServiceClass, this);
+                TSParameter urlServiceParameter = new TSParameter(FIELD_NAME_URL_SERVICE, urlServiceClass, method, this);
                 tsParameters.add(urlServiceParameter);
             }
             return tsParameters;

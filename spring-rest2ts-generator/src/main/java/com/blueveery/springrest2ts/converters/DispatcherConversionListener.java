@@ -2,9 +2,11 @@ package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.blueveery.springrest2ts.tsmodel.TSMethod;
+import com.blueveery.springrest2ts.tsmodel.TSParameter;
 import com.blueveery.springrest2ts.tsmodel.TSScopedType;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,5 +31,10 @@ public class DispatcherConversionListener implements ConversionListener {
     @Override
     public void tsMethodCreated(Method method, TSMethod tsMethod) {
         conversionListenerSet.forEach(l -> l.tsMethodCreated(method, tsMethod));
+    }
+
+    @Override
+    public void tsParameterCreated(Parameter parameter, TSParameter tsParameter) {
+        conversionListenerSet.forEach(l -> l.tsParameterCreated(parameter, tsParameter));
     }
 }
