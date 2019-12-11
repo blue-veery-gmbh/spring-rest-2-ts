@@ -67,7 +67,7 @@ public class SpringDataRestConversionExtension implements RestConversionExtensio
         code.append(String.format(arrayAssignment, queryParamsList, "size", tsParameter.getName() + ".pageSize+''"));
 
         String sortField = tsParameter.getName() + ".sort.sortOrders";
-        String sortValue = "sortOrder.property + (sortOrder.direction == Direction.DESC ? ',DESC' : '') ";
+        String sortValue = "sortOrder.property + (sortOrder.direction === Direction.DESC ? ',DESC' : '') ";
         String sortMapAssignment =  String.format(arrayAssignment, queryParamsList, "sort", sortValue);
         String sortSerializationFor = String.format(forOfTemplate, "sortOrder", sortField, sortMapAssignment);
         code.append(String.format("if(%s && %s) {\n%s\n}", tsParameter.getName() + ".sort", sortField, sortSerializationFor));
