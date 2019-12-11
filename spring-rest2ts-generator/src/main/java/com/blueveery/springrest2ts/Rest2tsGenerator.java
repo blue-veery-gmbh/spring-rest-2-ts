@@ -26,6 +26,7 @@ import java.util.*;
 public class Rest2tsGenerator {
 
     static Logger logger = LoggerFactory.getLogger("gen-logger");
+    public static boolean generateAmbientModules = false;
     private Map<Class, TSType> customTypeMapping = new HashMap<>();
 
     private JavaTypeFilter modelClassesCondition = new RejectJavaTypeFilter();
@@ -37,6 +38,8 @@ public class Rest2tsGenerator {
     private ComplexTypeConverter enumConverter = new JavaEnumToTsEnumConverter();;
     private ModelClassesAbstractConverter modelClassesConverter;
     private RestClassConverter restClassesConverter;
+
+
 
     public Map<Class, TSType> getCustomTypeMapping() {
         return customTypeMapping;

@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import com.blueveery.springrest2ts.Rest2tsGenerator;
 import com.blueveery.springrest2ts.converters.TypeMapper;
 
 import com.blueveery.springrest2ts.tsmodel.generics.IParameterizedWithFormalTypes;
@@ -73,7 +74,7 @@ public class TSModule extends TSElement {
 
     public void addScopedType(TSScopedType tsScopedType) {
         scopedTypesSet.add(tsScopedType);
-        if(tsScopedType instanceof TSClass){
+        if(tsScopedType instanceof TSClass || Rest2tsGenerator.generateAmbientModules){
             moduleExtensionType = implementation;
         }
     }
