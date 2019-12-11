@@ -49,10 +49,18 @@
         <module>spring-rest2ts-jackson</module>
         <module>spring-rest2ts-spring</module>
         <module>spring-rest2ts-spring-data</module>
-        <module>spring-rest2ts-swagger</module>
-        <module>spring-rest2ts-examples</module>
     </modules>
     <profiles>
+        <profile>
+            <id>development</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>spring-rest2ts-swagger</module>
+                <module>spring-rest2ts-examples</module>
+            </modules>
+        </profile>
         <profile>
             <id>release</id>
             <build>
