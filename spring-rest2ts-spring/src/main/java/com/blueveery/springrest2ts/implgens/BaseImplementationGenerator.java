@@ -54,8 +54,15 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
 
     protected void replaceInStringBuilder(StringBuilder pathStringBuilder, String targetToReplace, String replacement) {
         int start = pathStringBuilder.lastIndexOf(targetToReplace);
+        validatePathVariableParameter(pathStringBuilder, targetToReplace, start);
         int end = start + targetToReplace.length();
         pathStringBuilder.replace(start, end, replacement);
+    }
+
+    private void validatePathVariableParameter(StringBuilder pathStringBuilder, String targetToReplace, int start) {
+        if (start == -1) {
+            throw new IllegalStateException(String.format("Cannot find argument: %s in path %s. Add name in PathVariable annotation or configure compiler option to not optimize parameters", targetToReplace, pathStringBuilder));
+        }
     }
 
     protected String callToStringOnParameterIfRequired(TSParameter tsParameter) {
