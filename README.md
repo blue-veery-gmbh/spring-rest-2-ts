@@ -424,6 +424,15 @@ Java allows for overloaded methods what is not supported by TypeScript/JavaScrip
 in REST controller, generated method names in TypeScript are changed by appending in first round HTTP methods to TypeScript method name 
 if they differ, if not URL path is appended splitted on `/` and joined with `_`
 
+### Angular compilation issue for ambient modules d.ts
+Angular for modules with typings, reports an error : `Module not found: Error: Can't resolve <module path>` 
+We think that it is reported bug: https://github.com/angular/angular-cli/issues/4874 tsc compilation for generated modules 
+works fine. To overcome this problem generator by default, generates only normal modules `*.ts`. To generate ambient modules
+ following option must be set:
+```java
+Rest2tsGenerator.generateAmbientModules = true; 
+``` 
+
 ## Unsupported mappings, coming soon...
   + multipart mapping `RequestPart`
   + support for JAX-RS in version 1.2.3
