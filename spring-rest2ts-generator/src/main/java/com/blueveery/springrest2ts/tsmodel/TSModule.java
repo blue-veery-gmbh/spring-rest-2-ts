@@ -74,7 +74,7 @@ public class TSModule extends TSElement {
 
     public void addScopedType(TSScopedType tsScopedType) {
         scopedTypesSet.add(tsScopedType);
-        if(tsScopedType instanceof TSClass || Rest2tsGenerator.generateAmbientModules){
+        if(tsScopedType instanceof TSClass || !Rest2tsGenerator.generateAmbientModules){
             moduleExtensionType = implementation;
         }
     }
