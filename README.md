@@ -255,7 +255,7 @@ There are supported following Spring annotations:
    + PathVariable
    + RequestParam
    + RequestBody
-## Spring REST controllers converter - since ver 1.2.2 
+## Support for spring data in Spring REST controllers - since ver 1.2.2 
 Parameters with type 'Pageable' from spring data, now are supported by adding extension to spring converter:
 ```java
     restClassesConverter.getConversionExtensionList().add(new SpringDataRestConversionExtension());
