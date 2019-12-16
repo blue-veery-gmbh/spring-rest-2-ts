@@ -23,7 +23,7 @@ generated code will reflect these changes which will avoid compile-time error in
    + TS services for ReactJS framework   
    + Java class filtering for TS code generation
    + Java generic types mapped to TS generics : since ver 1.2.2    
-   + Java interfaces mapped by model classes which contains getters and setter mapped to TS interfaces : since ver 1.2.2    
+   + Java interfaces implemented by model classes which contains getters and setter are mapped to TS interfaces to have common types to diffrent TS model classes : since ver 1.2.2    
    + spring data support (Pageable & Page types) : since ver 1.2.2    
    
 ## Installation 
