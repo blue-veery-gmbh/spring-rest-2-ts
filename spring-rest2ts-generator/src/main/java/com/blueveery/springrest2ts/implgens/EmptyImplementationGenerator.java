@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.implgens;
 
+import com.blueveery.springrest2ts.extensions.ConversionExtension;
 import com.blueveery.springrest2ts.tsmodel.*;
 
 import java.io.BufferedWriter;
@@ -10,13 +11,13 @@ import java.util.SortedSet;
 
 public class EmptyImplementationGenerator implements ImplementationGenerator {
     @Override
-    public TSType mapReturnType(TSMethod tsMethod, TSType tsType) {
-        return tsType;
+    public void setExtensions(List<? extends ConversionExtension> conversionExtensionSet) {
+
     }
 
     @Override
-    public SortedSet<TSField> getImplementationSpecificFields(TSComplexType tsComplexType) {
-        return Collections.emptySortedSet();
+    public TSType mapReturnType(TSMethod tsMethod, TSType tsType) {
+        return tsType;
     }
 
     @Override

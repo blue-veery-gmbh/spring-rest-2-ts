@@ -6,7 +6,7 @@
 
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
     <packaging>pom</packaging>
 
     <name>spring-rest2ts</name>
@@ -48,10 +48,19 @@
         <module>spring-rest2ts-generator</module>
         <module>spring-rest2ts-jackson</module>
         <module>spring-rest2ts-spring</module>
-        <module>spring-rest2ts-swagger</module>
-        <module>spring-rest2ts-examples</module>
+        <module>spring-rest2ts-spring-data</module>
     </modules>
     <profiles>
+        <profile>
+            <id>development</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>spring-rest2ts-swagger</module>
+                <module>spring-rest2ts-examples</module>
+            </modules>
+        </profile>
         <profile>
             <id>release</id>
             <build>
@@ -59,7 +68,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.0.0</version>
+                        <version>3.0.1</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>

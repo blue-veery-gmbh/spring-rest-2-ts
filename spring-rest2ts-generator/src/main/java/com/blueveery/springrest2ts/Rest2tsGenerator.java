@@ -1,19 +1,23 @@
 package com.blueveery.springrest2ts;
 
 import com.blueveery.springrest2ts.converters.*;
+import com.blueveery.springrest2ts.extensions.ConversionExtension;
+import com.blueveery.springrest2ts.extensions.ModelConversionExtension;
+import com.blueveery.springrest2ts.extensions.RestConversionExtension;
 import com.blueveery.springrest2ts.filters.JavaTypeFilter;
+import com.blueveery.springrest2ts.filters.OrFilterOperator;
 import com.blueveery.springrest2ts.filters.RejectJavaTypeFilter;
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.*;
 
 /**
@@ -22,6 +26,7 @@ import java.util.*;
 public class Rest2tsGenerator {
 
     static Logger logger = LoggerFactory.getLogger("gen-logger");
+    public static boolean generateAmbientModules = false;
     private Map<Class, TSType> customTypeMapping = new HashMap<>();
 
     private JavaTypeFilter modelClassesCondition = new RejectJavaTypeFilter();
@@ -31,8 +36,10 @@ public class Rest2tsGenerator {
 
     private JavaPackageToTsModuleConverter javaPackageToTsModuleConverter = new TsModuleCreatorConverter(2);
     private ComplexTypeConverter enumConverter = new JavaEnumToTsEnumConverter();;
-    private ComplexTypeConverter modelClassesConverter;
-    private ComplexTypeConverter restClassesConverter;
+    private ModelClassesAbstractConverter modelClassesConverter;
+    private RestClassConverter restClassesConverter;
+
+
 
     public Map<Class, TSType> getCustomTypeMapping() {
         return customTypeMapping;
@@ -54,11 +61,11 @@ public class Rest2tsGenerator {
         this.enumConverter = enumConverter;
     }
 
-    public void setModelClassesConverter(ComplexTypeConverter modelClassesConverter) {
+    public void setModelClassesConverter(ModelClassesAbstractConverter modelClassesConverter) {
         this.modelClassesConverter = modelClassesConverter;
     }
 
-    public void setRestClassesConverter(ComplexTypeConverter restClassesConverter) {
+    public void setRestClassesConverter(RestClassConverter restClassesConverter) {
         this.restClassesConverter = restClassesConverter;
     }
 
@@ -66,10 +73,12 @@ public class Rest2tsGenerator {
         this.nullableTypesStrategy = nullableTypesStrategy;
     }
 
-    public SortedSet<TSModule> generate(Set<String> packagesNames, Path outputDir) throws IOException {
+    public SortedSet<TSModule> generate(Set<String> inputPackagesNames, Path outputDir) throws IOException {
         Set<Class> modelClasses = new HashSet<>();
         Set<Class> restClasses = new HashSet<>();
         Set<Class> enumClasses = new HashSet<>();
+        Set<String> packagesNames = new HashSet<>(inputPackagesNames);
+        applyConversionExtension(packagesNames);
 
         logger.info("Scanning model classes");
         List<Class> loadedClasses= loadClasses(packagesNames);
@@ -106,6 +115,67 @@ public class Rest2tsGenerator {
         writeTSModules(javaPackageToTsModuleConverter.getTsModules(), outputDir, logger);
 
         return javaPackageToTsModuleConverter.getTsModules();
+    }
+
+    private void applyConversionExtension(Set<String> packagesNames) {
+        List<JavaTypeFilter> modelClassFilterList = new ArrayList<>();
+        List<ModelConversionExtension> modelConversionExtensionList = getModelConversionExtensions();
+        for (ModelConversionExtension extension : modelConversionExtensionList) {
+            if (extension.getJavaTypeFilter() != null) {
+                modelClassFilterList.add(extension.getJavaTypeFilter());
+            }
+            packagesNames.addAll(extension.getAdditionalJavaPackages());
+            modelClassesConverter.getObjectMapperMap().putAll(extension.getObjectMapperMap());
+            modelClassesConverter.getConversionListener().getConversionListenerSet().add(extension);
+        }
+
+        List<JavaTypeFilter> restClassFilterList = new ArrayList<>();
+        if (restClassesConverter != null) {
+            for (RestConversionExtension extension : restClassesConverter.getConversionExtensionList()) {
+                if (extension.getJavaTypeFilter() != null) {
+                    restClassFilterList.add(extension.getJavaTypeFilter());
+                }
+                packagesNames.addAll(extension.getAdditionalJavaPackages());
+                restClassesConverter.getConversionListener().getConversionListenerSet().add(extension);
+            }
+            ImplementationGenerator implementationGenerator = restClassesConverter.getImplementationGenerator();
+            implementationGenerator.setExtensions(restClassesConverter.getConversionExtensionList());
+        }
+
+
+        if (!modelClassFilterList.isEmpty()) {
+            if (modelClassesConverter == null) {
+                throw new IllegalStateException("There is installed extension which requires model classes converter");
+            }
+            modelClassFilterList.add(modelClassesCondition);
+            OrFilterOperator orFilterOperator = new OrFilterOperator(modelClassFilterList);
+            modelClassesCondition = orFilterOperator;
+        }
+        if (!restClassFilterList.isEmpty()) {
+            if (restClassesConverter == null) {
+                throw new IllegalStateException("There is installed extension which requires REST classes converter");
+            }
+            restClassFilterList.add(restClassesCondition);
+            OrFilterOperator orFilterOperator = new OrFilterOperator(restClassFilterList);
+            restClassesCondition = orFilterOperator;
+        }
+
+    }
+
+    private List<ModelConversionExtension> getModelConversionExtensions() {
+        List<ModelConversionExtension> modelConversionExtensionList = new ArrayList<>();
+        if (restClassesConverter != null) {
+            for (RestConversionExtension restConversionExtension : restClassesConverter.getConversionExtensionList()) {
+                ModelConversionExtension modelConversionExtension = restConversionExtension.getModelConversionExtension();
+                if (modelConversionExtension != null) {
+                    modelConversionExtensionList.add(modelConversionExtension);
+                }
+            }
+        }
+        if (modelClassesConverter != null) {
+            modelConversionExtensionList.addAll(modelClassesConverter.getConversionExtensionList());
+        }
+        return modelConversionExtensionList;
     }
 
     private void registerCustomTypesMapping(Map<Class, TSType> customTypeMapping) {
@@ -176,37 +246,37 @@ public class Rest2tsGenerator {
             Enumeration<URL> urlEnumeration = classLoader.getResources(packageName.replace(".", "/"));
             while (urlEnumeration.hasMoreElements()) {
                 URL url = urlEnumeration.nextElement();
-                scanPackagesRecursively(classLoader, url, packageName, classList);
+                URI uri = null;
+                try {
+                    uri = url.toURI();
+                } catch (URISyntaxException e) {
+                    throw new IllegalStateException(e);
+                }
+                try {
+                    FileSystems.newFileSystem(uri, Collections.emptyMap());} catch (Exception ignore) {}
+                    Path path = Paths.get(uri);
+                    scanPackagesRecursively(classLoader, path, packageName, classList);
             }
         }
         return classList;
     }
 
-    private void scanPackagesRecursively(ClassLoader classLoader, URL url, String packageName, List<Class> classList) throws IOException {
-        try(InputStream inputStream = url.openStream()) {
-            BufferedReader reader = null;
-            try {
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-            } catch (Exception e) {
-                System.out.println("Failed to open package : " + packageName);
-                return;
-            }
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (!line.contains(".")) {
-                    String newPackageName = packageName + "/" + line;
-                    scanPackagesRecursively(classLoader, new URL(url.toString() + "/" + line), newPackageName, classList);                } else {
-                    if (line.endsWith(".class")) {
-                        String className = (packageName + "/" + line).replace(".class", "").replace("/", ".");
-                        try {
-                            Class<?> loadedClass = classLoader.loadClass(className);
-                            if (!loadedClass.isAnnotation()) {
-                                addNestedClasses(loadedClass.getDeclaredClasses(), classList);
-                                classList.add(loadedClass);
-                            }
-                        } catch (Exception e) {
-                            System.out.println(String.format("Failed to lad class %s due to error %s:%s", className, e.getClass().getSimpleName(), e.getMessage()));
+    private void scanPackagesRecursively(ClassLoader classLoader, Path currentPath, String packageName, List<Class> classList) throws IOException {
+        for (Path nextPath : Files.newDirectoryStream(currentPath)) {
+            if (Files.isDirectory(nextPath)) {
+                scanPackagesRecursively(classLoader, nextPath, packageName+"."+nextPath.getFileName(), classList);
+            } else {
+                if (nextPath.toString().endsWith(".class")) {
+                    String className = (packageName + "/" + nextPath.getFileName().toString()).replace(".class", "").replace("/", ".");
+                    try {
+                        Class<?> loadedClass = classLoader.loadClass(className);
+                        loadedClass.getSimpleName();
+                        if (!loadedClass.isAnnotation()) {
+                            addNestedClasses(loadedClass.getDeclaredClasses(), classList);
+                            classList.add(loadedClass);
                         }
+                    } catch (Error | Exception e) {
+                        System.out.println(String.format("Failed to load class %s due to error %s:%s", className, e.getClass().getSimpleName(), e.getMessage()));
                     }
                 }
             }

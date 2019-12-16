@@ -1,20 +1,19 @@
 package com.blueveery.springrest2ts.examples.test;
 
 import com.blueveery.springrest2ts.Rest2tsGenerator;
-import com.blueveery.springrest2ts.converters.*;
-import com.blueveery.springrest2ts.naming.SubstringClassNameMapper;
+import com.blueveery.springrest2ts.converters.JacksonObjectMapper;
+import com.blueveery.springrest2ts.converters.ModelClassesToTsInterfacesConverter;
+import com.blueveery.springrest2ts.converters.SpringRestToTsConverter;
+import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrl;
-import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
-import com.blueveery.springrest2ts.filters.*;
+import com.blueveery.springrest2ts.examples.model.core.ParametrizedBaseDTO;
+import com.blueveery.springrest2ts.filters.ExtendsJavaTypeFilter;
 import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSArray;
-import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.FileSystemUtils;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -22,7 +21,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.Set;
+import java.util.UUID;
 
 public class TsCodeGenerationsTest {
 
@@ -40,7 +41,7 @@ public class TsCodeGenerationsTest {
         tsGenerator = new Rest2tsGenerator();
 
         //set java type filters
-        tsGenerator.setModelClassesCondition(new ExtendsJavaTypeFilter(BaseDTO.class));
+        tsGenerator.setModelClassesCondition(new ExtendsJavaTypeFilter(ParametrizedBaseDTO.class));
         tsGenerator.setRestClassesCondition(new ExtendsJavaTypeFilter(BaseCtrl.class));
 
         //set model class converter

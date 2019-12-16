@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class CategoryDTO extends BaseDTO {
+public class CategoryDTO extends BaseDTO implements Named{
 
     private String name;
     private String categoryName;
@@ -51,6 +51,11 @@ public class CategoryDTO extends BaseDTO {
     @JsonProperty("creationDateGetter")
     public LocalDateTime getCreationDate() {
         return creationDate;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
 

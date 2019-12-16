@@ -2,6 +2,8 @@ package com.blueveery.springrest2ts.tsmodel;
 
 
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
+import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
+import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -14,8 +16,8 @@ import java.util.TreeSet;
  * Created by tomaszw on 31.07.2017.
  */
 public class TSClass extends TSComplexType {
-    private TSClass extendsClass;
-    private SortedSet<TSInterface> implementsInterfaces = new TreeSet<>();
+    private TSClassReference extendsClass;
+    private SortedSet<TSInterfaceReference> implementsInterfaces = new TreeSet<TSInterfaceReference>();
     private boolean isAbstract;
 
     public TSClass(String name, TSModule module, ImplementationGenerator implementationGenerator) {
@@ -24,18 +26,18 @@ public class TSClass extends TSComplexType {
     }
 
 
-    public TSClass getExtendsClass() {
+    public TSClassReference getExtendsClass() {
         return extendsClass;
     }
 
-    public void setExtendsClass(TSClass extendsClass) {
+    public void setExtendsClass(TSClassReference extendsClass) {
         if(extendsClass!=null){
             module.scopedTypeUsage(extendsClass);
         }
         this.extendsClass = extendsClass;
     }
 
-    public SortedSet<TSInterface> getImplementsInterfaces() {
+    public SortedSet<TSInterfaceReference> getImplementsInterfaces() {
         return implementsInterfaces;
     }
 
@@ -54,10 +56,10 @@ public class TSClass extends TSComplexType {
         if(extendsClass!=null){
             writer.write("extends " + extendsClass.getName() + " ");
         }
-
+        writer.write(typeParametersToString());
         if(!implementsInterfaces.isEmpty()){
             writer.write("implements ");
-            Iterator<TSInterface> iterator = implementsInterfaces.iterator();
+            Iterator<TSInterfaceReference> iterator = implementsInterfaces.iterator();
             while (iterator.hasNext()){
                 writer.write(iterator.next().getName());
                 if(iterator.hasNext()){

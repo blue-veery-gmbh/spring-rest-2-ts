@@ -8,7 +8,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import com.blueveery.springrest2ts.Rest2tsGenerator;
 import com.blueveery.springrest2ts.converters.TypeMapper;
+
+import com.blueveery.springrest2ts.tsmodel.generics.IParameterizedWithFormalTypes;
+import com.blueveery.springrest2ts.tsmodel.generics.TSFormalTypeParameter;
+import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference;
 import org.slf4j.Logger;
 
 import static com.blueveery.springrest2ts.tsmodel.ModuleExtensionType.implementation;
@@ -69,11 +74,35 @@ public class TSModule extends TSElement {
 
     public void addScopedType(TSScopedType tsScopedType) {
         scopedTypesSet.add(tsScopedType);
-        if(tsScopedType instanceof TSClass){
+        if(tsScopedType instanceof TSClass || !Rest2tsGenerator.generateAmbientModules){
             moduleExtensionType = implementation;
         }
     }
 
+    public void scopedTypeUsage(TSType tsType) {
+        if (tsType instanceof TSParameterizedTypeReference) {
+            scopedTypeUsage(((TSParameterizedTypeReference) tsType));
+        }
+        if (tsType instanceof TSScopedType) {
+            scopedTypeUsage(((TSScopedType) tsType));
+        }
+    }
+    public void scopedTypeUsage(TSParameterizedTypeReference<?> typeReference) {
+        IParameterizedWithFormalTypes referencedType = typeReference.getReferencedType();
+        if (referencedType instanceof TSScopedType) {
+            TSScopedType referencedScopedType = (TSScopedType) referencedType;
+            scopedTypeUsage(referencedScopedType);
+        }
+        if (referencedType instanceof TSFormalTypeParameter) {
+            TSFormalTypeParameter formalTypeParameter = (TSFormalTypeParameter) referencedType;
+            scopedTypeUsage(formalTypeParameter.getBoundTo());
+        }
+        for (TSType tsType : typeReference.getTsTypeParameterList()) {
+            if (tsType instanceof TSParameterizedTypeReference) {
+                scopedTypeUsage((TSParameterizedTypeReference<?>) tsType);
+            }
+        }
+    }
     public void scopedTypeUsage(TSScopedType tsScopedType) {
         TSModule module = tsScopedType.getModule();
         if(module != this && module != TypeMapper.systemModule){

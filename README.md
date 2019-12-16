@@ -1,23 +1,53 @@
 # Spring rest2ts generator 
 spring-rest2ts-generator generates TypeScript code based on Spring MVC REST controllers and data model for HTTP requests and responses. 
+# Features
+From model classes there are generated TypeScript interfaces and from REST controllers full working Angular services based on Observable API
+or plain JavaScript services based on Promises API. The main idea is that Spring annotations describing REST endpoints have enough information 
+to compose HTTP request and call REST endpoints so TypeScript code could be automatically generated. Code created by typescript generator reduces the amount 
+of handwritten code on the frontend and gives type-safe API to the backend, changes in URL path are hidden, in case of REST endpoint refactoring, 
+generated code will reflect these changes which will avoid compile-time error in the web app which reduces time on testing
 
+### Supported features:
+   + Java Beans convention for data model mapping
+   + FasterXML/Jackson annotations for data model mapping
+   + Custom type Mappings
+   + Java collections mapped into TS arrays     
+   + Java Map mapped into TS object
+   + Java packages to module conversion
+   + Java enums mapped as TS enums or union types   
+   + Inheritance mapping    
+   + Name mappings
+   + Imports between generated TS modules 
+   + Spring REST annotations based on which TS services are generated
+   + TS services for Angular framework
+   + TS services for ReactJS framework   
+   + Java class filtering for TS code generation
+   + Java generic types mapped to TS generics : since ver 1.2.2    
+   + Java interfaces mapped by model classes which contains getters and setter mapped to TS interfaces : since ver 1.2.2    
+   + spring data support (Pageable & Page types) : since ver 1.2.2    
+   
 ## Installation 
 To add a dependency on spring-rest2ts-generator using Maven, use the following:
 ```xml
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-generator</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
 </dependency>
 <dependency>
   <groupId>com.blue-veery</groupId>
   <artifactId>spring-rest2ts-spring</artifactId>
-  <version>1.2.1</version>
+  <version>1.2.2</version>
+</dependency>
+<dependency>
+  <groupId>com.blue-veery</groupId>
+  <artifactId>spring-rest2ts-spring-data</artifactId>
+  <version>1.2.2</version>
 </dependency>
 <dependency>
   <groupId>com.blue-veery</groupId>
   <artifactId>spring-rest2ts-jackson</artifactId>
-  <version>1.2.1</version>
+  <version>1.2.2</version>
 </dependency>
 ```          
            
@@ -164,29 +194,6 @@ due to changed module names. To compile generated TypeScript code just execute f
     
 ```
 or just review generated code in Your favourite IDE which supports TypeScript
-
-# Features
-From model classes there are generated TypeScript interfaces and from REST controllers full working Angular services based on Observable API
-or plain JavaScript services based on Promises API. The main idea is that Spring annotations describing REST endpoints have enough information 
-to compose HTTP request and call REST endpoints so TypeScript code could be automatically generated. Code created by typescript generator reduces the amount 
-of handwritten code on the frontend and gives type-safe API to the backend, changes in URL path are hidden, in case of REST endpoint refactoring, 
-generated code will reflect these changes which will avoid compile-time error in the web app which reduces time on testing
-
-### Supported features:
-   + Java Beans convention for data model mapping
-   + FasterXML/Jackson annotations for data model mapping
-   + Custom type Mappings
-   + Java collections mapped into TS arrays     
-   + Java Map mapped into TS object
-   + Java packages to module conversion
-   + Java enums mapped as TS enums or union types   
-   + Inheritance mapping    
-   + Name mappings
-   + Imports between generated TS modules 
-   + Spring REST annotations based on which TS services are generated
-   + TS services for Angular framework
-   + TS services for ReactJS framework   
-   + Java class filtering for TS code generation   
    
 # Basic Configuration
 ## Java Classes filtering 
@@ -248,6 +255,29 @@ There are supported following Spring annotations:
    + PathVariable
    + RequestParam
    + RequestBody
+## Spring REST controllers converter - since ver 1.2.2 
+Parameters with type 'Pageable' from spring data, now are supported by adding extension to spring converter:
+```java
+    restClassesConverter.getConversionExtensionList().add(new SpringDataRestConversionExtension());
+```
+Data from pageable are sent to server and server response with Page object which contains Pageable, fields which can be set
+on client side are not readonly, namely:
+```typo3_typoscript
+export interface Pageable {
+    pageNumber: number;
+    pageSize: number;
+    sort?: Sort;
+    readonly paged?: boolean;
+    readonly offset?: number;
+    readonly unpaged?: boolean;
+}
+```
+before REST method call in Pageable object pageNumber and pageSize must be set and optionally sort. 
+Others fields are calculated on the server and sent back to client in Page object
+
+If parameter with type `Pageable` is marked with annotation `@PageableDefault`, parameter in TypeScript is optional 
+
+   
 ## Response content conversion
  + If REST endpoint produces JSON generated service method returns Observable or `Promise<<Mapped java type>>`
  + If REST endpoint doesn't produce response it should return response code 204(no content) 
@@ -394,8 +424,17 @@ Java allows for overloaded methods what is not supported by TypeScript/JavaScrip
 in REST controller, generated method names in TypeScript are changed by appending in first round HTTP methods to TypeScript method name 
 if they differ, if not URL path is appended splitted on `/` and joined with `_`
 
+### Angular compilation issue for ambient modules d.ts
+Angular for modules with typings, reports an error : `Module not found: Error: Can't resolve <module path>` 
+We think that it is reported bug: https://github.com/angular/angular-cli/issues/4874 tsc compilation for generated modules 
+works fine. To overcome this problem generator by default, generates only normal modules `*.ts`. To generate ambient modules
+ following option must be set:
+```java
+Rest2tsGenerator.generateAmbientModules = true; 
+``` 
+
 ## Unsupported mappings, coming soon...
   + multipart mapping `RequestPart`
-  + spring data Pageable and Page
-  + java generic types    
+  + support for JAX-RS in version 1.2.3
+      
  

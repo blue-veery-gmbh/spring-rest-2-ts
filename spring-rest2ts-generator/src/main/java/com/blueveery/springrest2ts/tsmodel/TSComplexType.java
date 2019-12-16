@@ -1,10 +1,13 @@
 package com.blueveery.springrest2ts.tsmodel;
 
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
+import com.blueveery.springrest2ts.tsmodel.generics.IParameterizedWithFormalTypes;
+import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
+import com.blueveery.springrest2ts.tsmodel.generics.TSFormalTypeParameter;
+import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
@@ -13,13 +16,14 @@ import java.util.TreeSet;
 /**
  * Created by tomaszw on 30.07.2017.
  */
-public abstract class TSComplexType extends TSScopedType implements IDecorated {
+public abstract class TSComplexType extends TSScopedType implements IDecorated, IParameterizedWithFormalTypes {
     private SortedSet<TSField> tsFields = new TreeSet<>();
     private SortedSet<TSMethod> tsMethods = new TreeSet<>();
     private List<TSDecorator> tsDecoratorList = new ArrayList<>();
 
     private boolean converted;
     protected ImplementationGenerator implementationGenerator;
+    private List<TSFormalTypeParameter> tsFormalTypeParameterList = new ArrayList<>();
 
     public TSComplexType(String name, TSModule module, ImplementationGenerator implementationGenerator) {
         super(name, module);
@@ -32,6 +36,11 @@ public abstract class TSComplexType extends TSScopedType implements IDecorated {
 
     public SortedSet<TSField> getTsFields() {
         return tsFields;
+    }
+
+    @Override
+    public List<TSFormalTypeParameter> getTsTypeParameterList() {
+        return tsFormalTypeParameterList;
     }
 
     public void addTsMethod(TSMethod tsMethod) {
@@ -48,22 +57,21 @@ public abstract class TSComplexType extends TSScopedType implements IDecorated {
     public void addScopedTypeUsage(TSType tsType) {
         if (tsType instanceof TSArray) {
             TSArray tsArray = (TSArray) tsType;
-            if (tsArray.getElementType() instanceof TSScopedType) {
-                TSScopedType tsScopedType = (TSScopedType) tsArray.getElementType();
-                module.scopedTypeUsage(tsScopedType);
-            }
+            addScopedTypeUsage(tsArray.getElementType());
         }
         if (tsType instanceof TSScopedType) {
             TSScopedType tsScopedType = (TSScopedType) tsType;
             module.scopedTypeUsage(tsScopedType);
+        }
+        if(tsType instanceof TSParameterizedTypeReference){
+            TSParameterizedTypeReference typeReference = (TSParameterizedTypeReference) tsType;
+            module.scopedTypeUsage(typeReference);
         }
     }
 
     protected void writeMembers(BufferedWriter writer) throws IOException {
         implementationGenerator.addImplementationSpecificFields(this);
         writeFields(writer, tsFields);
-        SortedSet<TSField> implementationSpecificFields = implementationGenerator.getImplementationSpecificFields(this);
-        writeFields(writer, implementationSpecificFields);
 
         if (!tsMethods.isEmpty()) {
             writer.newLine();
