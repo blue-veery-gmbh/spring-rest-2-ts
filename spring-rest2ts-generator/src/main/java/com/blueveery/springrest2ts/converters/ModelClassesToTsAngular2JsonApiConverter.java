@@ -103,14 +103,15 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
                 }
                 for (TSField tsField : tsFieldList) {
                     tsClass.addTsField(tsField);
-                    addAngular2JsonApiDecorators(tsField);
+                    addAngular2JsonApiDecorators(property, tsField);
                     conversionListener.tsFieldCreated(property, tsField);
                 }
             }
 
             for (TSField typeLevelSpecificField : objectMapper.addTypeLevelSpecificFields(javaClass, tsClass)) {
-                addAngular2JsonApiDecorators(typeLevelSpecificField);
-                conversionListener.tsFieldCreated(new Property(typeLevelSpecificField.getName(), 0), typeLevelSpecificField);
+                Property property = new Property(typeLevelSpecificField.getName(), 0);
+                addAngular2JsonApiDecorators(property, typeLevelSpecificField);
+                conversionListener.tsFieldCreated(property, typeLevelSpecificField);
             }
             tsClass.addAllAnnotations(javaClass.getAnnotations());
             conversionListener.tsScopedTypeCreated(javaClass, tsClass);
@@ -126,7 +127,7 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
         return jsonApiModelConfigDecorator;
     }
 
-    private void addAngular2JsonApiDecorators(TSField tsField) {
+    private void addAngular2JsonApiDecorators(Property fromProperty, TSField tsField) {
         if(tsField.getType() instanceof TSArray){
             tsField.getTsDecoratorList().add(hasManyDecorator);
             tsField.getOwner().addScopedTypeUsage(hasManyDecorator.getTsFunction());
