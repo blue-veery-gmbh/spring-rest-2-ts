@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 public interface ObjectMapper {
-    void addTypeLevelSpecificFields(Class javaType, TSComplexType tsComplexType);
+    List<TSField> addTypeLevelSpecificFields(Class javaType, TSComplexType tsComplexType);
 
     boolean filterClass(Class clazz);
 

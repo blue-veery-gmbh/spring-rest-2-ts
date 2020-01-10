@@ -51,7 +51,8 @@ public class JacksonObjectMapper implements ObjectMapper {
     }
 
     @Override
-    public void addTypeLevelSpecificFields(Class javaType, TSComplexType tsComplexType) {
+    public List<TSField> addTypeLevelSpecificFields(Class javaType, TSComplexType tsComplexType) {
+        List<TSField> tsFieldList = new ArrayList<>();
         JsonTypeInfo jsonTypeInfoAnnotation = (JsonTypeInfo) javaType.getAnnotation(JsonTypeInfo.class);
         if (jsonTypeInfoAnnotation != null) {
             switch (jsonTypeInfoAnnotation.include()) {
@@ -62,11 +63,12 @@ public class JacksonObjectMapper implements ObjectMapper {
                     }
                     for (TSField tsField : tsComplexType.getTsFields()) {
                         if (propertyName.equals(tsField.getName())) {
-                            return;
+                            return tsFieldList;
                         }
                     }
                     TSField tsField = new TSField("\""+propertyName+"\"", tsComplexType, TypeMapper.tsString);
                     tsComplexType.addTsField(tsField);
+                    tsFieldList.add(tsField);
                     break;
                 case WRAPPER_OBJECT:
                 case WRAPPER_ARRAY:
@@ -75,6 +77,7 @@ public class JacksonObjectMapper implements ObjectMapper {
                     break;
             }
         }
+        return tsFieldList;
     }
 
     @Override

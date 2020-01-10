@@ -108,7 +108,10 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
                 }
             }
 
-            objectMapper.addTypeLevelSpecificFields(javaClass, tsClass);
+            for (TSField typeLevelSpecificField : objectMapper.addTypeLevelSpecificFields(javaClass, tsClass)) {
+                addAngular2JsonApiDecorators(typeLevelSpecificField);
+                conversionListener.tsFieldCreated(new Property(typeLevelSpecificField.getName(), 0), typeLevelSpecificField);
+            }
             tsClass.addAllAnnotations(javaClass.getAnnotations());
             conversionListener.tsScopedTypeCreated(javaClass, tsClass);
         }
