@@ -32,7 +32,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
 
     public Angular4ImplementationGenerator(Path urlServicePath) {
         TSModule angularCoreModule = new TSModule("@angular/core", null, true);
-        injectableDecorator = new TSDecorator("", new TSFunction("Injectable", angularCoreModule));
+        injectableDecorator = new TSDecorator(new TSFunction("Injectable", angularCoreModule));
 
         TSModule observableModule = new TSModule("rxjs", null, true);
         observableClass = new TSClass("Observable", observableModule, this);

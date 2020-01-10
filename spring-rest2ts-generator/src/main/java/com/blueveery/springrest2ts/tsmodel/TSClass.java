@@ -41,22 +41,50 @@ public class TSClass extends TSComplexType {
         return implementsInterfaces;
     }
 
+    public void addImplementsInterfaces(TSInterfaceReference tsInterfaceReference) {
+        getModule().scopedTypeUsage(tsInterfaceReference);
+        implementsInterfaces.add(tsInterfaceReference);
+    }
+
+    @Override
+    public boolean isInstanceOf(TSComplexType tsComplexType) {
+        if (tsComplexType instanceof TSClass) {
+            if (extendsClass == null) {
+                return false;
+            }
+            if (extendsClass.getReferencedType() == tsComplexType) {
+                return true;
+            }
+
+            return extendsClass.getReferencedType().isInstanceOf(tsComplexType);
+        }
+        for (TSInterfaceReference implementedInterface : implementsInterfaces) {
+            if (implementedInterface.getReferencedType() == tsComplexType) {
+                return true;
+            }
+
+            return implementedInterface.getReferencedType().isInstanceOf(tsComplexType);
+        }
+        return false;
+    }
+
     @Override
     public void write(BufferedWriter writer) throws IOException {
         tsComment.write(writer);
         List<TSDecorator> decorators = implementationGenerator.getDecorators(this);
         writeDecorators(writer, decorators);
+        writeDecorators(writer, getTsDecoratorList());
 
         writer.write("export");
         if (isAbstract) {
             writer.write(" abstract");
         }
         writer.write(" class " + getName() + " ");
-
+        writer.write(typeParametersToString());
         if(extendsClass!=null){
             writer.write("extends " + extendsClass.getName() + " ");
         }
-        writer.write(typeParametersToString());
+
         if(!implementsInterfaces.isEmpty()){
             writer.write("implements ");
             Iterator<TSInterfaceReference> iterator = implementsInterfaces.iterator();

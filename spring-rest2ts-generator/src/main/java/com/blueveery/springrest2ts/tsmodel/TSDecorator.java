@@ -11,8 +11,8 @@ public class TSDecorator extends TSElement {
     private List<TSLiteral> tsLiteralList = new ArrayList<>();
 
 
-    public TSDecorator(String name, TSFunction tsFunction) {
-        super(name);
+    public TSDecorator(TSFunction tsFunction) {
+        super("");
         this.tsFunction = tsFunction;
     }
 

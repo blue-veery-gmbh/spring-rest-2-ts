@@ -2,7 +2,6 @@ package com.blueveery.springrest2ts.tsmodel;
 
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.generics.IParameterizedWithFormalTypes;
-import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import com.blueveery.springrest2ts.tsmodel.generics.TSFormalTypeParameter;
 import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference;
 
@@ -103,4 +102,6 @@ public abstract class TSComplexType extends TSScopedType implements IDecorated, 
     public void setConverted(boolean converted) {
         this.converted = converted;
     }
+
+    public abstract boolean isInstanceOf(TSComplexType jsonApiModelClass);
 }

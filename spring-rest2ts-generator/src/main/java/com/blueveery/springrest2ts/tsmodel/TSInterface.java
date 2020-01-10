@@ -26,8 +26,21 @@ public class TSInterface extends TSComplexType {
     }
 
     @Override
+    public boolean isInstanceOf(TSComplexType tsComplexType) {
+        for (TSInterfaceReference extendedInterface : extendsInterfaces) {
+            if (extendedInterface.getReferencedType() == tsComplexType) {
+                return true;
+            }
+
+            return extendedInterface.getReferencedType().isInstanceOf(tsComplexType);
+        }
+        return false;
+    }
+
+    @Override
     public void write(BufferedWriter writer) throws IOException {
         tsComment.write(writer);
+        writeDecorators(writer, getTsDecoratorList());
         writer.write("export interface " + getName() + " ");
         writer.write(typeParametersToString());
         if(!extendsInterfaces.isEmpty()){

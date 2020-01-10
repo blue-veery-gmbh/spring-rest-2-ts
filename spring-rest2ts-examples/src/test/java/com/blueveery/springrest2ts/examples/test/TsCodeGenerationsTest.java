@@ -1,10 +1,7 @@
 package com.blueveery.springrest2ts.examples.test;
 
 import com.blueveery.springrest2ts.Rest2tsGenerator;
-import com.blueveery.springrest2ts.converters.JacksonObjectMapper;
-import com.blueveery.springrest2ts.converters.ModelClassesToTsInterfacesConverter;
-import com.blueveery.springrest2ts.converters.SpringRestToTsConverter;
-import com.blueveery.springrest2ts.converters.TypeMapper;
+import com.blueveery.springrest2ts.converters.*;
 import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrl;
 import com.blueveery.springrest2ts.examples.model.core.ParametrizedBaseDTO;
 import com.blueveery.springrest2ts.filters.ExtendsJavaTypeFilter;
@@ -31,7 +28,7 @@ public class TsCodeGenerationsTest {
 
     protected static Rest2tsGenerator tsGenerator;
     protected Set<String> javaPackageSet;
-    protected ModelClassesToTsInterfacesConverter modelClassesConverter;
+    protected ModelClassesAbstractConverter modelClassesConverter;
     protected SpringRestToTsConverter restClassesConverter;
 
     @Before
