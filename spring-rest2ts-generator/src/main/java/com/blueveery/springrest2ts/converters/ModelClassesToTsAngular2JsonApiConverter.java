@@ -18,10 +18,12 @@ import java.util.SortedSet;
 public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstractConverter {
 
     private TSModule angular2JsonApiModule;
-    private TSDecorator jsonApiModelConfigDecorator;
+    private TSFunction jsonApiModelConfigFunction;
+
     private TSDecorator attributeDecorator;
     private TSDecorator hasManyDecorator;
     private TSDecorator belongsToDecorator;
+
     private TSClass jsonApiModelClass;
     private TSClassReference tsJsonApiModelClassReference;
 
@@ -32,7 +34,7 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
     public ModelClassesToTsAngular2JsonApiConverter(ClassNameMapper classNameMapper, ObjectMapper objectMapper) {
         super(new EmptyImplementationGenerator(), classNameMapper, objectMapper);
         angular2JsonApiModule = new TSModule("angular2-jsonapi", null, true);
-        jsonApiModelConfigDecorator = new TSDecorator(new TSFunction("JsonApiModelConfig", angular2JsonApiModule));
+        jsonApiModelConfigFunction = new TSFunction("JsonApiModelConfig", angular2JsonApiModule);
         attributeDecorator = new TSDecorator(new TSFunction("Attribute", angular2JsonApiModule));
         hasManyDecorator = new TSDecorator(new TSFunction("HasMany", angular2JsonApiModule));
         belongsToDecorator = new TSDecorator(new TSFunction("BelongsTo", angular2JsonApiModule));
@@ -78,8 +80,9 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
                     tsSuperClassReference = tsJsonApiModelClassReference;
                 }
                 tsClass.setExtendsClass(tsSuperClassReference);
+                TSDecorator jsonApiModelConfigDecorator = createJsonApiModelConfigDecorator(tsClass);
                 tsClass.getTsDecoratorList().add(jsonApiModelConfigDecorator);
-                tsClass.addScopedTypeUsage(jsonApiModelConfigDecorator.getTsFunction());
+                tsClass.addScopedTypeUsage(jsonApiModelConfigFunction);
             }
 
             for (AnnotatedType annotatedInterface : javaClass.getAnnotatedInterfaces()) {
@@ -110,6 +113,14 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
             conversionListener.tsScopedTypeCreated(javaClass, tsClass);
         }
 
+    }
+
+    private TSDecorator createJsonApiModelConfigDecorator(TSClass tsClass) {
+        TSDecorator jsonApiModelConfigDecorator = new TSDecorator(jsonApiModelConfigFunction);
+        TSJsonLiteral jsonApiModelConfigParam = new TSJsonLiteral();
+        jsonApiModelConfigParam.getFieldMap().put("type", new TSLiteral("", TypeMapper.tsString, tsClass.getName().toLowerCase()+"s"));
+        jsonApiModelConfigDecorator.getTsLiteralList().add(jsonApiModelConfigParam);
+        return jsonApiModelConfigDecorator;
     }
 
     private void addAngular2JsonApiDecorators(TSField tsField) {

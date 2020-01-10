@@ -6,7 +6,7 @@ import com.blueveery.springrest2ts.converters.TypeMapper;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
-public class TSLiteral extends TSElement{
+public class TSLiteral extends TSElement implements ILiteral{
     TSType tsType;
     String value;
 
