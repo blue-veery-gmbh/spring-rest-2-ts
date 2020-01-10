@@ -4,6 +4,7 @@ package com.blueveery.springrest2ts.tsmodel;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
+@Deprecated()
 public class TSParameterisedType extends TSType{
 
     private TSComplexType tsComplexType;
