@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.blue-veery</groupId>
+        <artifactId>spring-rest2ts</artifactId>
+        <version>1.2.2</version>
+    </parent>
+
+    <artifactId>spring-rest2ts-angular2json</artifactId>
+    <version>1.2.2</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>spring-rest2ts-angular2json-api</module>
+        <module>spring-rest2ts-angular2json-impl</module>
+    </modules>
+</project>
