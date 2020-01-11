@@ -12,6 +12,7 @@ import com.blueveery.springrest2ts.Rest2tsGenerator;
 import com.blueveery.springrest2ts.converters.TypeMapper;
 
 import com.blueveery.springrest2ts.tsmodel.generics.IParameterizedWithFormalTypes;
+import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import com.blueveery.springrest2ts.tsmodel.generics.TSFormalTypeParameter;
 import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference;
 import org.slf4j.Logger;
@@ -65,10 +66,42 @@ public class TSModule extends TSElement {
         }
 
         writer.newLine();
-        for (TSScopedElement tsScopedElement : scopedTypesSet) {
+        for (TSScopedElement tsScopedElement : sort(scopedTypesSet)) {
             tsScopedElement.write(writer);
             writer.newLine();
             writer.newLine();
+        }
+    }
+
+    private List<? extends TSScopedElement> sort(SortedSet<TSScopedElement> scopedTypesSet) {
+        List<TSScopedElement> sortedElements = new ArrayList<>();
+        List<TSVariable> tsVariableList = new ArrayList<>();
+        for (TSScopedElement tsScopedElement : scopedTypesSet) {
+            if(tsScopedElement instanceof TSInterface){
+                sortedElements.add(tsScopedElement);
+            }
+            if(tsScopedElement instanceof TSClass){
+                TSClass tsClass = (TSClass) tsScopedElement;
+                addDependantClasses(tsClass, sortedElements);
+            }
+            if(tsScopedElement instanceof TSVariable){
+                tsVariableList.add((TSVariable) tsScopedElement);
+            }
+        }
+        sortedElements.addAll(tsVariableList);
+        return sortedElements;
+    }
+
+    private void addDependantClasses(TSClass tsClass, List<TSScopedElement> sortedElements) {
+        TSClassReference extendsClassReference = tsClass.getExtendsClass();
+        if (extendsClassReference != null) {
+            TSClass tsBaseClass = extendsClassReference.getReferencedType();
+            if (tsBaseClass.getModule() == this) {
+                addDependantClasses(tsBaseClass, sortedElements);
+            }
+        }
+        if (!sortedElements.contains(tsClass)) {
+            sortedElements.add(tsClass);
         }
     }
 
