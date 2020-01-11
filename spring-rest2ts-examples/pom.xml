@@ -93,7 +93,6 @@
             <groupId>com.blue-veery</groupId>
             <artifactId>spring-rest2ts-angular2json-impl</artifactId>
             <version>1.2.2</version>
-            <scope>test</scope>
         </dependency>
 
     </dependencies>

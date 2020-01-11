@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.angular2jsonapi.JsonApiModelConfig;
 import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.naming.NoChangeClassNameMapper;
@@ -7,6 +8,7 @@ import com.blueveery.springrest2ts.tsmodel.*;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.util.Collections;
 import java.util.List;
@@ -80,7 +82,7 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
                     tsSuperClassReference = tsJsonApiModelClassReference;
                 }
                 tsClass.setExtendsClass(tsSuperClassReference);
-                TSDecorator jsonApiModelConfigDecorator = createJsonApiModelConfigDecorator(tsClass);
+                TSDecorator jsonApiModelConfigDecorator = createJsonApiModelConfigDecorator(javaClass, tsClass);
                 tsClass.getTsDecoratorList().add(jsonApiModelConfigDecorator);
                 tsClass.addScopedTypeUsage(jsonApiModelConfigFunction);
             }
@@ -119,10 +121,18 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
 
     }
 
-    private TSDecorator createJsonApiModelConfigDecorator(TSClass tsClass) {
+    private TSDecorator createJsonApiModelConfigDecorator(Class javaClass, TSClass tsClass) {
         TSDecorator jsonApiModelConfigDecorator = new TSDecorator(jsonApiModelConfigFunction);
         TSJsonLiteral jsonApiModelConfigParam = new TSJsonLiteral();
-        jsonApiModelConfigParam.getFieldMap().put("type", new TSLiteral("", TypeMapper.tsString, tsClass.getName().toLowerCase()+"s"));
+
+        String typeName = null;
+        JsonApiModelConfig jsonApiModelConfig = (JsonApiModelConfig) javaClass.getAnnotation(JsonApiModelConfig.class);
+        if (jsonApiModelConfig != null) {
+            typeName = jsonApiModelConfig.type();
+        }else{
+            typeName = tsClass.getName().toLowerCase() + "s";
+        }
+        jsonApiModelConfigParam.getFieldMap().put("type", new TSLiteral("", TypeMapper.tsString, typeName));
         jsonApiModelConfigDecorator.getTsLiteralList().add(jsonApiModelConfigParam);
         return jsonApiModelConfigDecorator;
     }
