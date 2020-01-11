@@ -6,17 +6,17 @@
     <parent>
         <groupId>com.blue-veery</groupId>
         <artifactId>spring-rest2ts</artifactId>
-        <version>1.2.2</version>
+        <version>1.2.4</version>
     </parent>
 
     <artifactId>spring-rest2ts-jax-rs</artifactId>
-    <version>1.2.2</version>
+    <version>${spring-rest2ts.version}</version>
 
     <dependencies>
         <dependency>
             <groupId>com.blue-veery</groupId>
             <artifactId>spring-rest2ts-spring</artifactId>
-            <version>1.2.2</version>
+            <version>${spring-rest2ts.version}</version>
         </dependency>
         <dependency>
             <groupId>javax</groupId>

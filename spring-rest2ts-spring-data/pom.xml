@@ -6,17 +6,17 @@
     <parent>
         <groupId>com.blue-veery</groupId>
         <artifactId>spring-rest2ts</artifactId>
-        <version>1.2.2</version>
+        <version>1.2.4</version>
     </parent>
 
     <artifactId>spring-rest2ts-spring-data</artifactId>
-    <version>1.2.2</version>
+    <version>${spring-rest2ts.version}</version>
 
     <dependencies>
         <dependency>
             <groupId>com.blue-veery</groupId>
             <artifactId>spring-rest2ts-generator</artifactId>
-            <version>1.2.2</version>
+            <version>${spring-rest2ts.version}</version>
         </dependency>
 
          <dependency>
@@ -27,7 +27,7 @@
         <dependency>
             <groupId>com.blue-veery</groupId>
             <artifactId>spring-rest2ts-jackson</artifactId>
-            <version>1.2.2</version>
+            <version>${spring-rest2ts.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

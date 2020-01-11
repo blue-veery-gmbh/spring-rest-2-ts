@@ -6,7 +6,7 @@
 
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.4</version>
     <packaging>pom</packaging>
 
     <name>spring-rest2ts</name>
@@ -42,6 +42,10 @@
             <organizationUrl>https://github.com/blue-veery-gmbh</organizationUrl>
         </developer>
     </developers>
+
+    <properties>
+        <spring-rest2ts.version>1.2.4</spring-rest2ts.version>
+    </properties>
 
 
     <modules>

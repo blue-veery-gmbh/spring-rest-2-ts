@@ -6,11 +6,11 @@
     <parent>
         <groupId>com.blue-veery</groupId>
         <artifactId>spring-rest2ts</artifactId>
-        <version>1.2.2</version>
+        <version>1.2.4</version>
     </parent>
 
     <artifactId>spring-rest2ts-angular2json</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.4</version>
     <packaging>pom</packaging>
     <modules>
         <module>spring-rest2ts-angular2json-api</module>

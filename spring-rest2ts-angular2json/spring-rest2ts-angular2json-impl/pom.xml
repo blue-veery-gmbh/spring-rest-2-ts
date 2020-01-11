@@ -6,21 +6,21 @@
     <parent>
         <groupId>com.blue-veery</groupId>
         <artifactId>spring-rest2ts-angular2json</artifactId>
-        <version>1.2.2</version>
+        <version>1.2.4</version>
     </parent>
 
     <artifactId>spring-rest2ts-angular2json-impl</artifactId>
-    <version>1.2.2</version>
+    <version>${spring-rest2ts.version}</version>
     <dependencies>
         <dependency>
             <groupId>com.blue-veery</groupId>
             <artifactId>spring-rest2ts-angular2json-api</artifactId>
-            <version>1.2.2</version>
+            <version>${spring-rest2ts.version}</version>
         </dependency>
         <dependency>
             <groupId>com.blue-veery</groupId>
             <artifactId>spring-rest2ts-generator</artifactId>
-            <version>1.2.2</version>
+            <version>${spring-rest2ts.version}</version>
         </dependency>
     </dependencies>
 </project>
