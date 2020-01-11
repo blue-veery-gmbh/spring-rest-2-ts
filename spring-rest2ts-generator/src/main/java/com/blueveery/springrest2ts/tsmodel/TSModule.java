@@ -79,14 +79,19 @@ public class TSModule extends TSElement {
         for (TSScopedElement tsScopedElement : scopedTypesSet) {
             if(tsScopedElement instanceof TSInterface){
                 sortedElements.add(tsScopedElement);
+                continue;
             }
             if(tsScopedElement instanceof TSClass){
                 TSClass tsClass = (TSClass) tsScopedElement;
                 addDependantClasses(tsClass, sortedElements);
+                continue;
             }
             if(tsScopedElement instanceof TSVariable){
                 tsVariableList.add((TSVariable) tsScopedElement);
+                continue;
             }
+            sortedElements.add(tsScopedElement);
+
         }
         sortedElements.addAll(tsVariableList);
         return sortedElements;
