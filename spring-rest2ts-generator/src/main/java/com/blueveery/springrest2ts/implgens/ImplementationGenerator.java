@@ -22,5 +22,5 @@ public interface ImplementationGenerator {
 
     void addComplexTypeUsage(TSClass tsClass);
 
-    void addImplementationSpecificFields(TSComplexType tsComplexType);
+    void addImplementationSpecificFields(TSComplexElement tsComplexType);
 }

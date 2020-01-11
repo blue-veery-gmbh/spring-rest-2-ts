@@ -4,7 +4,7 @@ import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.extensions.ConversionExtension;
 import com.blueveery.springrest2ts.extensions.RestConversionExtension;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
-import com.blueveery.springrest2ts.tsmodel.TSComplexType;
+import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSMethod;
 import com.blueveery.springrest2ts.tsmodel.TSParameter;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -160,7 +160,7 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
         }
     }
 
-    protected boolean isRestClass(TSComplexType tsComplexType) {
+    protected boolean isRestClass(TSComplexElement tsComplexType) {
         return tsComplexType.findAnnotation(RequestMapping.class) != null;
     }
 

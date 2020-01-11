@@ -39,17 +39,17 @@ public class SpringDataModelConversionExtension implements ModelConversionExtens
     }
 
     @Override
-    public void tsScopedTypeCreated(Class javaType, TSScopedType tsScopedType) {
+    public void tsScopedTypeCreated(Class javaType, TSScopedElement tsScopedElement) {
         if (javaType.isAssignableFrom(Sort.class)) {
             TSType sortOrderType = TypeMapper.map(Sort.Order.class);
-            TSComplexType tsSortInterface = (TSComplexType) tsScopedType;
+            TSComplexElement tsSortInterface = (TSComplexElement) tsScopedElement;
             TSUnion orderPropertiesFieldType = new TSUnion(TypeMapper.tsUndefined, new TSArray(sortOrderType));
             TSField ordersField = new TSField("sortOrders", tsSortInterface, orderPropertiesFieldType);
             tsSortInterface.addScopedTypeUsage(sortOrderType);
             tsSortInterface.addTsField(ordersField);
         }
         if (javaType.isAssignableFrom(Sort.Order.class)) {
-            TSComplexType tsSortOrderInterface = (TSComplexType) tsScopedType;
+            TSComplexElement tsSortOrderInterface = (TSComplexElement) tsScopedElement;
             for (TSField tsField : tsSortOrderInterface.getTsFields()) {
                 if ("descending".equals(tsField.getName())) {
                     continue;

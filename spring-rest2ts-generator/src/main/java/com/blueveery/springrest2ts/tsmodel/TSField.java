@@ -10,7 +10,7 @@ public class TSField extends TSComplexTypeMember {
     private boolean optional;
     private boolean readOnly;
 
-    public TSField(String name, TSComplexType owner, TSType type) {
+    public TSField(String name, TSComplexElement owner, TSType type) {
         super(name, owner, type);
     }
 

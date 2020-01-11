@@ -24,9 +24,9 @@ public class TSJsonLiteral extends TSElement implements ILiteral{
         for (String fieldName : fieldMap.keySet()) {
             ILiteral literal = fieldMap.get(fieldName);
             if (!isFirstField) {
-                isFirstField = false;
                 writer.write(",");
             }
+            isFirstField = false;
             writer.newLine();
             writer.write(fieldName);
             writer.write(":");

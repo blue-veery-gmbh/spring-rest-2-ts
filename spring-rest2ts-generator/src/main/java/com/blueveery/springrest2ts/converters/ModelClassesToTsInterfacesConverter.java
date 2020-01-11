@@ -9,9 +9,6 @@ import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 
 import java.lang.reflect.AnnotatedType;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**
@@ -34,7 +31,7 @@ public class ModelClassesToTsInterfacesConverter extends ModelClassesAbstractCon
             if (objectMapper.filterClass(javaClass)) {
                 TSModule tsModule = javaPackageToTsModuleConverter.getTsModule(javaClass);
                 TSInterface tsInterface = new TSInterface(createTsClassName(javaClass), tsModule);
-                tsModule.addScopedType(tsInterface);
+                tsModule.addScopedElement(tsInterface);
                 TypeMapper.registerTsType(javaClass, tsInterface);
                 return true;
             }

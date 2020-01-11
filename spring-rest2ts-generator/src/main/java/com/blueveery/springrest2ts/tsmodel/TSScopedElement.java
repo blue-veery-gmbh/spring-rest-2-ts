@@ -9,13 +9,13 @@ import java.util.Set;
 /**
  * Created by tomek on 08.08.17.
  */
-public abstract class TSScopedType extends TSType implements ICommentedElement, IAnnotated{
+public abstract class TSScopedElement extends TSType implements ICommentedElement, IAnnotated{
     protected TSModule module;
     protected TSComment tsComment = new TSComment("ComplexTypeComment");
     private List<Annotation> annotationList = new ArrayList<>();
     private Set<Class> mappedFromJavaTypeSet = new HashSet<>();
 
-    protected TSScopedType(String name, TSModule module) {
+    protected TSScopedElement(String name, TSModule module) {
         super(name);
         this.module = module;
     }

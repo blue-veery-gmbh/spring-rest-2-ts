@@ -7,10 +7,10 @@ import java.io.IOException;
 @Deprecated()
 public class TSParameterisedType extends TSType{
 
-    private TSComplexType tsComplexType;
+    private TSComplexElement tsComplexType;
     private TSType tsTypeParameter;
 
-    public TSParameterisedType(String name, TSComplexType tsComplexType, TSType tsTypeParameter) {
+    public TSParameterisedType(String name, TSComplexElement tsComplexType, TSType tsTypeParameter) {
         super(name);
         this.tsComplexType = tsComplexType;
         this.tsTypeParameter = tsTypeParameter;

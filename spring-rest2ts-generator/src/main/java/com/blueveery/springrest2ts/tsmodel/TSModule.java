@@ -25,7 +25,7 @@ import static com.blueveery.springrest2ts.tsmodel.ModuleExtensionType.typing;
 public class TSModule extends TSElement {
     private boolean isExternal = false;
     private Map<TSModule, TSImport> importMap = new TreeMap<>();
-    private SortedSet<TSScopedType> scopedTypesSet = new TreeSet<>();
+    private SortedSet<TSScopedElement> scopedTypesSet = new TreeSet<>();
     private Path moduleRelativePath;
     private ModuleExtensionType moduleExtensionType = typing;
 
@@ -65,16 +65,16 @@ public class TSModule extends TSElement {
         }
 
         writer.newLine();
-        for (TSScopedType tsScopedType: scopedTypesSet) {
-            tsScopedType.write(writer);
+        for (TSScopedElement tsScopedElement : scopedTypesSet) {
+            tsScopedElement.write(writer);
             writer.newLine();
             writer.newLine();
         }
     }
 
-    public void addScopedType(TSScopedType tsScopedType) {
-        scopedTypesSet.add(tsScopedType);
-        if(tsScopedType instanceof TSClass || !Rest2tsGenerator.generateAmbientModules){
+    public void addScopedElement(TSScopedElement tsScopedElement) {
+        scopedTypesSet.add(tsScopedElement);
+        if(tsScopedElement instanceof TSClass || !Rest2tsGenerator.generateAmbientModules){
             moduleExtensionType = implementation;
         }
     }
@@ -83,14 +83,14 @@ public class TSModule extends TSElement {
         if (tsType instanceof TSParameterizedTypeReference) {
             scopedTypeUsage(((TSParameterizedTypeReference) tsType));
         }
-        if (tsType instanceof TSScopedType) {
-            scopedTypeUsage(((TSScopedType) tsType));
+        if (tsType instanceof TSScopedElement) {
+            scopedTypeUsage(((TSScopedElement) tsType));
         }
     }
     public void scopedTypeUsage(TSParameterizedTypeReference<?> typeReference) {
         IParameterizedWithFormalTypes referencedType = typeReference.getReferencedType();
-        if (referencedType instanceof TSScopedType) {
-            TSScopedType referencedScopedType = (TSScopedType) referencedType;
+        if (referencedType instanceof TSScopedElement) {
+            TSScopedElement referencedScopedType = (TSScopedElement) referencedType;
             scopedTypeUsage(referencedScopedType);
         }
         if (referencedType instanceof TSFormalTypeParameter) {
@@ -103,15 +103,15 @@ public class TSModule extends TSElement {
             }
         }
     }
-    public void scopedTypeUsage(TSScopedType tsScopedType) {
-        TSModule module = tsScopedType.getModule();
+    public void scopedTypeUsage(TSScopedElement tsScopedElement) {
+        TSModule module = tsScopedElement.getModule();
         if(module != this && module != TypeMapper.systemModule){
             TSImport tsImport = importMap.get(module);
             if(tsImport == null){
                 tsImport = new TSImport(module);
                 importMap.put(module, tsImport);
             }
-            tsImport.getWhat().add(tsScopedType);
+            tsImport.getWhat().add(tsScopedElement);
         }
     }
 

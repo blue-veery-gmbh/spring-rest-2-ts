@@ -8,7 +8,6 @@ import com.blueveery.springrest2ts.tsmodel.*;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.util.Collections;
 import java.util.List;
@@ -29,11 +28,13 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
     private TSClass jsonApiModelClass;
     private TSClassReference tsJsonApiModelClassReference;
 
+    TSVariable modelsVariable;
+
     public ModelClassesToTsAngular2JsonApiConverter(ObjectMapper objectMapper) {
-        this(new NoChangeClassNameMapper(), objectMapper);
+        this(objectMapper, new NoChangeClassNameMapper());
     }
 
-    public ModelClassesToTsAngular2JsonApiConverter(ClassNameMapper classNameMapper, ObjectMapper objectMapper) {
+    public ModelClassesToTsAngular2JsonApiConverter(ObjectMapper objectMapper, ClassNameMapper classNameMapper) {
         super(new EmptyImplementationGenerator(), classNameMapper, objectMapper);
         angular2JsonApiModule = new TSModule("angular2-jsonapi", null, true);
         jsonApiModelConfigFunction = new TSFunction("JsonApiModelConfig", angular2JsonApiModule);
@@ -44,6 +45,14 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
         tsJsonApiModelClassReference = new TSClassReference(jsonApiModelClass, Collections.emptyList());
     }
 
+    public TSVariable getModelsVariable() {
+        return modelsVariable;
+    }
+
+    public void setModelsVariable(TSVariable modelsVariable) {
+        this.modelsVariable = modelsVariable;
+    }
+
     @Override
     public boolean preConverted(JavaPackageToTsModuleConverter javaPackageToTsModuleConverter, Class javaClass) {
         if (TypeMapper.map(javaClass) == TypeMapper.tsAny) {
@@ -52,11 +61,11 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
                 TSModule tsModule = javaPackageToTsModuleConverter.getTsModule(javaClass);
                 if (javaClass.isInterface()) {
                     TSInterface tsInterface = new TSInterface(createTsClassName(javaClass), tsModule);
-                    tsModule.addScopedType(tsInterface);
+                    tsModule.addScopedElement(tsInterface);
                     TypeMapper.registerTsType(javaClass, tsInterface);
                 }else {
                     TSClass tsClass = new TSClass(createTsClassName(javaClass), tsModule, getImplementationGenerator());
-                    tsModule.addScopedType(tsClass);
+                    tsModule.addScopedElement(tsClass);
                     TypeMapper.registerTsType(javaClass, tsClass);
                 }
                 return true;
@@ -134,6 +143,13 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
         }
         jsonApiModelConfigParam.getFieldMap().put("type", new TSLiteral("", TypeMapper.tsString, typeName));
         jsonApiModelConfigDecorator.getTsLiteralList().add(jsonApiModelConfigParam);
+
+        if (modelsVariable != null) {
+            TSJsonLiteral models = (TSJsonLiteral) modelsVariable.getValue();
+            models.getFieldMap().put(typeName, new TSLiteral("", tsClass, tsClass.getName()));
+            modelsVariable.getModule().scopedTypeUsage(tsClass);
+        }
+
         return jsonApiModelConfigDecorator;
     }
 

@@ -3,10 +3,8 @@ package com.blueveery.springrest2ts.converters;
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.naming.NoChangeClassNameMapper;
-import com.blueveery.springrest2ts.tsmodel.TSComplexType;
-import com.blueveery.springrest2ts.tsmodel.TSScopedType;
+import com.blueveery.springrest2ts.tsmodel.TSScopedElement;
 import com.blueveery.springrest2ts.tsmodel.TSType;
-import com.blueveery.springrest2ts.tsmodel.generics.IParameterizedWithFormalTypes;
 import com.blueveery.springrest2ts.tsmodel.generics.TSFormalTypeParameter;
 import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference;
 import org.slf4j.Logger;
@@ -73,8 +71,8 @@ public abstract class ComplexTypeConverter {
                 TSType boundToType = TypeMapper.map(typeVariable.getBounds()[0]);
                 if (boundToType != TypeMapper.tsObject && boundToType instanceof TSParameterizedTypeReference) {
                     tsFormalTypeParameter.setBoundTo(boundToType);
-                    if (typeReference.getReferencedType() instanceof TSScopedType) {
-                        TSScopedType referencedType = (TSScopedType) typeReference.getReferencedType();
+                    if (typeReference.getReferencedType() instanceof TSScopedElement) {
+                        TSScopedElement referencedType = (TSScopedElement) typeReference.getReferencedType();
                         referencedType.getModule().scopedTypeUsage(boundToType);
                     }
                 }

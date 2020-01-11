@@ -7,7 +7,6 @@ import com.blueveery.springrest2ts.spring.RequestMappingUtility;
 import com.blueveery.springrest2ts.tsmodel.*;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.annotation.Annotation;
@@ -30,7 +29,7 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
             TSModule tsModule = javaPackageToTsModuleConverter.getTsModule(javaClass);
             String tsClassName = createTsClassName(javaClass);
             TSClass tsClass = new TSClass(tsClassName, tsModule, implementationGenerator);
-            tsModule.addScopedType(tsClass);
+            tsModule.addScopedElement(tsClass);
             TypeMapper.registerTsType(javaClass, tsClass);
             return true;
         }

@@ -15,7 +15,7 @@ import java.util.TreeSet;
 /**
  * Created by tomaszw on 31.07.2017.
  */
-public class TSClass extends TSComplexType {
+public class TSClass extends TSComplexElement {
     private TSClassReference extendsClass;
     private SortedSet<TSInterfaceReference> implementsInterfaces = new TreeSet<TSInterfaceReference>();
     private boolean isAbstract;
@@ -47,7 +47,7 @@ public class TSClass extends TSComplexType {
     }
 
     @Override
-    public boolean isInstanceOf(TSComplexType tsComplexType) {
+    public boolean isInstanceOf(TSComplexElement tsComplexType) {
         if (tsComplexType instanceof TSClass) {
             if (extendsClass == null) {
                 return false;

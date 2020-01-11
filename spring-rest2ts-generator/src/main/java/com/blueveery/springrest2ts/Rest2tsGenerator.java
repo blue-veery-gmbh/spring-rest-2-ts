@@ -57,6 +57,10 @@ public class Rest2tsGenerator {
         this.javaPackageToTsModuleConverter = javaPackageToTsModuleConverter;
     }
 
+    public JavaPackageToTsModuleConverter getJavaPackageToTsModuleConverter() {
+        return javaPackageToTsModuleConverter;
+    }
+
     public void setEnumConverter(ComplexTypeConverter enumConverter) {
         this.enumConverter = enumConverter;
     }

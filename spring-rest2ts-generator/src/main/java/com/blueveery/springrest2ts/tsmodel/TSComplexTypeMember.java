@@ -9,13 +9,13 @@ import java.util.List;
  */
 public abstract class TSComplexTypeMember extends TSElement implements INullableElement, ICommentedElement, IAnnotated, IDecorated{
     protected TSComment tsComment = new TSComment("ComplexTypeMemberComment");
-    private TSComplexType owner;
+    private TSComplexElement owner;
     private TSType type;
     private List<TSDecorator> tsDecoratorList = new ArrayList<>();
 
     private List<Annotation> annotationList = new ArrayList<>();
 
-    public TSComplexTypeMember(String name, TSComplexType owner, TSType type) {
+    public TSComplexTypeMember(String name, TSComplexElement owner, TSType type) {
         super(name);
         this.owner = owner;
         this.type = type;
@@ -35,7 +35,7 @@ public abstract class TSComplexTypeMember extends TSElement implements INullable
         return annotationList;
     }
 
-    public TSComplexType getOwner() {
+    public TSComplexElement getOwner() {
         return owner;
     }
 

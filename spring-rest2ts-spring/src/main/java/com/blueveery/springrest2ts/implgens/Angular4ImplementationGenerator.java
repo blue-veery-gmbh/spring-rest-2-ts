@@ -213,7 +213,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
     }
 
     @Override
-    public void addImplementationSpecificFields(TSComplexType tsComplexType) {
+    public void addImplementationSpecificFields(TSComplexElement tsComplexType) {
         TSClass tsClass = (TSClass) tsComplexType;
         if (tsClass.getExtendsClass() == null) {
             tsClass.getTsFields().add(new TSField(FIELD_NAME_HTTP_SERVICE, tsComplexType, httpClass));

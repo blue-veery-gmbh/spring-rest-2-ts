@@ -13,7 +13,7 @@ import java.util.TreeSet;
 /**
  * Created by tomaszw on 30.07.2017.
  */
-public class TSInterface extends TSComplexType {
+public class TSInterface extends TSComplexElement {
     SortedSet<TSInterfaceReference> extendsInterfaces = new TreeSet<TSInterfaceReference>();
 
     public TSInterface(String name, TSModule module) {
@@ -26,7 +26,7 @@ public class TSInterface extends TSComplexType {
     }
 
     @Override
-    public boolean isInstanceOf(TSComplexType tsComplexType) {
+    public boolean isInstanceOf(TSComplexElement tsComplexType) {
         for (TSInterfaceReference extendedInterface : extendsInterfaces) {
             if (extendedInterface.getReferencedType() == tsComplexType) {
                 return true;

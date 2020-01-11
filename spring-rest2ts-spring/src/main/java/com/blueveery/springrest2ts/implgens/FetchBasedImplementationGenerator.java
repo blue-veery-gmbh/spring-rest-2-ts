@@ -161,7 +161,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     }
 
     @Override
-    public void addImplementationSpecificFields(TSComplexType tsComplexType) {
+    public void addImplementationSpecificFields(TSComplexElement tsComplexType) {
         TSClass tsClass = (TSClass) tsComplexType;
         if (tsClass.getExtendsClass() == null) {
             baseUrlTsField = new TSField("baseURL", tsComplexType, new TSInterface("URL", TypeMapper.systemModule));

@@ -17,7 +17,7 @@ public class TSMethod extends TSComplexTypeMember {
     private boolean isAbstract;
     private List<TSParameter> parameterList = new ArrayList<>();
 
-    public TSMethod(String name, TSComplexType owner, TSType type, ImplementationGenerator implementationGenerator, boolean isAbstract, boolean isConstructor) {
+    public TSMethod(String name, TSComplexElement owner, TSType type, ImplementationGenerator implementationGenerator, boolean isAbstract, boolean isConstructor) {
         super(name, owner, type);
         this.implementationGenerator = implementationGenerator;
         this.isAbstract = isAbstract;
