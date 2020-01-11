@@ -40,6 +40,28 @@ public class ModelClassesToTsInterfacesConverter extends ModelClassesAbstractCon
     }
 
     @Override
+    public void convertInheritance(Class javaClass) {
+        TSInterfaceReference tsInterfaceReference = (TSInterfaceReference) TypeMapper.map(javaClass);
+        TSInterface tsInterface = tsInterfaceReference.getReferencedType();
+        if (!javaClass.isInterface()) {
+            if (javaClass.getSuperclass() != Object.class) {
+                TSType superClass = TypeMapper.map(javaClass.getAnnotatedSuperclass().getType());
+                if (superClass instanceof TSInterfaceReference) {
+                    TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) superClass;
+                    tsInterface.addExtendsInterfaces(tsSuperClassInterface);
+                }
+            }
+        }
+        for (AnnotatedType annotatedInterface : javaClass.getAnnotatedInterfaces()) {
+            TSType superClass = TypeMapper.map(annotatedInterface.getType());
+            if (superClass instanceof TSInterfaceReference) {
+                TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) superClass;
+                tsInterface.addExtendsInterfaces(tsSuperClassInterface);
+            }
+        }
+    }
+
+    @Override
     public void convert(Class javaClass, NullableTypesStrategy nullableTypesStrategy) {
         ObjectMapper objectMapper = selectObjectMapper(javaClass);
         TSInterfaceReference tsInterfaceReference = (TSInterfaceReference) TypeMapper.map(javaClass);
@@ -47,25 +69,6 @@ public class ModelClassesToTsInterfacesConverter extends ModelClassesAbstractCon
         if (!tsInterface.isConverted()) {
             tsInterface.setConverted(true);
             convertFormalTypeParameters(javaClass.getTypeParameters(), tsInterfaceReference);
-            if (!javaClass.isInterface()) {
-                if (javaClass.getSuperclass() != Object.class) {
-                    TSType superClass = TypeMapper.map(javaClass.getAnnotatedSuperclass().getType());
-                    if (superClass instanceof TSInterfaceReference) {
-                        TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) superClass;
-                        tsInterface.addExtendsInterfaces(tsSuperClassInterface);
-                    }
-                }
-            }
-
-            for (AnnotatedType annotatedInterface : javaClass.getAnnotatedInterfaces()) {
-                TSType superClass = TypeMapper.map(annotatedInterface.getType());
-                if (superClass instanceof TSInterfaceReference) {
-                    TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) superClass;
-                    tsInterface.addExtendsInterfaces(tsSuperClassInterface);
-                }
-            }
-
-
             SortedSet<Property> propertySet = getClassProperties(javaClass, objectMapper);
 
             for (Property property : propertySet) {

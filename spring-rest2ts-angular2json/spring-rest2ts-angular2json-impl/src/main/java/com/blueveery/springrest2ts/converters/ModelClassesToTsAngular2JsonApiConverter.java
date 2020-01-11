@@ -75,6 +75,33 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
     }
 
     @Override
+    public void convertInheritance(Class javaClass) {
+        TSClassReference tsClassReference = (TSClassReference) TypeMapper.map(javaClass);
+        TSClass tsClass = tsClassReference.getReferencedType();
+        if (!javaClass.isInterface()) {
+            TSType superClass = TypeMapper.map(javaClass.getAnnotatedSuperclass().getType());
+            TSClassReference tsSuperClassReference;
+            if (superClass instanceof TSClassReference) {
+                tsSuperClassReference = (TSClassReference) superClass;
+            }else{
+                tsSuperClassReference = tsJsonApiModelClassReference;
+            }
+            tsClass.setExtendsClass(tsSuperClassReference);
+            TSDecorator jsonApiModelConfigDecorator = createJsonApiModelConfigDecorator(javaClass, tsClass);
+            tsClass.getTsDecoratorList().add(jsonApiModelConfigDecorator);
+            tsClass.addScopedTypeUsage(jsonApiModelConfigFunction);
+        }
+
+        for (AnnotatedType annotatedInterface : javaClass.getAnnotatedInterfaces()) {
+            TSType superClass = TypeMapper.map(annotatedInterface.getType());
+            if (superClass instanceof TSInterfaceReference) {
+                TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) superClass;
+                tsClass.addImplementsInterfaces(tsSuperClassInterface);
+            }
+        }
+    }
+
+    @Override
     public void convert(Class javaClass, NullableTypesStrategy nullableTypesStrategy) {
         ObjectMapper objectMapper = selectObjectMapper(javaClass);
         TSClassReference tsClassReference = (TSClassReference) TypeMapper.map(javaClass);
@@ -82,29 +109,6 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
         if (!tsClass.isConverted()) {
             tsClass.setConverted(true);
             convertFormalTypeParameters(javaClass.getTypeParameters(), tsClassReference);
-            if (!javaClass.isInterface()) {
-                TSType superClass = TypeMapper.map(javaClass.getAnnotatedSuperclass().getType());
-                TSClassReference tsSuperClassReference;
-                if (superClass instanceof TSClassReference) {
-                    tsSuperClassReference = (TSClassReference) superClass;
-                }else{
-                    tsSuperClassReference = tsJsonApiModelClassReference;
-                }
-                tsClass.setExtendsClass(tsSuperClassReference);
-                TSDecorator jsonApiModelConfigDecorator = createJsonApiModelConfigDecorator(javaClass, tsClass);
-                tsClass.getTsDecoratorList().add(jsonApiModelConfigDecorator);
-                tsClass.addScopedTypeUsage(jsonApiModelConfigFunction);
-            }
-
-            for (AnnotatedType annotatedInterface : javaClass.getAnnotatedInterfaces()) {
-                TSType superClass = TypeMapper.map(annotatedInterface.getType());
-                if (superClass instanceof TSInterfaceReference) {
-                    TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) superClass;
-                    tsClass.addImplementsInterfaces(tsSuperClassInterface);
-                }
-            }
-
-
             SortedSet<Property> propertySet = getClassProperties(javaClass, objectMapper);
 
             for (Property property : propertySet) {
@@ -172,5 +176,4 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
         tsField.getTsDecoratorList().add(attributeDecorator);
         tsField.getOwner().addScopedTypeUsage(attributeDecorator.getTsFunction());
     }
-
 }

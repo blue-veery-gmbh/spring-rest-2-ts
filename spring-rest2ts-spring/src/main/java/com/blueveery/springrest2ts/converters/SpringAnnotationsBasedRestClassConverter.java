@@ -37,12 +37,18 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
     }
 
     @Override
+    public void convertInheritance(Class javaClass) {
+        TSClassReference tsClassReference = (TSClassReference) TypeMapper.map(javaClass);
+        TSClass tsClass = tsClassReference.getReferencedType();
+        setSupperClass(javaClass, tsClass);;
+    }
+
+    @Override
     public void convert(Class javaClass, NullableTypesStrategy nullableTypesStrategy) {
         TSClassReference tsClassReference = (TSClassReference) TypeMapper.map(javaClass);
         TSClass tsClass = tsClassReference.getReferencedType();
 
         convertFormalTypeParameters(javaClass.getTypeParameters(), tsClassReference);
-        setSupperClass(javaClass, tsClass);
         addClassAnnotations(javaClass, tsClass);
 
         TSMethod tsConstructorMethod = new TSMethod("constructor", tsClass, null, implementationGenerator, false, true);

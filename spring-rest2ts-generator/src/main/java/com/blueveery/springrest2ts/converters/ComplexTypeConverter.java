@@ -80,4 +80,8 @@ public abstract class ComplexTypeConverter {
             typeReference.getReferencedType().getTsTypeParameterList().add(tsFormalTypeParameter);
         }
     }
+
+    public void convertInheritance(Class javaType){
+
+    }
 }

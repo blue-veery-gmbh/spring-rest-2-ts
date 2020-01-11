@@ -210,6 +210,10 @@ public class Rest2tsGenerator {
         }
 
         for (Class javaType : preConvertedTypes) {
+            complexTypeConverter.convertInheritance(javaType);
+        }
+
+        for (Class javaType : preConvertedTypes) {
             complexTypeConverter.convert(javaType, nullableTypesStrategy);
         }
 
