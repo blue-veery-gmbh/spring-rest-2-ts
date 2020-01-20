@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.lang.annotation.Annotation;
 
 public class RequestBodyEntity implements RequestBody {
-    private boolean required;
+    private boolean required = true;
 
     @Override
     public boolean required() {

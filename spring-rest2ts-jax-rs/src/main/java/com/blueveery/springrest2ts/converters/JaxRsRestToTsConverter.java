@@ -22,6 +22,16 @@ import java.util.List;
 import java.util.Set;
 
 public class JaxRsRestToTsConverter extends SpringAnnotationsBasedRestClassConverter {
+    private static Set<Class> restMethodAnnotations;
+    static{
+        restMethodAnnotations = new HashSet<>();
+        restMethodAnnotations.add(GET.class);
+        restMethodAnnotations.add(POST.class);
+        restMethodAnnotations.add(PUT.class);
+        restMethodAnnotations.add(DELETE.class);
+//        restMethodAnnotations.add(PATCH.class);
+    }
+
     protected JaxRsRestToTsConverter(ImplementationGenerator implementationGenerator) {
         super(implementationGenerator);
     }
@@ -30,12 +40,33 @@ public class JaxRsRestToTsConverter extends SpringAnnotationsBasedRestClassConve
         super(implementationGenerator, classNameMapper);
     }
 
+    protected boolean isRestMethod(Method method) {
+        for (Class requiredAnnotationType : restMethodAnnotations) {
+            if (method.isAnnotationPresent(requiredAnnotationType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     protected void addClassAnnotations(Class javaClass, TSClass tsClass) {
+        Path path = null;
         RequestMappingEntity requestMapping = null;
         Annotation[] annotationsByType = javaClass.getAnnotationsByType(Path.class);
-        if (annotationsByType != null) {
-            Path path = (Path) annotationsByType[0];
+        if (annotationsByType.length > 0) {
+            path = (Path) annotationsByType[0];
+        }else{
+            for (Class javaClassInterface : javaClass.getInterfaces()) {
+                annotationsByType = javaClassInterface.getAnnotationsByType(Path.class);
+                if (annotationsByType.length > 0) {
+                    path = (Path) annotationsByType[0];
+                    break;
+                }
+            }
+        }
+
+        if (path != null) {
             requestMapping = new RequestMappingEntity();
             requestMapping.setPath(new String[]{path.value()});
             tsClass.addAllAnnotations(new Annotation[]{requestMapping});
@@ -46,38 +77,45 @@ public class JaxRsRestToTsConverter extends SpringAnnotationsBasedRestClassConve
     @Override
     protected void addMethodAnnotations(Method method, TSMethod tsMethod) {
         RequestMappingEntity requestMapping = new RequestMappingEntity();
+        requestMapping.setPath(new String[]{""});
         Set<RequestMethod> requestMethodSet = new HashSet<>();
         for (Annotation annotation : method.getAnnotations()) {
             if(annotation instanceof Path){
                 Path path = (Path) annotation;
                 requestMapping.setPath(new String[]{path.value()});
+                continue;
             }
             if(annotation instanceof GET){
                 requestMethodSet.add(RequestMethod.GET);
+                continue;
             }
             if(annotation instanceof POST){
                 requestMethodSet.add(RequestMethod.POST);
+                continue;
             }
             if(annotation instanceof PUT){
                 requestMethodSet.add(RequestMethod.PUT);
+                continue;
             }
             if(annotation instanceof DELETE){
                 requestMethodSet.add(RequestMethod.DELETE);
+                continue;
             }
             if(annotation instanceof Produces){
                 Produces produces = (Produces) annotation;
                 requestMapping.setProduces(produces.value());
+                continue;
             }
             if(annotation instanceof Consumes){
                 Consumes consumes = (Consumes) annotation;
                 requestMapping.setConsumes(consumes.value());
+                continue;
             }
         }
         if (!requestMethodSet.isEmpty()) {
             requestMapping.setMethod(requestMethodSet.toArray(new RequestMethod[0]));
-            tsMethod.addAllAnnotations(new Annotation[]{requestMapping});
         }
-
+        tsMethod.addAllAnnotations(new Annotation[]{requestMapping});
     }
 
     @Override
@@ -126,7 +164,7 @@ public class JaxRsRestToTsConverter extends SpringAnnotationsBasedRestClassConve
             if (isPutOrPost) {
                 RequestBodyEntity requestBodyEntity = new RequestBodyEntity();
                 requestBodyEntity.setRequired(true);
-                tsParameter.getTsMethod().getAnnotationList().add(requestBodyEntity);
+                tsParameter.getAnnotationList().add(requestBodyEntity);
             }
         }
     }

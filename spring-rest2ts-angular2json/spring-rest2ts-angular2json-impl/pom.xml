@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>spring-rest2ts-angular2json-impl</artifactId>
-    <version>${spring-rest2ts.version}</version>
+    <version>1.2.4</version>
     <dependencies>
         <dependency>
             <groupId>com.blue-veery</groupId>

@@ -69,6 +69,7 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
             TSType methodReturnType = TypeMapper.map(resolveTypeVariable(genericReturnType, variableNameToJavaType));
             tsClass.getModule().scopedTypeUsage(methodReturnType);
             TSMethod tsMethod = new TSMethod(methodName, tsClass, methodReturnType, implementationGenerator, false, false);
+            addMethodAnnotations(method, tsMethod);
             for (Parameter parameter:method.getParameters()) {
                 Type parameterType = resolveTypeVariable(parameter.getParameterizedType(), variableNameToJavaType);
                 TSParameter tsParameter = new TSParameter(parameter.getName(), TypeMapper.map(parameterType), tsMethod, implementationGenerator);
@@ -81,7 +82,6 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
                 }
                 conversionListener.tsParameterCreated(parameter, tsParameter);
             }
-            addMethodAnnotations(method, tsMethod);
             tsClass.addTsMethod(tsMethod);
             conversionListener.tsMethodCreated(method, tsMethod);
         }

@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>spring-rest2ts-jackson</artifactId>
-    <version>${spring-rest2ts.version}</version>
+    <version>1.2.4</version>
 
     <dependencies>
         <dependency>

@@ -67,7 +67,13 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
             RequestMapping classRequestMapping = getRequestMapping(tsClass.getAnnotationList());
 
             String tsPath = useUrlService ? "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" : "'";
-            tsPath += getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "'";
+            String classLevelPath = getPathFromRequestMapping(classRequestMapping);
+            String methodLevelPath = getPathFromRequestMapping(methodRequestMapping);
+            String pathSeparator = "";
+            if (!classLevelPath.endsWith("/") && !methodLevelPath.endsWith("/")) {
+                pathSeparator="/";
+            }
+            tsPath += classLevelPath + pathSeparator +  methodLevelPath + "'";
             String httpMethod = methodRequestMapping.method()[0].toString();
 
             String requestHeadersVar = "headers";

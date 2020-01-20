@@ -43,11 +43,13 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
     protected abstract void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, String queryParamVar);
 
     protected String getPathFromRequestMapping(RequestMapping requestMapping) {
-        if (requestMapping.path().length > 0) {
-            return requestMapping.path()[0];
-        }
-        if (requestMapping.value().length > 0) {
-            return requestMapping.value()[0];
+        if (requestMapping != null) {
+            if (requestMapping.path().length > 0) {
+                return requestMapping.path()[0];
+            }
+            if (requestMapping.value().length > 0) {
+                return requestMapping.value()[0];
+            }
         }
         return "";
     }

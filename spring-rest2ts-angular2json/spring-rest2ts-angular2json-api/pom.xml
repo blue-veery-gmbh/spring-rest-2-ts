@@ -10,5 +10,5 @@
     </parent>
 
     <artifactId>spring-rest2ts-angular2json-api</artifactId>
-    <version>${spring-rest2ts.version}</version>
+    <version>1.2.4</version>
 </project>
