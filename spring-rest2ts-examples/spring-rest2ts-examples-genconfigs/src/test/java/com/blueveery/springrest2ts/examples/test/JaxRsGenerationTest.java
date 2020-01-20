@@ -7,6 +7,8 @@ import com.blueveery.springrest2ts.converters.JaxRsRestToTsConverter;
 import com.blueveery.springrest2ts.converters.ModelClassesToTsInterfacesConverter;
 import com.blueveery.springrest2ts.filters.JavaTypeSetFilter;
 import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
+import com.blueveery.springrest2ts.implgens.FetchBasedImplementationGenerator;
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.SubstringClassNameMapper;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import io.mincong.shop.rest.ProductResourceImpl;
@@ -23,6 +25,17 @@ public class JaxRsGenerationTest extends TsCodeGenerationsTest {
 
     @Test
     public void jaxRsToAngular2PlusConverterTest() throws IOException {
+        Angular4ImplementationGenerator implementationGenerator = new Angular4ImplementationGenerator();
+        jaxRsConverterTest(implementationGenerator);
+    }
+
+    @Test
+    public void jaxRsToPromiseAPIConverterTest() throws IOException {
+        FetchBasedImplementationGenerator implementationGenerator = new FetchBasedImplementationGenerator();
+        jaxRsConverterTest(implementationGenerator);
+    }
+
+    private void jaxRsConverterTest(ImplementationGenerator implementationGenerator) throws IOException {
         tsGenerator = new Rest2tsGenerator();
 
         //set java model type filters
@@ -43,7 +56,7 @@ public class JaxRsGenerationTest extends TsCodeGenerationsTest {
         tsGenerator.setRestClassesCondition(new JavaTypeSetFilter(resourcesTypes));
 
         SubstringClassNameMapper classNameMapper = new SubstringClassNameMapper("ResourceImpl", "Service");
-        JaxRsRestToTsConverter jaxRsRestToTsConverter = new JaxRsRestToTsConverter(new Angular4ImplementationGenerator(), classNameMapper);
+        JaxRsRestToTsConverter jaxRsRestToTsConverter = new JaxRsRestToTsConverter(implementationGenerator, classNameMapper);
         tsGenerator.setRestClassesConverter(jaxRsRestToTsConverter);
 
 
