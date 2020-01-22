@@ -2,10 +2,13 @@ package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
+import com.blueveery.springrest2ts.spring.RequestMappingUtility;
 import com.blueveery.springrest2ts.tsmodel.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.lang.reflect.*;
+import java.util.Arrays;
 
 public class SpringRestToTsConverter extends SpringAnnotationsBasedRestClassConverter{
 
@@ -42,5 +45,10 @@ public class SpringRestToTsConverter extends SpringAnnotationsBasedRestClassConv
             }
         }
         return genericReturnType;
+    }
+
+    @Override
+    protected RequestMapping getRequestMappingForMethod(Method method) {
+        return RequestMappingUtility.getRequestMapping(Arrays.asList (method.getDeclaredAnnotations()));
     }
 }

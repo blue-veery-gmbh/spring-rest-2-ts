@@ -158,7 +158,7 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
         Map<Method, RequestMapping> methodsRequestMappingsMap = new HashMap<>();
         for (Method m : overloadedMethods) {
             overloadedMethodNamesMap.put(m, new StringBuilder(m.getName()));
-            methodsRequestMappingsMap.put(m, RequestMappingUtility.getRequestMapping(Arrays.asList (m.getDeclaredAnnotations())));
+            methodsRequestMappingsMap.put(m, getRequestMappingForMethod(m));
         }
 
 
@@ -172,6 +172,8 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
         overloadedMethodNamesMap.forEach((method, name) -> methodNamesMap.put(method, name));
         return overloadedMethodNamesMap.get(currentMethod).toString();
     }
+
+    protected abstract RequestMapping getRequestMappingForMethod(Method method);
 
     private void appendHttpMethodToMethodName(Map<Method, StringBuilder> overloadedMethodNamesMap, Map<Method, RequestMapping> methodsRequestMappingsMap) {
         Map<Method, String> httpMethodsValuesMap = new HashMap<>();

@@ -76,6 +76,12 @@ public class JaxRsRestToTsConverter extends SpringAnnotationsBasedRestClassConve
 
     @Override
     protected void addMethodAnnotations(Method method, TSMethod tsMethod) {
+        RequestMappingEntity requestMapping = getRequestMappingForMethod(method);
+        tsMethod.addAllAnnotations(new Annotation[]{requestMapping});
+    }
+
+    @Override
+    protected RequestMappingEntity getRequestMappingForMethod(Method method) {
         RequestMappingEntity requestMapping = new RequestMappingEntity();
         requestMapping.setPath(new String[]{""});
         Set<RequestMethod> requestMethodSet = new HashSet<>();
@@ -115,7 +121,7 @@ public class JaxRsRestToTsConverter extends SpringAnnotationsBasedRestClassConve
         if (!requestMethodSet.isEmpty()) {
             requestMapping.setMethod(requestMethodSet.toArray(new RequestMethod[0]));
         }
-        tsMethod.addAllAnnotations(new Annotation[]{requestMapping});
+        return requestMapping;
     }
 
     @Override
