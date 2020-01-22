@@ -29,7 +29,7 @@ public class JaxRsRestToTsConverter extends SpringAnnotationsBasedRestClassConve
         restMethodAnnotations.add(POST.class);
         restMethodAnnotations.add(PUT.class);
         restMethodAnnotations.add(DELETE.class);
-//        restMethodAnnotations.add(PATCH.class);
+        restMethodAnnotations.add(PATCH.class);
     }
 
     protected JaxRsRestToTsConverter(ImplementationGenerator implementationGenerator) {
