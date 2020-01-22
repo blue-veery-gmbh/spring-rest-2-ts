@@ -34,7 +34,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
             String classLevelPath = getPathFromRequestMapping(classRequestMapping);
             String methodLevelPath = getPathFromRequestMapping(methodRequestMapping);
             String pathSeparator = "";
-            if (!classLevelPath.endsWith("/") && !methodLevelPath.endsWith("/")) {
+            if (!classLevelPath.endsWith("/") && !(methodLevelPath.startsWith("/") || "".equals(methodLevelPath))) {
                 pathSeparator="/";
             }
             String tsPath = classLevelPath + pathSeparator +  methodLevelPath + "'";

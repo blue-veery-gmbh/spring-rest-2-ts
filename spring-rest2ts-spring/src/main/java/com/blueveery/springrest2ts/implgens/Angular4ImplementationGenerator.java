@@ -70,7 +70,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
             String classLevelPath = getPathFromRequestMapping(classRequestMapping);
             String methodLevelPath = getPathFromRequestMapping(methodRequestMapping);
             String pathSeparator = "";
-            if (!classLevelPath.endsWith("/") && !methodLevelPath.endsWith("/")) {
+            if (!classLevelPath.endsWith("/") && !(methodLevelPath.startsWith("/") || "".equals(methodLevelPath))) {
                 pathSeparator="/";
             }
             tsPath += classLevelPath + pathSeparator +  methodLevelPath + "'";
