@@ -7,12 +7,13 @@ import java.lang.annotation.Annotation;
 
 public class RequestMappingEntity implements RequestMapping {
 
-    private String name;
+    private String name = "";
     private RequestMethod[] method = {};
     private String[] produces = {};
     private String[] consumes = {};
     private String[] headers = {};
     private String[] path = {};
+    private String[] value = {};
     private String[] params = {};
 
     public void setName(String name) {
@@ -40,7 +41,7 @@ public class RequestMappingEntity implements RequestMapping {
     }
 
     public void setValue(String[] value) {
-        this.path = value;
+        this.value = value;
     }
 
     public void setParams(String[] params) {
@@ -54,7 +55,7 @@ public class RequestMappingEntity implements RequestMapping {
 
     @Override
     public String[] value() {
-        return path;
+        return value;
     }
 
     @Override

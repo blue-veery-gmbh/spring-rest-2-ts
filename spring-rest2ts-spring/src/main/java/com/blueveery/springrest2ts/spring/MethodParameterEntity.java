@@ -2,10 +2,11 @@ package com.blueveery.springrest2ts.spring;
 
 public class MethodParameterEntity {
     private String name = "";
+    private String value = "";
     private boolean required = true;
 
     public String value() {
-        return name;
+        return value;
     }
 
     public String name() {
@@ -17,7 +18,7 @@ public class MethodParameterEntity {
     }
 
     public void setValue(String value) {
-        this.name = value;
+        this.value = value;
     }
 
     public void setName(String name) {
