@@ -1,5 +1,12 @@
 # Spring rest2ts generator 
-spring-rest2ts-generator generates TypeScript code based on Spring MVC REST controllers and data model for HTTP requests and responses. 
+spring-rest2ts-generator generates TypeScript code based on Spring MVC REST controllers and data model for HTTP requests and responses.
+ 
+spring-rest2ts-generator started from Spring MVC but we noticed that it is easy to support also JAX-RS annotations and such support
+has been added in version 1.2.4
+
+In version 1.2.4 we also added support for [angular2-jsonapi](https://github.com/ghidoz/angular2-jsonapi) which is a lightweight Angular2+ adapter for JSON API 
+ 
+ 
 # Features
 From model classes there are generated TypeScript interfaces and from REST controllers full working Angular services based on Observable API
 or plain JavaScript services based on Promises API. The main idea is that Spring annotations describing REST endpoints have enough information 
@@ -32,22 +39,32 @@ To add a dependency on spring-rest2ts-generator using Maven, use the following:
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-generator</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.4</version>
 </dependency>
 <dependency>
   <groupId>com.blue-veery</groupId>
   <artifactId>spring-rest2ts-spring</artifactId>
-  <version>1.2.2</version>
+  <version>1.2.4</version>
 </dependency>
 <dependency>
   <groupId>com.blue-veery</groupId>
   <artifactId>spring-rest2ts-spring-data</artifactId>
-  <version>1.2.2</version>
+  <version>1.2.4</version>
 </dependency>
 <dependency>
   <groupId>com.blue-veery</groupId>
   <artifactId>spring-rest2ts-jackson</artifactId>
-  <version>1.2.2</version>
+  <version>1.2.4</version>
+</dependency>
+<dependency>
+  <groupId>com.blue-veery</groupId>
+  <artifactId>spring-rest2ts-jax-rs</artifactId>
+  <version>1.2.4</version>
+</dependency>
+<dependency>
+  <groupId>com.blue-veery</groupId>
+  <artifactId>spring-rest2ts-angular2json-impl</artifactId>
+  <version>1.2.4</version>
 </dependency>
 ```          
            
