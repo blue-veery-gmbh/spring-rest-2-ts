@@ -31,7 +31,9 @@ generated code will reflect these changes which will avoid compile-time error in
    + Java class filtering for TS code generation
    + Java generic types mapped to TS generics : since ver 1.2.2    
    + Java interfaces mapped by model classes which contains getters and setter mapped to TS interfaces : since ver 1.2.2    
-   + spring data support (Pageable & Page types) : since ver 1.2.2    
+   + spring data support (Pageable & Page types) : since ver 1.2.2  
+   + JAX-RS annotation support : since ver 1.2.4
+   + model converter which generates TypeScript classes aligned with angular2-jsonapi library
    
 ## Installation 
 To add a dependency on spring-rest2ts-generator using Maven, use the following:
@@ -42,29 +44,32 @@ To add a dependency on spring-rest2ts-generator using Maven, use the following:
     <version>1.2.4</version>
 </dependency>
 <dependency>
-  <groupId>com.blue-veery</groupId>
-  <artifactId>spring-rest2ts-spring</artifactId>
-  <version>1.2.4</version>
+    <groupId>com.blue-veery</groupId>
+    <artifactId>spring-rest2ts-spring</artifactId>
+    <version>1.2.4</version>
 </dependency>
 <dependency>
-  <groupId>com.blue-veery</groupId>
-  <artifactId>spring-rest2ts-spring-data</artifactId>
-  <version>1.2.4</version>
+    <groupId>com.blue-veery</groupId>
+    <artifactId>spring-rest2ts-spring-data</artifactId>
+    <version>1.2.4</version>
+    <!-- only if spring data is used-->
 </dependency>
 <dependency>
-  <groupId>com.blue-veery</groupId>
-  <artifactId>spring-rest2ts-jackson</artifactId>
-  <version>1.2.4</version>
+    <groupId>com.blue-veery</groupId>
+    <artifactId>spring-rest2ts-jackson</artifactId>
+    <version>1.2.4</version>
 </dependency>
 <dependency>
-  <groupId>com.blue-veery</groupId>
-  <artifactId>spring-rest2ts-jax-rs</artifactId>
-  <version>1.2.4</version>
+    <groupId>com.blue-veery</groupId>
+    <artifactId>spring-rest2ts-jax-rs</artifactId>
+    <version>1.2.4</version>
+    <!-- only if JAX-RS is used-->
 </dependency>
 <dependency>
-  <groupId>com.blue-veery</groupId>
-  <artifactId>spring-rest2ts-angular2json-impl</artifactId>
-  <version>1.2.4</version>
+    <groupId>com.blue-veery</groupId>
+    <artifactId>spring-rest2ts-angular2json-impl</artifactId>
+    <version>1.2.4</version>
+    <!-- only if angular2json is used-->
 </dependency>
 ```          
            
@@ -294,6 +299,8 @@ Others fields are calculated on the server and sent back to client in Page objec
 
 If parameter with type `Pageable` is marked with annotation `@PageableDefault`, parameter in TypeScript is optional 
 
+## JaX-RS REST controllers converter - since ver 1.2.4
+To generate code for 
    
 ## Response content conversion
  + If REST endpoint produces JSON generated service method returns Observable or `Promise<<Mapped java type>>`
