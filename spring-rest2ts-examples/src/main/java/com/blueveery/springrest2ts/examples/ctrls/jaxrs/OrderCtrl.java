@@ -16,7 +16,7 @@ import java.util.List;
 
 
 @Path("api/order")
-public class OrderCtrl extends BaseCtrlImpl<OrderDTO> implements BaseCtrl<OrderDTO> {
+public class OrderCtrl implements BaseCtrl<OrderDTO> {
 
     @Operation(summary = "method creates order", description = "method creates order based on given data")
     @Produces(MediaType.APPLICATION_JSON)

@@ -40,7 +40,7 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
     public void convertInheritance(Class javaClass) {
         TSClassReference tsClassReference = (TSClassReference) TypeMapper.map(javaClass);
         TSClass tsClass = tsClassReference.getReferencedType();
-        setSupperClass(javaClass, tsClass);;
+        setSupperClass(javaClass, tsClass);
     }
 
     @Override
