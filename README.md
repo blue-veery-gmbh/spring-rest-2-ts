@@ -341,7 +341,7 @@ as it is required by `angular2-jsonapi` library
 `JsonApiModelConfig` decorator  has parameter `type` which is type name, this field is generated
 from TypeScript class name (name.toLowerCase()+"s") or is taken from Java annotation `JsonApiModelConfig`. To customize 
 type name, Java model class must be annotated with `JsonApiModelConfig` annotation which is provided by module
-```
+```xml
     <dependency>
         <groupId>com.blue-veery</groupId>
         <artifactId>spring-rest2ts-angular2json-api</artifactId>
