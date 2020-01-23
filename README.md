@@ -317,7 +317,7 @@ It supports following JAX-RS annotations:
 and `FetchBasedImplementationGenerator` so code could be generated for Angular as well as for frameworks where Promises are used. 
 `JaxRsRestToTsConverter` usage example:
 ```java
-    SubstringClassNameMapper classNameMapper = new SubstringClassNameMapper("ResourceImpl", "Service");
+    ClassNameMapper classNameMapper = new SubstringClassNameMapper("ResourceImpl", "Service");
     JaxRsRestToTsConverter jaxRsRestToTsConverter = new JaxRsRestToTsConverter(new Angular4ImplementationGenerator(), classNameMapper);
     tsGenerator.setRestClassesConverter(jaxRsRestToTsConverter);
 ``` 

@@ -11,6 +11,7 @@ import com.blueveery.springrest2ts.filters.ExtendsJavaTypeFilter;
 import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
 import com.blueveery.springrest2ts.implgens.FetchBasedImplementationGenerator;
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
+import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.naming.SubstringClassNameMapper;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.junit.Test;
@@ -45,7 +46,7 @@ public class JaxRsGenerationTest extends TsCodeGenerationsTest {
         ModelClassesToTsInterfacesConverter modelClassesConverter = new ModelClassesToTsInterfacesConverter(jacksonObjectMapper);
         tsGenerator.setModelClassesConverter(modelClassesConverter);
 
-        SubstringClassNameMapper classNameMapper = new SubstringClassNameMapper("ResourceImpl", "Service");
+        ClassNameMapper classNameMapper = new SubstringClassNameMapper("ResourceImpl", "Service");
         JaxRsRestToTsConverter jaxRsRestToTsConverter = new JaxRsRestToTsConverter(implementationGenerator, classNameMapper);
         tsGenerator.setRestClassesConverter(jaxRsRestToTsConverter);
 
