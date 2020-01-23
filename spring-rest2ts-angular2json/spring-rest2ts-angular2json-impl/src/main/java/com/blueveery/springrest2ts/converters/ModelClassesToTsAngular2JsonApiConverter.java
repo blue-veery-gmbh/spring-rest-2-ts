@@ -53,6 +53,12 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
         this.modelsVariable = modelsVariable;
     }
 
+    public void createModelsVariable(String modelsVariableName, TSModule tsModuleForModelsVariable) {
+        TSVariable modelsVariable = new TSVariable(modelsVariableName, tsModuleForModelsVariable, TSDeclarationType.CONST, TypeMapper.tsObject, new TSJsonLiteral());
+        tsModuleForModelsVariable.addScopedElement(modelsVariable);
+        this.modelsVariable = modelsVariable;
+    }
+
     @Override
     public boolean preConverted(JavaPackageToTsModuleConverter javaPackageToTsModuleConverter, Class javaClass) {
         if (TypeMapper.map(javaClass) == TypeMapper.tsAny) {
