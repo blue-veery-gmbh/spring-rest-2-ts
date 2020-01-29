@@ -37,7 +37,7 @@ public class OrderCtrl implements BaseCtrl<OrderDTO> {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public OrderDTO updateOrder(OrderDTO entity) {
+    public OrderDTO updateOrder(@PathParam("id") int id, OrderDTO entity) {
         return entity;
     }
 

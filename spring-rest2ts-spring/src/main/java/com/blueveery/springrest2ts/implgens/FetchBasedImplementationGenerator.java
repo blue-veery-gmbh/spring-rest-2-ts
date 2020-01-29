@@ -35,13 +35,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
             RequestMapping methodRequestMapping = getRequestMapping(method.getAnnotationList());
             RequestMapping classRequestMapping = getRequestMapping(method.getOwner().getAnnotationList());
 
-            String classLevelPath = getPathFromRequestMapping(classRequestMapping);
-            String methodLevelPath = getPathFromRequestMapping(methodRequestMapping);
-            String pathSeparator = "";
-            if (!classLevelPath.endsWith("/") && !(methodLevelPath.startsWith("/") || "".equals(methodLevelPath))) {
-                pathSeparator="/";
-            }
-            String tsPath = classLevelPath + pathSeparator +  methodLevelPath + "'";
+            String tsPath = getEndpointPath(methodRequestMapping, classRequestMapping);
             String httpMethod = methodRequestMapping.method()[0].toString();
 
             String requestUrlVar = "url";
