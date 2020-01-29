@@ -1,6 +1,7 @@
 package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.BufferedWriter;
@@ -66,14 +67,9 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
             RequestMapping methodRequestMapping = getRequestMapping(method.getAnnotationList());
             RequestMapping classRequestMapping = getRequestMapping(tsClass.getAnnotationList());
 
-            String tsPath = useUrlService ? "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" : "'";
-            String classLevelPath = getPathFromRequestMapping(classRequestMapping);
-            String methodLevelPath = getPathFromRequestMapping(methodRequestMapping);
-            String pathSeparator = "";
-            if (!classLevelPath.endsWith("/") && !(methodLevelPath.startsWith("/") || "".equals(methodLevelPath))) {
-                pathSeparator="/";
-            }
-            tsPath += classLevelPath + pathSeparator +  methodLevelPath + "'";
+            String tsPath = getEndpointPath(methodRequestMapping, classRequestMapping);
+            tsPath = useUrlService ? "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" + tsPath : "'" + tsPath;
+
             String httpMethod = methodRequestMapping.method()[0].toString();
 
             String requestHeadersVar = "headers";
@@ -174,7 +170,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
     @Override
     public TSType mapReturnType(TSMethod tsMethod, TSType tsType) {
         if (isRestClass(tsMethod.getOwner())) {
-            return new TSParameterisedType("", observableClass, tsType);
+            return new TSClassReference(observableClass, tsType);
         }
         return tsType;
     }

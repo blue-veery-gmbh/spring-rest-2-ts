@@ -20,12 +20,16 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
 
     protected List<? extends ConversionExtension> extensionSet;
 
+    protected abstract void initializeHttpParams(StringBuilder requestParamsBuilder, String requestParamsVar);
+
+    protected abstract void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, String queryParamVar);
+
+    protected abstract String[] getImplementationSpecificFieldNames();
+
     @Override
     public void setExtensions(List<? extends ConversionExtension> conversionExtensionSet) {
         this.extensionSet = conversionExtensionSet;
     }
-
-    protected abstract void initializeHttpParams(StringBuilder requestParamsBuilder, String requestParamsVar);
 
     protected void writeConstructorImplementation(BufferedWriter writer, TSClass tsClass) throws IOException {
 
@@ -39,8 +43,6 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
             writer.write(");");
         }
     }
-
-    protected abstract void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, String queryParamVar);
 
     protected String getPathFromRequestMapping(RequestMapping requestMapping) {
         if (requestMapping != null) {
@@ -166,6 +168,14 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
         return tsComplexType.findAnnotation(RequestMapping.class) != null;
     }
 
+    protected String getEndpointPath(RequestMapping methodRequestMapping, RequestMapping classRequestMapping) {
+        String classLevelPath = getPathFromRequestMapping(classRequestMapping);
+        String methodLevelPath = getPathFromRequestMapping(methodRequestMapping);
+        String pathSeparator = "";
+        if (!classLevelPath.endsWith("/") && !(methodLevelPath.startsWith("/") || "".equals(methodLevelPath))) {
+            pathSeparator="/";
+        }
+        return classLevelPath + pathSeparator +  methodLevelPath + "'";
+    }
 
-    protected abstract String[] getImplementationSpecificFieldNames();
 }

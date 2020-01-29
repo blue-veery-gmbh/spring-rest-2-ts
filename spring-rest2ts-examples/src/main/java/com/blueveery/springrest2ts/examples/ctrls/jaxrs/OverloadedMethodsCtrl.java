@@ -22,7 +22,7 @@ public class OverloadedMethodsCtrl extends BaseCtrlImpl<CategoryDTO.ProductDTO> 
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/product/create/{id}/with-update")
-    public CategoryDTO.ProductDTO createProduct(CategoryDTO.ProductDTO entity, @QueryParam("update") boolean update) {
+    public CategoryDTO.ProductDTO createProduct(@PathParam("id") int id, CategoryDTO.ProductDTO entity, @QueryParam("update") boolean update) {
         return entity;
     }
 
@@ -30,7 +30,7 @@ public class OverloadedMethodsCtrl extends BaseCtrlImpl<CategoryDTO.ProductDTO> 
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/product/create/{id}")
-    public CategoryDTO.ProductDTO createOrder(CategoryDTO.ProductDTO entity) {
+    public CategoryDTO.ProductDTO createOrder(@PathParam("id") int id, CategoryDTO.ProductDTO entity) {
         return entity;
     }
 
