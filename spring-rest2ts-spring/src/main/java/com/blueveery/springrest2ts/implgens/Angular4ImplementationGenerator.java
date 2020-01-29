@@ -174,7 +174,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
     @Override
     public TSType mapReturnType(TSMethod tsMethod, TSType tsType) {
         if (isRestClass(tsMethod.getOwner())) {
-            return new TSParameterisedType("", observableClass, tsType);
+            return new TSClassReference(observableClass, tsType);
         }
         return tsType;
     }

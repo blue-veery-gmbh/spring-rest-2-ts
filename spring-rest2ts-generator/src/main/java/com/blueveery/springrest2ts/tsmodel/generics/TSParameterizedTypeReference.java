@@ -1,7 +1,9 @@
 package com.blueveery.springrest2ts.tsmodel.generics;
 
 import com.blueveery.springrest2ts.tsmodel.TSType;
+
 import java.io.BufferedWriter;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class TSParameterizedTypeReference<T extends IParameterizedWithFormalTypes> extends TSType implements IParameterizedWithActualTypes {
@@ -18,6 +20,9 @@ public abstract class TSParameterizedTypeReference<T extends IParameterizedWithF
         this.actualParameterList = actualParameterList;
     }
 
+    public TSParameterizedTypeReference(T referencedType, TSType actualParameter) {
+        this(referencedType, Collections.singletonList(actualParameter));
+    }
 
     @Override
     public List<TSType> getTsTypeParameterList() {
@@ -32,7 +37,7 @@ public abstract class TSParameterizedTypeReference<T extends IParameterizedWithF
     }
 
     @Override
-    public final void write(BufferedWriter writer){
+    public final void write(BufferedWriter writer) {
         throw new UnsupportedOperationException();
     }
 }

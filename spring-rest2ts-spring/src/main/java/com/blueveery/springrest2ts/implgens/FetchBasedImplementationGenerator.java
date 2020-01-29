@@ -2,6 +2,7 @@ package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.BufferedWriter;
@@ -17,6 +18,8 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     private final String baseURLFieldName = "baseURL";
     private final String[] implementationSpecificFieldsSet = {baseURLFieldName};
     private final TSInterface baseUrlTsFieldType = new TSInterface("URL", TypeMapper.systemModule);
+    private final TSInterface promiseInterface = new TSInterface("Promise", TypeMapper.systemModule);
+    private final TSInterface responseInterface = new TSInterface("Response", TypeMapper.systemModule);
 
     @Override
     protected String[] getImplementationSpecificFieldNames() {
@@ -134,18 +137,18 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     public TSType mapReturnType(TSMethod tsMethod, TSType tsType) {
         if (isRestClass(tsMethod.getOwner())) {
             if (tsType == TypeMapper.tsVoid) {
-                return new TSParameterisedType("", new TSInterface("Promise", null), new TSInterface("Response", null));
+                return new TSInterfaceReference(promiseInterface, responseInterface);
             }
-            return new TSParameterisedType("", new TSInterface("Promise", null), tsType);
+            return new TSInterfaceReference(promiseInterface, tsType);
         }
         return tsType;
     }
 
     @Override
     public List<TSParameter> getImplementationSpecificParameters(TSMethod method) {
-        if (method.isConstructor()){
+        if (method.isConstructor()) {
             List<TSParameter> tsParameters = new ArrayList<>();
-            TSParameter newParameter = new TSParameter(baseURLFieldName, baseUrlTsFieldType, method,this, "new URL(window.document.URL)");
+            TSParameter newParameter = new TSParameter(baseURLFieldName, baseUrlTsFieldType, method, this, "new URL(window.document.URL)");
             tsParameters.add(newParameter);
             return tsParameters;
         }

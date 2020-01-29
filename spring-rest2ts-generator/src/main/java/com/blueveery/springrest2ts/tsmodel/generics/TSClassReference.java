@@ -9,4 +9,8 @@ public class TSClassReference extends TSParameterizedTypeReference<TSClass> {
     public TSClassReference(TSClass referencedType, List<TSType> actualParameterList) {
         super(referencedType, actualParameterList);
     }
+
+    public TSClassReference(TSClass referencedType, TSType actualParameter) {
+        super(referencedType, actualParameter);
+    }
 }
