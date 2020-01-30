@@ -324,6 +324,7 @@ and `FetchBasedImplementationGenerator` so code could be generated for Angular a
 Class `JaxRsGenerationTest` contains examples how to generate TypeScript code from JAX-RS REST endpoints     
 
 ## Java model classes to angular2-json-api  converter - since ver 1.2.4
+
 [angular2-jsonapi](https://github.com/ghidoz/angular2-jsonapi) is an TypeScript
 library which converts in web application incoming JSON into classes and classes into JSON.
 Given advantage is that TypeScript interfaces doesn't exists in runtime in opposite to classes but to use classes, 
@@ -372,6 +373,11 @@ To have such config generated, generator configuration needs to create such vari
     tsGenerator.setModelClassesConverter(modelClassesConverter);
 ```
 Configuration examples are in class Angular2JsonApiTest
+
+<b style="color:red">This converter is an experimental version, generated code could 
+contains some inconsistencies since we weren't able to find rules 
+how to apply angular2-jsonapi decorators to fields, only examples,
+base on which incorrect conclusions could be made!</b>
    
 ## Response content conversion
  + If REST endpoint produces JSON generated service method returns Observable or `Promise<<Mapped java type>>`
@@ -488,6 +494,13 @@ which adds comments to TypeScript types based on swagger 2.0 `io.swagger.oas.ann
 ```java
     restClassesConverter.getConversionListener().getConversionListenerSet().add(new SwaggerConversionListener());
 ```
+## TypeScript code formatting
+Generated TypeScript code is not formatted. Code formatting from project to project
+could have totally different requirements and it is better to use dedicated library 
+for this purpose like:
+  + [prettier.io](https://prettier.io/docs/en/index.html) 
+  + [typescript-formatter](https://github.com/vvakame/typescript-formatter) 
+    
 
 ## Java compiler setup
 Java compiler by default optimizes methods parameters names, to have readable parameters names in Typescript at least for 
