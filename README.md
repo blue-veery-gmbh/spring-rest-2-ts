@@ -30,10 +30,10 @@ generated code will reflect these changes which will avoid compile-time error in
    + TS services for ReactJS framework   
    + Java class filtering for TS code generation
    + Java generic types mapped to TS generics : since ver 1.2.2    
-   + Java interfaces mapped by model classes which contains getters and setter mapped to TS interfaces : since ver 1.2.2    
-   + spring data support (Pageable & Page types) : since ver 1.2.2  
+   + Java interfaces implemented by model classes which contains getters and setter are mapped to TS interfaces to have common types to diffrent TS model classes : since ver 1.2.2    
+   + spring data support (Pageable & Page types) : since ver 1.2.2
    + JAX-RS annotation support : since ver 1.2.4
-   + model converter which generates TypeScript classes aligned with angular2-jsonapi library
+   + model converter which generates TypeScript classes aligned with angular2-jsonapi library       
    
 ## Installation 
 To add a dependency on spring-rest2ts-generator using Maven, use the following:
@@ -277,7 +277,7 @@ There are supported following Spring annotations:
    + PathVariable
    + RequestParam
    + RequestBody
-## Spring Data support - since ver 1.2.2 
+## Support for spring data in Spring REST controllers - since ver 1.2.2 
 Parameters with type 'Pageable' from spring data, now are supported by adding extension to spring converter:
 ```java
     restClassesConverter.getConversionExtensionList().add(new SpringDataRestConversionExtension());
