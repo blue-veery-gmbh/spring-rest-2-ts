@@ -277,7 +277,7 @@ There are supported following Spring annotations:
    + PathVariable
    + RequestParam
    + RequestBody
-## Spring REST controllers converter - since ver 1.2.2 
+## Spring Data support - since ver 1.2.2 
 Parameters with type 'Pageable' from spring data, now are supported by adding extension to spring converter:
 ```java
     restClassesConverter.getConversionExtensionList().add(new SpringDataRestConversionExtension());
@@ -496,7 +496,7 @@ which adds comments to TypeScript types based on swagger 2.0 `io.swagger.oas.ann
 ```
 ## TypeScript code formatting
 Generated TypeScript code is not formatted. Code formatting from project to project
-could have totally different requirements and it is better to use dedicated library 
+could have totally different requirements and it is suggested to use dedicated formatting library 
 for this purpose like:
   + [prettier.io](https://prettier.io/docs/en/index.html) 
   + [typescript-formatter](https://github.com/vvakame/typescript-formatter) 
