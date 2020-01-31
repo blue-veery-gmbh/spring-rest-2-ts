@@ -23,8 +23,8 @@ public class JavaEnumToTsUnionConverter extends ComplexTypeConverter {
             TSModule tsModule = javaPackageToTsModuleConverter.getTsModule(javaClass);
             TSUnion tsUnion = new TSUnion();
             String aliasName = classNameMapper.mapJavaClassNameToTs(javaClass.getSimpleName());
-            TSTypeAlias tsTypeAlias = new TSTypeAlias(aliasName, tsModule, tsUnion);
-            tsModule.addScopedType(tsTypeAlias);
+            TSElementAlias tsTypeAlias = new TSElementAlias(aliasName, tsModule, tsUnion);
+            tsModule.addScopedElement(tsTypeAlias);
             TypeMapper.registerTsType(javaClass, tsTypeAlias);
             return true;
         }
@@ -33,7 +33,7 @@ public class JavaEnumToTsUnionConverter extends ComplexTypeConverter {
 
     @Override
     public void convert(Class javaClass, NullableTypesStrategy nullableTypesStrategy) {
-        TSTypeAlias tsTypeAlias = (TSTypeAlias) TypeMapper.map(javaClass);
+        TSElementAlias tsTypeAlias = (TSElementAlias) TypeMapper.map(javaClass);
         TSUnion tsUnion = (TSUnion) tsTypeAlias.getAliasedType();
         for (Object enumConstant : javaClass.getEnumConstants()) {
             String enumConstantStringValue = enumConstant.toString();

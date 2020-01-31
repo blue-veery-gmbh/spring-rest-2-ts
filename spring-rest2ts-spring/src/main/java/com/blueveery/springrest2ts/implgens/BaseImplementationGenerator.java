@@ -4,7 +4,7 @@ import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.extensions.ConversionExtension;
 import com.blueveery.springrest2ts.extensions.RestConversionExtension;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
-import com.blueveery.springrest2ts.tsmodel.TSComplexType;
+import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSMethod;
 import com.blueveery.springrest2ts.tsmodel.TSParameter;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,12 +20,16 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
 
     protected List<? extends ConversionExtension> extensionSet;
 
+    protected abstract void initializeHttpParams(StringBuilder requestParamsBuilder, String requestParamsVar);
+
+    protected abstract void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, String queryParamVar);
+
+    protected abstract String[] getImplementationSpecificFieldNames();
+
     @Override
     public void setExtensions(List<? extends ConversionExtension> conversionExtensionSet) {
         this.extensionSet = conversionExtensionSet;
     }
-
-    protected abstract void initializeHttpParams(StringBuilder requestParamsBuilder, String requestParamsVar);
 
     protected void writeConstructorImplementation(BufferedWriter writer, TSClass tsClass) throws IOException {
 
@@ -40,14 +44,14 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
         }
     }
 
-    protected abstract void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, String queryParamVar);
-
     protected String getPathFromRequestMapping(RequestMapping requestMapping) {
-        if (requestMapping.path().length > 0) {
-            return requestMapping.path()[0];
-        }
-        if (requestMapping.value().length > 0) {
-            return requestMapping.value()[0];
+        if (requestMapping != null) {
+            if (requestMapping.path().length > 0) {
+                return requestMapping.path()[0];
+            }
+            if (requestMapping.value().length > 0) {
+                return requestMapping.value()[0];
+            }
         }
         return "";
     }
@@ -160,10 +164,18 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
         }
     }
 
-    protected boolean isRestClass(TSComplexType tsComplexType) {
+    protected boolean isRestClass(TSComplexElement tsComplexType) {
         return tsComplexType.findAnnotation(RequestMapping.class) != null;
     }
 
+    protected String getEndpointPath(RequestMapping methodRequestMapping, RequestMapping classRequestMapping) {
+        String classLevelPath = getPathFromRequestMapping(classRequestMapping);
+        String methodLevelPath = getPathFromRequestMapping(methodRequestMapping);
+        String pathSeparator = "";
+        if (!classLevelPath.endsWith("/") && !(methodLevelPath.startsWith("/") || "".equals(methodLevelPath))) {
+            pathSeparator="/";
+        }
+        return classLevelPath + pathSeparator +  methodLevelPath + "'";
+    }
 
-    protected abstract String[] getImplementationSpecificFieldNames();
 }

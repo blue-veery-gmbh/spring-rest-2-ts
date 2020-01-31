@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TSFunction extends TSScopedType{
+public class TSFunction extends TSScopedElement {
 
     private List<TSParameter> parameterList = new ArrayList<>();
 

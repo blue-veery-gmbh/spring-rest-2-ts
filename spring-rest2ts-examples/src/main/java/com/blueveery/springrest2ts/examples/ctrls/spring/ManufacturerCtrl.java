@@ -1,7 +1,7 @@
-package com.blueveery.springrest2ts.examples.ctrls;
+package com.blueveery.springrest2ts.examples.ctrls.spring;
 
 
-import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrl;
+import com.blueveery.springrest2ts.examples.ctrls.spring.core.BaseCtrl;
 import com.blueveery.springrest2ts.examples.model.ManufacturerDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

@@ -1,6 +1,6 @@
-package com.blueveery.springrest2ts.examples.ctrls;
+package com.blueveery.springrest2ts.examples.ctrls.spring;
 
-import com.blueveery.springrest2ts.examples.ctrls.core.GetObjectCtrl;
+import com.blueveery.springrest2ts.examples.ctrls.spring.core.GetObjectCtrl;
 import com.blueveery.springrest2ts.examples.model.CategoryDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,13 +18,13 @@ public class OverloadedMethodsCtrl implements GetObjectCtrl<CategoryDTO.ProductD
 
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"}, path = "/product/create/{id}/with-update")
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDTO.ProductDTO createProduct(@RequestBody CategoryDTO.ProductDTO entity, @RequestParam boolean update) {
+    public CategoryDTO.ProductDTO createProduct(@PathVariable int id, @RequestBody CategoryDTO.ProductDTO entity, @RequestParam boolean update) {
         return entity;
     }
 
     @PostMapping(consumes = {"application/json"}, produces = {"application/json"}, path = "/product/create/{id}")
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDTO.ProductDTO createOrder(@RequestBody CategoryDTO.ProductDTO entity) {
+    public CategoryDTO.ProductDTO createOrder(@PathVariable int id, @RequestBody CategoryDTO.ProductDTO entity) {
         return entity;
     }
 

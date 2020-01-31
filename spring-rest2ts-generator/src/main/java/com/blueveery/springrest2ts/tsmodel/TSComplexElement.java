@@ -2,7 +2,6 @@ package com.blueveery.springrest2ts.tsmodel;
 
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.generics.IParameterizedWithFormalTypes;
-import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import com.blueveery.springrest2ts.tsmodel.generics.TSFormalTypeParameter;
 import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference;
 
@@ -16,7 +15,7 @@ import java.util.TreeSet;
 /**
  * Created by tomaszw on 30.07.2017.
  */
-public abstract class TSComplexType extends TSScopedType implements IDecorated, IParameterizedWithFormalTypes {
+public abstract class TSComplexElement extends TSScopedElement implements IDecorated, IParameterizedWithFormalTypes {
     private SortedSet<TSField> tsFields = new TreeSet<>();
     private SortedSet<TSMethod> tsMethods = new TreeSet<>();
     private List<TSDecorator> tsDecoratorList = new ArrayList<>();
@@ -25,7 +24,7 @@ public abstract class TSComplexType extends TSScopedType implements IDecorated, 
     protected ImplementationGenerator implementationGenerator;
     private List<TSFormalTypeParameter> tsFormalTypeParameterList = new ArrayList<>();
 
-    public TSComplexType(String name, TSModule module, ImplementationGenerator implementationGenerator) {
+    public TSComplexElement(String name, TSModule module, ImplementationGenerator implementationGenerator) {
         super(name, module);
         this.implementationGenerator = implementationGenerator;
     }
@@ -59,9 +58,9 @@ public abstract class TSComplexType extends TSScopedType implements IDecorated, 
             TSArray tsArray = (TSArray) tsType;
             addScopedTypeUsage(tsArray.getElementType());
         }
-        if (tsType instanceof TSScopedType) {
-            TSScopedType tsScopedType = (TSScopedType) tsType;
-            module.scopedTypeUsage(tsScopedType);
+        if (tsType instanceof TSScopedElement) {
+            TSScopedElement tsScopedElement = (TSScopedElement) tsType;
+            module.scopedTypeUsage(tsScopedElement);
         }
         if(tsType instanceof TSParameterizedTypeReference){
             TSParameterizedTypeReference typeReference = (TSParameterizedTypeReference) tsType;
@@ -103,4 +102,6 @@ public abstract class TSComplexType extends TSScopedType implements IDecorated, 
     public void setConverted(boolean converted) {
         this.converted = converted;
     }
+
+    public abstract boolean isInstanceOf(TSComplexElement jsonApiModelClass);
 }

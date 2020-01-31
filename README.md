@@ -1,5 +1,12 @@
 # Spring rest2ts generator 
-spring-rest2ts-generator generates TypeScript code based on Spring MVC REST controllers and data model for HTTP requests and responses. 
+spring-rest2ts-generator generates TypeScript code based on Spring MVC REST controllers and data model for HTTP requests and responses.
+ 
+spring-rest2ts-generator started from Spring MVC but we noticed that it is easy to support also JAX-RS annotations and such support
+has been added in version 1.2.4
+
+In version 1.2.4 we also added support for [angular2-jsonapi](https://github.com/ghidoz/angular2-jsonapi) which is a lightweight Angular2+ adapter for JSON API 
+ 
+ 
 # Features
 From model classes there are generated TypeScript interfaces and from REST controllers full working Angular services based on Observable API
 or plain JavaScript services based on Promises API. The main idea is that Spring annotations describing REST endpoints have enough information 
@@ -24,7 +31,9 @@ generated code will reflect these changes which will avoid compile-time error in
    + Java class filtering for TS code generation
    + Java generic types mapped to TS generics : since ver 1.2.2    
    + Java interfaces implemented by model classes which contains getters and setter are mapped to TS interfaces to have common types to diffrent TS model classes : since ver 1.2.2    
-   + spring data support (Pageable & Page types) : since ver 1.2.2    
+   + spring data support (Pageable & Page types) : since ver 1.2.2
+   + JAX-RS annotation support : since ver 1.2.4
+   + model converter which generates TypeScript classes aligned with angular2-jsonapi library       
    
 ## Installation 
 To add a dependency on spring-rest2ts-generator using Maven, use the following:
@@ -32,22 +41,35 @@ To add a dependency on spring-rest2ts-generator using Maven, use the following:
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-generator</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.4</version>
 </dependency>
 <dependency>
-  <groupId>com.blue-veery</groupId>
-  <artifactId>spring-rest2ts-spring</artifactId>
-  <version>1.2.2</version>
+    <groupId>com.blue-veery</groupId>
+    <artifactId>spring-rest2ts-spring</artifactId>
+    <version>1.2.4</version>
 </dependency>
 <dependency>
-  <groupId>com.blue-veery</groupId>
-  <artifactId>spring-rest2ts-spring-data</artifactId>
-  <version>1.2.2</version>
+    <groupId>com.blue-veery</groupId>
+    <artifactId>spring-rest2ts-spring-data</artifactId>
+    <version>1.2.4</version>
+    <!-- only if spring data is used-->
 </dependency>
 <dependency>
-  <groupId>com.blue-veery</groupId>
-  <artifactId>spring-rest2ts-jackson</artifactId>
-  <version>1.2.2</version>
+    <groupId>com.blue-veery</groupId>
+    <artifactId>spring-rest2ts-jackson</artifactId>
+    <version>1.2.4</version>
+</dependency>
+<dependency>
+    <groupId>com.blue-veery</groupId>
+    <artifactId>spring-rest2ts-jax-rs</artifactId>
+    <version>1.2.4</version>
+    <!-- only if JAX-RS is used-->
+</dependency>
+<dependency>
+    <groupId>com.blue-veery</groupId>
+    <artifactId>spring-rest2ts-angular2json-impl</artifactId>
+    <version>1.2.4</version>
+    <!-- only if angular2json is used-->
 </dependency>
 ```          
            
@@ -277,6 +299,85 @@ Others fields are calculated on the server and sent back to client in Page objec
 
 If parameter with type `Pageable` is marked with annotation `@PageableDefault`, parameter in TypeScript is optional 
 
+## JaX-RS REST controllers converter - since ver 1.2.4
+Since version 1.2.4 there is provided `JaxRsRestToTsConverter` which converts JAX-RS controllers into TypeScript services. 
+It supports following JAX-RS annotations:
+   + @GET
+   + @POST
+   + @PUT
+   + @DELETE
+   + @PATCH 
+   + @Path 
+   + @Produces 
+   + @Consumes 
+   + @PathParam 
+   + @DefaultValue 
+   
+`JaxRsRestToTsConverter` converter can be used with existing implementation generators `Angular4ImplementationGenerator`
+and `FetchBasedImplementationGenerator` so code could be generated for Angular as well as for frameworks where Promises are used. 
+`JaxRsRestToTsConverter` usage example:
+```java
+    ClassNameMapper classNameMapper = new SubstringClassNameMapper("ResourceImpl", "Service");
+    JaxRsRestToTsConverter jaxRsRestToTsConverter = new JaxRsRestToTsConverter(new Angular4ImplementationGenerator(), classNameMapper);
+    tsGenerator.setRestClassesConverter(jaxRsRestToTsConverter);
+``` 
+Class `JaxRsGenerationTest` contains examples how to generate TypeScript code from JAX-RS REST endpoints     
+
+## Java model classes to angular2-json-api  converter - since ver 1.2.4
+
+[angular2-jsonapi](https://github.com/ghidoz/angular2-jsonapi) is an TypeScript
+library which converts in web application incoming JSON into classes and classes into JSON.
+Given advantage is that TypeScript interfaces doesn't exists in runtime in opposite to classes but to use classes, 
+conversion is required which is done by `angular2-jsonapi` library, to enable this conversions some TypeScript
+decorators are required on generated TypeScript model classes. There is provided java model classes converter 
+`ModelClassesToTsAngular2JsonApiConverter` which adds following TypeScript decorators
+   + JsonApiModelConfig - class level decorator
+   + Attribute - set for simple fields
+   + HasMany - set for collections
+   + BelongsTo - set for fields with type which is model class 
+
+First TypeScript class in the inheritance root has set base class to TypeScript `JsonApiModel` 
+as it is required by `angular2-jsonapi` library
+
+`JsonApiModelConfig` decorator  has parameter `type` which is type name, this field is generated
+from TypeScript class name (name.toLowerCase()+"s") or is taken from Java annotation `JsonApiModelConfig`. To customize 
+type name, Java model class must be annotated with `JsonApiModelConfig` annotation which is provided by module
+```xml
+    <dependency>
+        <groupId>com.blue-veery</groupId>
+        <artifactId>spring-rest2ts-angular2json-api</artifactId>
+        <version>1.2.4</version>
+    </dependency>
+```
+which needs to be included in Java project. 
+Simple configuration:
+```java
+//set model class converter
+    JacksonObjectMapper jacksonObjectMapper = new JacksonObjectMapper();
+    jacksonObjectMapper.setFieldsVisibility(JsonAutoDetect.Visibility.ANY);
+    ModelClassesToTsAngular2JsonApiConverter modelClassesConverter = new ModelClassesToTsAngular2JsonApiConverter(jacksonObjectMapper);
+    tsGenerator.setModelClassesConverter(modelClassesConverter);
+```
+`ModelClassesToTsAngular2JsonApiConverter` has also ability to generate model variable
+which is a mapping from type name to TypeScript class, this mapping is required by `angular2-jsonapi` configuration object.
+To have such config generated, generator configuration needs to create such variable, 
+```java
+    ModelClassesToTsAngular2JsonApiConverter modelClassesConverter = new ModelClassesToTsAngular2JsonApiConverter(jacksonObjectMapper);
+    //models variable is optional, if not set it will not be generated, module selection is up to user decision
+    JavaPackageToTsModuleConverter javaPackageToTsModuleConverter = tsGenerator.getJavaPackageToTsModuleConverter();
+    //there is selected TypeScript module where there will be generated class for ManufacturerDTO.class
+    TSModule tsModuleForModelsVariable = javaPackageToTsModuleConverter.getTsModule(ManufacturerDTO.class);
+    JavaPackageToTsModuleConverter javaPackageToTsModuleConverter = tsGenerator.getJavaPackageToTsModuleConverter();
+    TSModule tsModuleForModelsVariable = javaPackageToTsModuleConverter.getTsModule(ManufacturerDTO.class);
+    modelClassesConverter.createModelsVariable("models", tsModuleForModelsVariable);
+    tsGenerator.setModelClassesConverter(modelClassesConverter);
+```
+Configuration examples are in class Angular2JsonApiTest
+
+<b style="color:red">This converter is an experimental version, generated code could 
+contains some inconsistencies since we weren't able to find rules 
+how to apply angular2-jsonapi decorators to fields, only examples,
+base on which incorrect conclusions could be made!</b>
    
 ## Response content conversion
  + If REST endpoint produces JSON generated service method returns Observable or `Promise<<Mapped java type>>`
@@ -393,6 +494,13 @@ which adds comments to TypeScript types based on swagger 2.0 `io.swagger.oas.ann
 ```java
     restClassesConverter.getConversionListener().getConversionListenerSet().add(new SwaggerConversionListener());
 ```
+## TypeScript code formatting
+Generated TypeScript code is not formatted. Code formatting from project to project
+could have totally different requirements and it is suggested to use dedicated formatting library 
+for this purpose like:
+  + [prettier.io](https://prettier.io/docs/en/index.html) 
+  + [typescript-formatter](https://github.com/vvakame/typescript-formatter) 
+    
 
 ## Java compiler setup
 Java compiler by default optimizes methods parameters names, to have readable parameters names in Typescript at least for 
@@ -434,7 +542,5 @@ Rest2tsGenerator.generateAmbientModules = true;
 ``` 
 
 ## Unsupported mappings, coming soon...
-  + multipart mapping `RequestPart`
-  + support for JAX-RS in version 1.2.3
-      
+  + multipart mapping `RequestPart`     
  

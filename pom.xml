@@ -6,7 +6,7 @@
 
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.4</version>
     <packaging>pom</packaging>
 
     <name>spring-rest2ts</name>
@@ -43,11 +43,17 @@
         </developer>
     </developers>
 
+    <properties>
+        <spring-rest2ts.version>1.2.4</spring-rest2ts.version>
+    </properties>
+
 
     <modules>
         <module>spring-rest2ts-generator</module>
         <module>spring-rest2ts-jackson</module>
         <module>spring-rest2ts-spring</module>
+        <module>spring-rest2ts-jax-rs</module>
+        <module>spring-rest2ts-angular2json</module>
         <module>spring-rest2ts-spring-data</module>
     </modules>
     <profiles>

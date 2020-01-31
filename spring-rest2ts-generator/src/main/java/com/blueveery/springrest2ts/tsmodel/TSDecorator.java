@@ -8,11 +8,11 @@ import java.util.List;
 
 public class TSDecorator extends TSElement {
     private TSFunction tsFunction;
-    private List<TSLiteral> tsLiteralList = new ArrayList<>();
+    private List<ILiteral> tsLiteralList = new ArrayList<>();
 
 
-    public TSDecorator(String name, TSFunction tsFunction) {
-        super(name);
+    public TSDecorator(TSFunction tsFunction) {
+        super("");
         this.tsFunction = tsFunction;
     }
 
@@ -20,7 +20,7 @@ public class TSDecorator extends TSElement {
         return tsFunction;
     }
 
-    public List<TSLiteral> getTsLiteralList() {
+    public List<ILiteral> getTsLiteralList() {
         return tsLiteralList;
     }
 
@@ -30,7 +30,7 @@ public class TSDecorator extends TSElement {
         writer.write(tsFunction.getName());
         writer.write("(");
         for (int i = 0; i < tsLiteralList.size(); i++) {
-            TSLiteral tsLiteral = tsLiteralList.get(i);
+            ILiteral tsLiteral = tsLiteralList.get(i);
             tsLiteral.write(writer);
             if (i < tsLiteralList.size()-1) {
                 writer.write(",");

@@ -2,6 +2,7 @@ package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.BufferedWriter;
@@ -14,8 +15,11 @@ import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getReques
 
 public class FetchBasedImplementationGenerator extends BaseImplementationGenerator {
 
-    private String[] implementationSpecificFieldsSet = {"baseURL"};
-    private TSField baseUrlTsField;
+    private final String baseURLFieldName = "baseURL";
+    private final String[] implementationSpecificFieldsSet = {baseURLFieldName};
+    private final TSInterface baseUrlTsFieldType = new TSInterface("URL", TypeMapper.systemModule);
+    private final TSInterface promiseInterface = new TSInterface("Promise", TypeMapper.systemModule);
+    private final TSInterface responseInterface = new TSInterface("Response", TypeMapper.systemModule);
 
     @Override
     protected String[] getImplementationSpecificFieldNames() {
@@ -31,7 +35,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
             RequestMapping methodRequestMapping = getRequestMapping(method.getAnnotationList());
             RequestMapping classRequestMapping = getRequestMapping(method.getOwner().getAnnotationList());
 
-            String tsPath = getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "'";
+            String tsPath = getEndpointPath(methodRequestMapping, classRequestMapping);
             String httpMethod = methodRequestMapping.method()[0].toString();
 
             String requestUrlVar = "url";
@@ -67,7 +71,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     private void writeRequestUrl(BufferedWriter writer, String requestUrlVar, StringBuilder pathStringBuilder) throws IOException {
         String tsPath = pathStringBuilder.toString();
         tsPath = tsPath.startsWith("/") ? tsPath : "/" + tsPath;
-        writer.write("const " + requestUrlVar + " = " + " new URL('" + tsPath + ", this." + this.baseUrlTsField.getName() + ");");
+        writer.write("const " + requestUrlVar + " = " + " new URL('" + tsPath + ", this." + baseURLFieldName + ");");
         writer.newLine();
     }
 
@@ -127,18 +131,18 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     public TSType mapReturnType(TSMethod tsMethod, TSType tsType) {
         if (isRestClass(tsMethod.getOwner())) {
             if (tsType == TypeMapper.tsVoid) {
-                return new TSParameterisedType("", new TSInterface("Promise", null), new TSInterface("Response", null));
+                return new TSInterfaceReference(promiseInterface, responseInterface);
             }
-            return new TSParameterisedType("", new TSInterface("Promise", null), tsType);
+            return new TSInterfaceReference(promiseInterface, tsType);
         }
         return tsType;
     }
 
     @Override
     public List<TSParameter> getImplementationSpecificParameters(TSMethod method) {
-        if (method.isConstructor() && isRestClass(method.getOwner())) {
+        if (method.isConstructor()) {
             List<TSParameter> tsParameters = new ArrayList<>();
-            TSParameter newParameter = new TSParameter(baseUrlTsField.getName(), baseUrlTsField.getType(), method,this, "new URL(window.document.URL)");
+            TSParameter newParameter = new TSParameter(baseURLFieldName, baseUrlTsFieldType, method, this, "new URL(window.document.URL)");
             tsParameters.add(newParameter);
             return tsParameters;
         }
@@ -161,10 +165,10 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     }
 
     @Override
-    public void addImplementationSpecificFields(TSComplexType tsComplexType) {
+    public void addImplementationSpecificFields(TSComplexElement tsComplexType) {
         TSClass tsClass = (TSClass) tsComplexType;
         if (tsClass.getExtendsClass() == null) {
-            baseUrlTsField = new TSField("baseURL", tsComplexType, new TSInterface("URL", TypeMapper.systemModule));
+            TSField baseUrlTsField = new TSField(baseURLFieldName, tsComplexType, baseUrlTsFieldType);
             tsClass.getTsFields().add(baseUrlTsField);
         }
     }

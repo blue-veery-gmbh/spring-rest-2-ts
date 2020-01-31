@@ -1,6 +1,7 @@
 package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.BufferedWriter;
@@ -32,7 +33,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
 
     public Angular4ImplementationGenerator(Path urlServicePath) {
         TSModule angularCoreModule = new TSModule("@angular/core", null, true);
-        injectableDecorator = new TSDecorator("", new TSFunction("Injectable", angularCoreModule));
+        injectableDecorator = new TSDecorator(new TSFunction("Injectable", angularCoreModule));
 
         TSModule observableModule = new TSModule("rxjs", null, true);
         observableClass = new TSClass("Observable", observableModule, this);
@@ -66,8 +67,9 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
             RequestMapping methodRequestMapping = getRequestMapping(method.getAnnotationList());
             RequestMapping classRequestMapping = getRequestMapping(tsClass.getAnnotationList());
 
-            String tsPath = useUrlService ? "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" : "'";
-            tsPath += getPathFromRequestMapping(classRequestMapping) + getPathFromRequestMapping(methodRequestMapping) + "'";
+            String tsPath = getEndpointPath(methodRequestMapping, classRequestMapping);
+            tsPath = useUrlService ? "this." + FIELD_NAME_URL_SERVICE + ".getBackendUrl() + '" + tsPath : "'" + tsPath;
+
             String httpMethod = methodRequestMapping.method()[0].toString();
 
             String requestHeadersVar = "headers";
@@ -168,7 +170,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
     @Override
     public TSType mapReturnType(TSMethod tsMethod, TSType tsType) {
         if (isRestClass(tsMethod.getOwner())) {
-            return new TSParameterisedType("", observableClass, tsType);
+            return new TSClassReference(observableClass, tsType);
         }
         return tsType;
     }
@@ -213,7 +215,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
     }
 
     @Override
-    public void addImplementationSpecificFields(TSComplexType tsComplexType) {
+    public void addImplementationSpecificFields(TSComplexElement tsComplexType) {
         TSClass tsClass = (TSClass) tsComplexType;
         if (tsClass.getExtendsClass() == null) {
             tsClass.getTsFields().add(new TSField(FIELD_NAME_HTTP_SERVICE, tsComplexType, httpClass));

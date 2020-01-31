@@ -7,14 +7,14 @@ import java.lang.annotation.Annotation;
 
 public class RequestMappingEntity implements RequestMapping {
 
-    private String name;
-    private RequestMethod[] method;
-    private String[] produces;
-    private String[] consumes;
-    private String[] headers;
-    private String[] path;
-    private String[] value;
-    private String[] params;
+    private String name = "";
+    private RequestMethod[] method = {};
+    private String[] produces = {};
+    private String[] consumes = {};
+    private String[] headers = {};
+    private String[] path = {};
+    private String[] value = {};
+    private String[] params = {};
 
     public void setName(String name) {
         this.name = name;

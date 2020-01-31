@@ -9,9 +9,6 @@ import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 
 import java.lang.reflect.AnnotatedType;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**
@@ -34,12 +31,34 @@ public class ModelClassesToTsInterfacesConverter extends ModelClassesAbstractCon
             if (objectMapper.filterClass(javaClass)) {
                 TSModule tsModule = javaPackageToTsModuleConverter.getTsModule(javaClass);
                 TSInterface tsInterface = new TSInterface(createTsClassName(javaClass), tsModule);
-                tsModule.addScopedType(tsInterface);
+                tsModule.addScopedElement(tsInterface);
                 TypeMapper.registerTsType(javaClass, tsInterface);
                 return true;
             }
         }
         return false;
+    }
+
+    @Override
+    public void convertInheritance(Class javaClass) {
+        TSInterfaceReference tsInterfaceReference = (TSInterfaceReference) TypeMapper.map(javaClass);
+        TSInterface tsInterface = tsInterfaceReference.getReferencedType();
+        if (!javaClass.isInterface()) {
+            if (javaClass.getSuperclass() != Object.class) {
+                TSType superClass = TypeMapper.map(javaClass.getAnnotatedSuperclass().getType());
+                if (superClass instanceof TSInterfaceReference) {
+                    TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) superClass;
+                    tsInterface.addExtendsInterfaces(tsSuperClassInterface);
+                }
+            }
+        }
+        for (AnnotatedType annotatedInterface : javaClass.getAnnotatedInterfaces()) {
+            TSType superClass = TypeMapper.map(annotatedInterface.getType());
+            if (superClass instanceof TSInterfaceReference) {
+                TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) superClass;
+                tsInterface.addExtendsInterfaces(tsSuperClassInterface);
+            }
+        }
     }
 
     @Override
@@ -50,25 +69,6 @@ public class ModelClassesToTsInterfacesConverter extends ModelClassesAbstractCon
         if (!tsInterface.isConverted()) {
             tsInterface.setConverted(true);
             convertFormalTypeParameters(javaClass.getTypeParameters(), tsInterfaceReference);
-            if (!javaClass.isInterface()) {
-                if (javaClass.getSuperclass() != Object.class) {
-                    TSType superClass = TypeMapper.map(javaClass.getAnnotatedSuperclass().getType());
-                    if (superClass instanceof TSInterfaceReference) {
-                        TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) superClass;
-                        tsInterface.addExtendsInterfaces(tsSuperClassInterface);
-                    }
-                }
-            }
-
-            for (AnnotatedType annotatedInterface : javaClass.getAnnotatedInterfaces()) {
-                TSType superClass = TypeMapper.map(annotatedInterface.getType());
-                if (superClass instanceof TSInterfaceReference) {
-                    TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) superClass;
-                    tsInterface.addExtendsInterfaces(tsSuperClassInterface);
-                }
-            }
-
-
             SortedSet<Property> propertySet = getClassProperties(javaClass, objectMapper);
 
             for (Property property : propertySet) {
@@ -87,60 +87,6 @@ public class ModelClassesToTsInterfacesConverter extends ModelClassesAbstractCon
             conversionListener.tsScopedTypeCreated(javaClass, tsInterface);
         }
 
-    }
-
-    private void setAsNullableType(Property property, TSField tsField, NullableTypesStrategy nullableTypesStrategy) {
-        if (property.getGetterType() != null) {
-            nullableTypesStrategy.setAsNullableType(property.getGetterType(), property.getDeclaredAnnotations(), tsField);
-            return;
-        }
-
-        if (property.getSetterType() != null && Objects.equals(property.getGetterType(), property.getSetterType())) {
-            nullableTypesStrategy.setAsNullableType(property.getSetterType(), property.getDeclaredAnnotations(), tsField);
-        }
-    }
-
-    private SortedSet<Property> getClassProperties(Class javaClass, ObjectMapper objectMapper) {
-        Map<String, Property> propertyMap = new HashMap<>();
-        int currentIndex = 0;
-
-        for (Field field : javaClass.getDeclaredFields()) {
-            if (!Modifier.isTransient(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())) {
-                if(objectMapper.filter(field)) {
-                    Property property = new Property(objectMapper.getPropertyName(field), currentIndex++, field);
-                    propertyMap.put(property.getName(), property);
-                }
-            }
-        }
-
-        for (Method method : javaClass.getDeclaredMethods()) {
-            if (!Modifier.isStatic(method.getModifiers())) {
-                if(couldBeGetter(method) && objectMapper.filter(method, true)){
-                    String propertyName = objectMapper.getPropertyName(method, true);
-                    final int newIndex = currentIndex++;
-                    Property property = propertyMap.computeIfAbsent(propertyName, (key) -> new Property(key, newIndex));
-                    property.setGetter(method);
-                }
-
-                if(couldBeSetter(method) && objectMapper.filter(method, false)){
-                    String propertyName = objectMapper.getPropertyName(method, false);
-                    final int newIndex = currentIndex++;
-                    Property property = propertyMap.computeIfAbsent(propertyName, (key) -> new Property(key, newIndex));
-                    property.setSetter(method);
-                }
-
-            }
-        }
-
-        return new TreeSet<>(propertyMap.values());
-    }
-
-    private boolean couldBeGetter(Method method) {
-        return method.getParameterCount() == 0 && method.getReturnType() != void.class;
-    }
-
-    private boolean couldBeSetter(Method method) {
-        return method.getParameterCount() == 1 && method.getReturnType() == void.class;
     }
 
 }

@@ -1,4 +1,4 @@
-package com.blueveery.springrest2ts.examples.ctrls.core;
+package com.blueveery.springrest2ts.examples.ctrls.spring.core;
 
 import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
 import org.springframework.web.bind.annotation.PathVariable;

@@ -7,9 +7,9 @@ import java.lang.reflect.Method;
 
 public class SwaggerConversionListener implements ConversionListener {
     @Override
-    public void tsScopedTypeCreated(Class javaType, TSScopedType tsScopedType) {
+    public void tsScopedTypeCreated(Class javaType, TSScopedElement tsScopedElement) {
         Operation operationAnnotation = (Operation) javaType.getAnnotation(Operation.class);
-        applyOperationAnnotation(tsScopedType, operationAnnotation);
+        applyOperationAnnotation(tsScopedElement, operationAnnotation);
 
     }
 

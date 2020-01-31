@@ -1,7 +1,7 @@
 package com.blueveery.springrest2ts.examples.test;
 
 import com.blueveery.springrest2ts.converters.*;
-import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrl;
+import com.blueveery.springrest2ts.examples.ctrls.spring.core.BaseCtrl;
 import com.blueveery.springrest2ts.examples.model.Named;
 import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
 import com.blueveery.springrest2ts.filters.*;
@@ -34,8 +34,8 @@ public class ExtendedTsCodeGenerationsTest extends TsCodeGenerationsTest{
         packagesMap.put("com.blueveery.springrest2ts.examples.model", new TSModule("model", Paths.get("app/sdk/model"), false));
         packagesMap.put("com.blueveery.springrest2ts.examples.model.enums", new TSModule("model-enums", Paths.get("app/sdk/enums"), false));
         TSModule servicesModule = new TSModule("services", Paths.get("app/sdk/services"), false);
-        packagesMap.put("com.blueveery.springrest2ts.examples.ctrls.core", servicesModule);
-        packagesMap.put("com.blueveery.springrest2ts.examples.ctrls", servicesModule);
+        packagesMap.put("com.blueveery.springrest2ts.examples.ctrls.spring.core", servicesModule);
+        packagesMap.put("com.blueveery.springrest2ts.examples.ctrls.spring", servicesModule);
         ConfigurableTsModulesConverter moduleConverter = new ConfigurableTsModulesConverter(packagesMap);
         tsGenerator.setJavaPackageToTsModuleConverter(moduleConverter);
 

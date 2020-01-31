@@ -1,7 +1,7 @@
-package com.blueveery.springrest2ts.examples.ctrls;
+package com.blueveery.springrest2ts.examples.ctrls.spring;
 
-import com.blueveery.springrest2ts.examples.ctrls.core.BaseCtrlImpl;
-import com.blueveery.springrest2ts.examples.ctrls.core.GetObjectCtrl;
+import com.blueveery.springrest2ts.examples.ctrls.spring.core.BaseCtrlImpl;
+import com.blueveery.springrest2ts.examples.ctrls.spring.core.GetObjectCtrl;
 import com.blueveery.springrest2ts.examples.model.CategoryDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

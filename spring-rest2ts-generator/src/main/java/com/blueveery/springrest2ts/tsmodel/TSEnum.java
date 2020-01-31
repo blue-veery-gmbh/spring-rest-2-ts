@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by tomek on 08.08.17.
  */
-public class TSEnum extends TSScopedType {
+public class TSEnum extends TSScopedElement {
     private List<TSEnumConstant> tsEnumConstantList = new ArrayList<>();
 
     public TSEnum(String name, TSModule module) {

@@ -7,7 +7,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.SortedSet;
 
 public class EmptyImplementationGenerator implements ImplementationGenerator {
     @Override
@@ -46,7 +45,7 @@ public class EmptyImplementationGenerator implements ImplementationGenerator {
     }
 
     @Override
-    public void addImplementationSpecificFields(TSComplexType tsComplexType) {
+    public void addImplementationSpecificFields(TSComplexElement tsComplexType) {
 
     }
 }

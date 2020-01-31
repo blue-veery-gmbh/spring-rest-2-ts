@@ -9,4 +9,9 @@ public class TSInterfaceReference extends TSParameterizedTypeReference<TSInterfa
     public TSInterfaceReference(TSInterface referencedType, List<TSType> actualParameterList) {
         super(referencedType, actualParameterList);
     }
+
+    public TSInterfaceReference(TSInterface referencedType, TSType actualParameter) {
+        super(referencedType, actualParameter);
+    }
+
 }

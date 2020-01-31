@@ -10,7 +10,7 @@ public class TSField extends TSComplexTypeMember {
     private boolean optional;
     private boolean readOnly;
 
-    public TSField(String name, TSComplexType owner, TSType type) {
+    public TSField(String name, TSComplexElement owner, TSType type) {
         super(name, owner, type);
     }
 
@@ -34,6 +34,7 @@ public class TSField extends TSComplexTypeMember {
     @Override
     public void write(BufferedWriter writer) throws IOException {
         tsComment.write(writer);
+        writeDecorators(writer, getTsDecoratorList());
         if(readOnly){
             writer.write("readonly ");
         }

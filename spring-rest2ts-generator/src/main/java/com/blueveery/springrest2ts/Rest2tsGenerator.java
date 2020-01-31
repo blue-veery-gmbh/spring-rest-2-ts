@@ -57,6 +57,10 @@ public class Rest2tsGenerator {
         this.javaPackageToTsModuleConverter = javaPackageToTsModuleConverter;
     }
 
+    public JavaPackageToTsModuleConverter getJavaPackageToTsModuleConverter() {
+        return javaPackageToTsModuleConverter;
+    }
+
     public void setEnumConverter(ComplexTypeConverter enumConverter) {
         this.enumConverter = enumConverter;
     }
@@ -203,6 +207,10 @@ public class Rest2tsGenerator {
             if (complexTypeConverter.preConverted(tsModuleSortedMap, javaType)) {
                 preConvertedTypes.add(javaType);
             }
+        }
+
+        for (Class javaType : preConvertedTypes) {
+            complexTypeConverter.convertInheritance(javaType);
         }
 
         for (Class javaType : preConvertedTypes) {

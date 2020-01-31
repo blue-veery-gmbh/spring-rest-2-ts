@@ -4,10 +4,10 @@ package com.blueveery.springrest2ts.tsmodel;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
-public class TSTypeAlias extends TSScopedType {
+public class TSElementAlias extends TSScopedElement {
     TSType aliasedType;
 
-    public TSTypeAlias(String name, TSModule module, TSType aliasedType) {
+    public TSElementAlias(String name, TSModule module, TSType aliasedType) {
         super(name, module);
         this.aliasedType = aliasedType;
     }

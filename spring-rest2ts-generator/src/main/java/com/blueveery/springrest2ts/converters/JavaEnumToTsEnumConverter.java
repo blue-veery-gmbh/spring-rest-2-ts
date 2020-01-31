@@ -24,7 +24,7 @@ public class JavaEnumToTsEnumConverter extends ComplexTypeConverter {
         if (TypeMapper.map(javaClass) == TypeMapper.tsAny) {
             TSModule tsModule = javaPackageToTsModuleConverter.getTsModule(javaClass);
             TSEnum tsEnum = new TSEnum(classNameMapper.mapJavaClassNameToTs(javaClass.getSimpleName()), tsModule);
-            tsModule.addScopedType(tsEnum);
+            tsModule.addScopedElement(tsEnum);
             TypeMapper.registerTsType(javaClass, tsEnum);
             return true;
         }

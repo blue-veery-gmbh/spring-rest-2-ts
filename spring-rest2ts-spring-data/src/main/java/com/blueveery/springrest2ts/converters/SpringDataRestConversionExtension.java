@@ -4,7 +4,7 @@ import com.blueveery.springrest2ts.extensions.ModelConversionExtension;
 import com.blueveery.springrest2ts.extensions.RestConversionExtension;
 import com.blueveery.springrest2ts.tsmodel.TSMethod;
 import com.blueveery.springrest2ts.tsmodel.TSParameter;
-import com.blueveery.springrest2ts.tsmodel.TSScopedType;
+import com.blueveery.springrest2ts.tsmodel.TSScopedElement;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference;
 import org.springframework.data.domain.Pageable;
@@ -32,8 +32,8 @@ public class SpringDataRestConversionExtension implements RestConversionExtensio
     public boolean isMappedRestParam(TSParameter tsParameter) {
         if (tsParameter.getType() instanceof TSParameterizedTypeReference<?>) {
             TSParameterizedTypeReference<?> typeReference = (TSParameterizedTypeReference<?>) tsParameter.getType();
-            TSScopedType tsScopedType = (TSScopedType) typeReference.getReferencedType();
-            for (Class aClass : tsScopedType.getMappedFromJavaTypeSet()) {
+            TSScopedElement tsScopedElement = (TSScopedElement) typeReference.getReferencedType();
+            for (Class aClass : tsScopedElement.getMappedFromJavaTypeSet()) {
                 if (aClass.isAssignableFrom(Pageable.class)) {
                    return true;
                 }

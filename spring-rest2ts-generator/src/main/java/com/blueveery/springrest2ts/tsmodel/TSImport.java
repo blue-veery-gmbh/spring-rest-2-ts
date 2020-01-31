@@ -11,13 +11,13 @@ import java.util.TreeSet;
  */
 public class TSImport extends TSElement{
     private TSModule fromModule;
-    private SortedSet<TSScopedType> what = new TreeSet<>();
+    private SortedSet<TSScopedElement> what = new TreeSet<>();
 
     public TSModule getFromModule() {
         return fromModule;
     }
 
-    public SortedSet<TSScopedType> getWhat() {
+    public SortedSet<TSScopedElement> getWhat() {
         return what;
     }
 
@@ -30,8 +30,8 @@ public class TSImport extends TSElement{
     public void write(BufferedWriter writer) throws IOException {
         StringBuilder whatString = new StringBuilder();
         int i=0;
-        for(TSScopedType tsScopedType:getWhat()){
-            whatString.append(tsScopedType.getName());
+        for(TSScopedElement tsScopedElement :getWhat()){
+            whatString.append(tsScopedElement.getName());
             if((i++)<getWhat().size()-1) {
                 whatString.append(", ");
             }

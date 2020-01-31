@@ -59,6 +59,7 @@ public class RequestMappingUtility {
             Method valueMethod = annotationType.getMethod("value");
             requestMappingEntity.setValue((String[]) valueMethod.invoke(requestMapping));
 
+
             Method paramsMethod = annotationType.getMethod("params");
             requestMappingEntity.setParams((String[]) paramsMethod.invoke(requestMapping));
         } catch (Exception e) {
