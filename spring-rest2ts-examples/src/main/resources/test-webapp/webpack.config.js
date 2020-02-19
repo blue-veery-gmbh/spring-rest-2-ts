@@ -1,7 +1,7 @@
 var path = require('path');
 module.exports = {
     entry: {
-        services: "./src/app/sdk/services/services.ts"
+        services: "./src/ctrls-spring.ts"
     },
     mode: "development",
     output: {
