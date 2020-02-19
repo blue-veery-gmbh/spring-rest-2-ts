@@ -60,6 +60,7 @@ public abstract class ModelClassesAbstractConverter extends ClassConverter<Model
                 if(objectMapper.filter(field)) {
                     Property property = new Property(objectMapper.getPropertyName(field), currentIndex++, field);
                     propertyMap.put(property.getName(), property);
+                    objectMapper.setIfIsIgnored(property, field);
                 }
             }
         }
@@ -71,6 +72,7 @@ public abstract class ModelClassesAbstractConverter extends ClassConverter<Model
                     final int newIndex = currentIndex++;
                     Property property = propertyMap.computeIfAbsent(propertyName, (key) -> new Property(key, newIndex));
                     property.setGetter(method);
+                    objectMapper.setIfIsIgnored(property, method);
                 }
 
                 if(couldBeSetter(method) && objectMapper.filter(method, false)){
@@ -78,6 +80,7 @@ public abstract class ModelClassesAbstractConverter extends ClassConverter<Model
                     final int newIndex = currentIndex++;
                     Property property = propertyMap.computeIfAbsent(propertyName, (key) -> new Property(key, newIndex));
                     property.setSetter(method);
+                    objectMapper.setIfIsIgnored(property, method);
                 }
 
             }
