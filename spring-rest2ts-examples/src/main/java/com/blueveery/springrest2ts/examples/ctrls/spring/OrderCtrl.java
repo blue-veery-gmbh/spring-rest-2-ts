@@ -31,9 +31,9 @@ public class OrderCtrl extends BaseCtrlImpl<OrderDTO> {
     }
 
 
-    @RequestMapping(path = "/{id}", method = RequestMethod.PUT, consumes = {"application/json"}, produces = {"application/json"})
+    @PutMapping(path = "/{id}", consumes = {"application/json"}, produces = {"application/json"})
     @ResponseBody
-    public OrderDTO updateOrder(@PathVariable int id, @RequestBody OrderDTO entity) {
+    public OrderDTO updateOrder(@PathVariable(name = "id") int orderId, @RequestBody OrderDTO entity) {
         return entity;
     }
 
