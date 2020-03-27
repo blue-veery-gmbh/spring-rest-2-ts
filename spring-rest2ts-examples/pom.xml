@@ -7,11 +7,21 @@
     <parent>
         <groupId>com.blue-veery</groupId>
         <artifactId>spring-rest2ts</artifactId>
-        <version>1.2.4</version>
+        <version>1.2.5</version>
     </parent>
 
     <artifactId>spring-rest2ts-examples</artifactId>
-    <version>1.2.4</version>
+    <version>1.2.5</version>
+    <description>
+        Typescript data model and services from rest generator for java spring. It supports generation for Angular and React
+    </description>
+    <url>https://github.com/blue-veery-gmbh/spring-rest-2-ts</url>
+
+    <organization>
+        <url>https://github.com/blue-veery-gmbh</url>
+        <name>blue veery GmbH</name>
+    </organization>
+    <inceptionYear>2019</inceptionYear>
 
 
 
@@ -19,12 +29,12 @@
         <dependency>
             <groupId>com.blue-veery</groupId>
             <artifactId>spring-rest2ts-generator</artifactId>
-            <version>1.2.4</version>
+            <version>1.2.5</version>
         </dependency>
         <dependency>
             <groupId>com.blue-veery</groupId>
             <artifactId>spring-rest2ts-jackson</artifactId>
-            <version>1.2.4</version>
+            <version>1.2.5</version>
         </dependency>
         <dependency>
             <groupId>com.blue-veery</groupId>

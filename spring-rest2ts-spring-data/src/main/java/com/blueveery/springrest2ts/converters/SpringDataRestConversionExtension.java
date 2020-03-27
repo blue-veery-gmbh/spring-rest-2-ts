@@ -62,7 +62,7 @@ public class SpringDataRestConversionExtension implements RestConversionExtensio
 
         String forOfTemplate = "for(const %s of %s) {\n%s\n}";
         StringBuilder code = new StringBuilder();
-        code.append(String.format(arrayAssignment, queryParamsList, "number", tsParameter.getName() + ".pageNumber+''"));
+        code.append(String.format(arrayAssignment, queryParamsList, "page", tsParameter.getName() + ".pageNumber+''"));
         code.append(String.format(arrayAssignment, queryParamsList, "size", tsParameter.getName() + ".pageSize+''"));
 
         String sortField = tsParameter.getName() + ".sort.sortOrders";

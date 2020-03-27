@@ -192,6 +192,11 @@ public class JacksonObjectMapper implements ObjectMapper {
                                                 ImplementationGenerator implementationGenerator,
                                                 NullableTypesStrategy nullableTypesStrategy) {
         List<TSField> tsFieldList = new ArrayList<>();
+
+        if (property.isIgnored()) {
+            return tsFieldList;
+        }
+
         Type fieldJavaGetterType = property.getGetterType();
         if (fieldJavaGetterType != null) {
             fieldJavaGetterType = applyJsonValue(fieldJavaGetterType);
@@ -260,6 +265,14 @@ public class JacksonObjectMapper implements ObjectMapper {
             }
         }
         return name;
+    }
+
+    @Override
+    public void setIfIsIgnored(Property property, AnnotatedElement annotatedElement) {
+        JsonIgnore jsonIgnore = annotatedElement.getDeclaredAnnotation(JsonIgnore.class);
+        if (jsonIgnore != null && jsonIgnore.value()) {
+            property.setIgnored(true);
+        }
     }
 
     private String cutPrefix(String methodName, String prefix) {
@@ -423,9 +436,6 @@ public class JacksonObjectMapper implements ObjectMapper {
             return true;
         }
 
-        if (isJsonIgnoreActive(member)){
-            return true;
-        }
         return false;
     }
 
@@ -436,14 +446,6 @@ public class JacksonObjectMapper implements ObjectMapper {
     private boolean containsIgnoreTypeAnnotation(Class<?> type) {
         JsonIgnoreType jsonIgnoreType = type.getDeclaredAnnotation(JsonIgnoreType.class);
         return jsonIgnoreType != null && jsonIgnoreType.value();
-    }
-
-    private boolean isJsonIgnoreActive(AccessibleObject member) {
-        JsonIgnore jsonIgnore = member.getDeclaredAnnotation(JsonIgnore.class);
-        if (jsonIgnore != null && jsonIgnore.value()) {
-            return true;
-        }
-        return false;
     }
 
     private boolean isDefaultVisibility(JsonAutoDetect.Visibility visibility) {

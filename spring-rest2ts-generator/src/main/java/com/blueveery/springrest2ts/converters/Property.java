@@ -15,6 +15,7 @@ public class Property implements Comparable<Property>{
     private Field field;
     private Method getter;
     private Method setter;
+    private boolean isIgnored;
     private Class<?> declaringClass;
 
     public Property(String name, int index) {
@@ -53,6 +54,14 @@ public class Property implements Comparable<Property>{
     public void setSetter(Method setter) {
         this.setter = setter;
         declaringClass = setter.getDeclaringClass();
+    }
+
+    public boolean isIgnored() {
+        return isIgnored;
+    }
+
+    public void setIgnored(boolean ignored) {
+        isIgnored = ignored;
     }
 
     public boolean isReadOnly() {

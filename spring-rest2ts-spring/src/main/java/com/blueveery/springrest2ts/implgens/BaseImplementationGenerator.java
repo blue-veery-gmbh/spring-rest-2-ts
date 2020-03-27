@@ -144,6 +144,10 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
 
     protected void addPathVariable(StringBuilder pathStringBuilder, String tsParameterName, PathVariable pathVariable) {
         String variableName = pathVariable.value();
+        if ("".equals(variableName)){
+            variableName = pathVariable.name();
+        }
+
         if ("".equals(variableName)) {
             variableName = tsParameterName;
         }
