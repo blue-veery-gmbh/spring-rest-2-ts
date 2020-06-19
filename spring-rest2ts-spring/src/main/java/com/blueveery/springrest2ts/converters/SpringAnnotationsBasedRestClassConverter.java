@@ -122,7 +122,7 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
                     }
                     return typeParametersMap;
                 }
-                return fillVariableNameToJavaType((Class) type, declaringClass);
+                return fillVariableNameToJavaType(type.getClass(), declaringClass);
             }
         }
         return typeParametersMap;
