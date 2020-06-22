@@ -6,11 +6,11 @@
     <parent>
         <groupId>com.blue-veery</groupId>
         <artifactId>spring-rest2ts</artifactId>
-        <version>1.2.5</version>
+        <version>1.2.6</version>
     </parent>
 
     <artifactId>spring-rest2ts-angular2json</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
     <description>
         Typescript data model and services from rest generator for java spring. It supports generation for Angular and React
     </description>
