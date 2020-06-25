@@ -1,6 +1,7 @@
 package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.converters.TypeMapper;
+import com.blueveery.springrest2ts.extensions.ModelSerializerExtension;
 import com.blueveery.springrest2ts.tsmodel.*;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -88,7 +89,8 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
         } else if (actualType == TypeMapper.tsVoid) {
             return "";
         } else {
-            parseFunction = "res.json()";
+            ModelSerializerExtension modelSerializerExtension = findModelSerializerExtension(new String[]{"application/json"});
+            parseFunction = modelSerializerExtension.generateDeserializationCode("res.text()");
         }
         return ".then(res =>  " + parseFunction + ")";
     }
@@ -112,7 +114,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
         List<String> requestOptionsList = new ArrayList<>();
         if (("PUT".equals(httpMethod) || "POST".equals(httpMethod)) && isRequestBodyDefined) {
             addContentTypeHeader(consumesContentType, requestOptionsList);
-            requestOptionsList.add("body: JSON.stringify(" + requestBodyVar + ")");
+            requestOptionsList.add("body: " + findModelSerializerExtension(consumesContentType).generateSerializationCode(requestBodyVar));
         }
 
         requestOptions += String.join(", ", requestOptionsList);

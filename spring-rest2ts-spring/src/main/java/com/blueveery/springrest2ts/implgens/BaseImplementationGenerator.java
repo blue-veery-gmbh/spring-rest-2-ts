@@ -2,7 +2,9 @@ package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.extensions.ConversionExtension;
+import com.blueveery.springrest2ts.extensions.ModelSerializerExtension;
 import com.blueveery.springrest2ts.extensions.RestConversionExtension;
+import com.blueveery.springrest2ts.extensions.StandardJsonSerializerExtension;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSMethod;
@@ -14,11 +16,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class BaseImplementationGenerator implements ImplementationGenerator {
 
     protected List<? extends ConversionExtension> extensionSet;
+
+    protected Map<String, ModelSerializerExtension> modelSerializerExtensionsMap = new HashMap<>();
 
     protected abstract void initializeHttpParams(StringBuilder requestParamsBuilder, String requestParamsVar);
 
@@ -26,9 +32,29 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
 
     protected abstract String[] getImplementationSpecificFieldNames();
 
+    protected BaseImplementationGenerator() {
+        modelSerializerExtensionsMap.put("application/json", new StandardJsonSerializerExtension());
+    }
+
     @Override
     public void setExtensions(List<? extends ConversionExtension> conversionExtensionSet) {
         this.extensionSet = conversionExtensionSet;
+    }
+
+    @Override
+    public void setSerializationExtensions(Map<String, ModelSerializerExtension> modelSerializerExtensionsMap) {
+        this.modelSerializerExtensionsMap = modelSerializerExtensionsMap;
+    }
+
+    protected ModelSerializerExtension findModelSerializerExtension(String[] mimeTypes) {
+        for (String mimeType : mimeTypes) {
+            ModelSerializerExtension modelSerializerExtension = modelSerializerExtensionsMap.get(mimeType);
+            if(modelSerializerExtension != null) {
+                return modelSerializerExtension;
+            }
+        }
+
+        return modelSerializerExtensionsMap.get("application/json");
     }
 
     protected void writeConstructorImplementation(BufferedWriter writer, TSClass tsClass) throws IOException {

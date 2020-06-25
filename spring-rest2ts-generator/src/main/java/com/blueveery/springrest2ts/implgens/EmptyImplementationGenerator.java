@@ -1,16 +1,23 @@
 package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.extensions.ConversionExtension;
+import com.blueveery.springrest2ts.extensions.ModelSerializerExtension;
 import com.blueveery.springrest2ts.tsmodel.*;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class EmptyImplementationGenerator implements ImplementationGenerator {
     @Override
     public void setExtensions(List<? extends ConversionExtension> conversionExtensionSet) {
+
+    }
+
+    @Override
+    public void setSerializationExtensions(Map<String, ModelSerializerExtension> modelSerializerExtensionsMap) {
 
     }
 
