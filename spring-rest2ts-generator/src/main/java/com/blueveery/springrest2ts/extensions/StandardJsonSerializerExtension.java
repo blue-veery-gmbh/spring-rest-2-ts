@@ -1,6 +1,17 @@
 package com.blueveery.springrest2ts.extensions;
 
+import com.blueveery.springrest2ts.tsmodel.TSMethod;
+import com.blueveery.springrest2ts.tsmodel.TSParameter;
+
+import java.util.Collections;
+import java.util.List;
+
 public class StandardJsonSerializerExtension implements ModelSerializerExtension {
+    @Override
+    public List<TSParameter> getImplementationSpecificParameters(TSMethod method) {
+        return Collections.emptyList();
+    }
+
     @Override
     public String generateSerializationCode(String modelVariableName) {
         return "JSON.stringify(" + modelVariableName + ")";
