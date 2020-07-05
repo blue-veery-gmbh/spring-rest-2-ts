@@ -90,7 +90,8 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
             return "";
         } else {
             ModelSerializerExtension modelSerializerExtension = findModelSerializerExtension(new String[]{"application/json"});
-            parseFunction = modelSerializerExtension.generateDeserializationCode("res.text()");
+            parseFunction = modelSerializerExtension.generateDeserializationCode("res");
+            return ".then(res => res.text()).then(res =>  " + parseFunction + ")";
         }
         return ".then(res =>  " + parseFunction + ")";
     }
@@ -122,7 +123,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     }
 
     private void addContentTypeHeader(String[] consumesContentType, List<String> requestOptionsList) {
-        String contentType = getConsumesContentType(consumesContentType);
+        String contentType = getContentType(consumesContentType);
         String headers = "headers: {";
         headers += "'Content-Type': '" + contentType + "'";
         headers += "}";

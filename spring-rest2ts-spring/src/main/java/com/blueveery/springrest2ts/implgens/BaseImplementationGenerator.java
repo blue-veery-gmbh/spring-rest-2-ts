@@ -22,6 +22,7 @@ import java.util.Map;
 
 public abstract class BaseImplementationGenerator implements ImplementationGenerator {
 
+    protected static final String JSON_CONTENT_TYPE = "application/json";
     protected List<? extends ConversionExtension> extensionSet;
 
     protected Map<String, ModelSerializerExtension> modelSerializerExtensionsMap = new HashMap<>();
@@ -186,11 +187,11 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
         return requestParamsBuilder.length() == 0;
     }
 
-    protected String getConsumesContentType(String[] consumesContentType) {
-        if (consumesContentType.length > 0) {
-            return consumesContentType[0];
+    protected String getContentType(String[] contentTypes) {
+        if (contentTypes.length > 0) {
+            return contentTypes[0];
         } else {
-            return "application/json";
+            return JSON_CONTENT_TYPE;
         }
     }
 
