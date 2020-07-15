@@ -6,11 +6,11 @@
     <parent>
         <groupId>com.blue-veery</groupId>
         <artifactId>spring-rest2ts-angular2json</artifactId>
-        <version>1.2.5</version>
+        <version>1.2.6</version>
     </parent>
 
     <artifactId>spring-rest2ts-angular2json-impl</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
     <dependencies>
         <dependency>
             <groupId>com.blue-veery</groupId>
