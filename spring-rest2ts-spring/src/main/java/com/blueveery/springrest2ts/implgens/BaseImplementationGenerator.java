@@ -62,7 +62,7 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
 
         if (tsClass.getExtendsClass() == null) {
             for (String name : getImplementationSpecificFieldNames()) {
-                writer.write("this." + name + " = " + name + ";");
+                writer.write("    this." + name + " = " + name + ";");
             }
         } else {
             writer.write("super(");
@@ -128,15 +128,15 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
                 if (tsParameter.isOptional() || isNullableType) {
                     queryParamsListBuilder
                             .append("\n")
-                            .append("if (")
+                            .append("    if (")
                             .append(tsParameterName)
                             .append(" !== undefined && ")
                             .append(tsParameterName)
-                            .append(" !== null) {");
-                    queryParamsListBuilder.append(String.format("%s.push({name: '%s', value: %s});", queryParamsListVar, requestParamName, callToStringOnParameterIfRequired(tsParameter)));
-                    queryParamsListBuilder.append("}");
+                            .append(" !== null) {\n");
+                    queryParamsListBuilder.append(String.format("      %s.push({name: '%s', value: %s});\n", queryParamsListVar, requestParamName, callToStringOnParameterIfRequired(tsParameter)));
+                    queryParamsListBuilder.append("    }\n");
                 } else {
-                    queryParamsListBuilder.append(String.format("%s.push({name: '%s', value: %s});", queryParamsListVar, requestParamName, callToStringOnParameterIfRequired(tsParameter)));
+                    queryParamsListBuilder.append(String.format("\n    %s.push({name: '%s', value: %s});\n  ", queryParamsListVar, requestParamName, callToStringOnParameterIfRequired(tsParameter)));
                 }
             }
             for (ConversionExtension conversionExtension : extensionSet) {
@@ -152,13 +152,13 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
     }
 
     private void fillUpRequestParamsBuilder(String requestParamsVar, StringBuilder requestParamsBuilder, StringBuilder queryParamsListBuilder, String queryParamsListVar) {
-        queryParamsListBuilder.insert(0, "const " + queryParamsListVar + " : { name: string, value: string }[] = [];");
+        queryParamsListBuilder.insert(0, "    const " + queryParamsListVar + ": { name: string, value: string }[] = [];");
         requestParamsBuilder.append(queryParamsListBuilder);
         initializeHttpParams(requestParamsBuilder, requestParamsVar);
         String queryParamVar = "queryParam";
-        requestParamsBuilder.append(String.format("for(const %s of %s) {", queryParamVar, queryParamsListVar));
+        requestParamsBuilder.append(String.format("\n    for (const %s of %s) {", queryParamVar, queryParamsListVar));
         addRequestParameter(requestParamsBuilder, requestParamsVar, queryParamVar);
-        requestParamsBuilder.append("}");
+        requestParamsBuilder.append("\n    }\n");
     }
 
     private String getRequestParamName(TSParameter tsParameter, RequestParam requestParam) {

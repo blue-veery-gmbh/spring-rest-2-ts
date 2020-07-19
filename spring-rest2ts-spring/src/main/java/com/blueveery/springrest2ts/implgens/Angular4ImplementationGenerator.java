@@ -97,12 +97,17 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
             writeRequestOption(writer, requestHeadersVar, contentTypeHeader, isRequestHeaderDefined);
 
             String requestOptions = "";
-            requestOptions = composeRequestBody(requestBodyBuilder.toString(), isRequestBodyDefined, requestOptions, httpMethod, isJsonParsingRequired, methodRequestMapping.consumes());
+            String requestBody = requestBodyBuilder.toString();
+            String path = pathStringBuilder.toString();
+            if (!requestBody.contains("id") && path.contains("{id}")) {
+                path = path.replace("{id}", "' + " + requestBody + ".id.split('/')[1] + '");
+            }
+            requestOptions = composeRequestBody(requestBody, isRequestBodyDefined, requestOptions, httpMethod, isJsonParsingRequired, methodRequestMapping.consumes());
             requestOptions = composeRequestOptions(requestHeadersVar, requestParamsVar, isRequestParamDefined, isRequestHeaderDefined, requestOptions, isJsonParsingRequired);
 
-            tsPath = pathStringBuilder.toString();
+            tsPath = path;
             writer.write(
-                    "return this." + FIELD_NAME_HTTP_SERVICE + "." + httpMethod.toLowerCase() + getGenericType(method, isJsonParsingRequired) + "("
+                    "    return this." + FIELD_NAME_HTTP_SERVICE + "." + httpMethod.toLowerCase() + getGenericType(method, isJsonParsingRequired) + "("
                             + tsPath
                             + requestOptions
                             + ")" + getParseResponseFunction(isJsonParsingRequired) + ";");
@@ -126,7 +131,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
 
     protected void initializeHttpParams(StringBuilder requestParamsBuilder, String requestParamsVar) {
         requestParamsBuilder
-                .append("let ")
+                .append("    let ")
                 .append(requestParamsVar)
                 .append(" = new HttpParams();");
     }
@@ -134,12 +139,12 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
     @Override
     protected void addRequestParameter(StringBuilder requestParamsBuilder, String requestParamsVar, String queryParamVar) {
         requestParamsBuilder
-                .append("\n")
+                .append("\n      ")
                 .append(requestParamsVar)
                 .append(" = ")
                 .append(requestParamsVar)
                 .append(".append(").append(queryParamVar).append(".name")
-                .append(",").append(queryParamVar).append(".value")
+                .append(", ").append(queryParamVar).append(".value")
                 .append(");");
     }
 
@@ -150,7 +155,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
 
     private void writeRequestOption(BufferedWriter writer, String requestOption, String requestOptionValue, boolean isOptionDefined) throws IOException {
         if (isOptionDefined) {
-            writer.write("let " + requestOption + " = " + requestOptionValue);
+            writer.write("    const " + requestOption + " = " + requestOptionValue);
             writer.newLine();
         }
     }
@@ -199,7 +204,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
     private String getContentTypeHeaderFromRequestMapping(String httpMethod, RequestMapping requestMapping, boolean isRequestBodyDefined) {
         if (isPutOrPostMethod(httpMethod) && isRequestBodyDefined) {
             String contentType = getContentType(requestMapping.consumes());
-            return " new HttpHeaders().set('Content-type'," + " '" + contentType + "');";
+            return "new HttpHeaders().set('Content-type'," + " '" + contentType + "');";
         }
         return "";
     }

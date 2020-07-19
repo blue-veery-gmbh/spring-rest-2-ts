@@ -49,7 +49,7 @@ public class TSMethod extends TSComplexTypeMember {
         List<TSDecorator> decorators = implementationGenerator.getDecorators(this);
         writeDecorators(writer, decorators);
 
-        writer.write("public ");
+        writer.write("  public ");
         if(isAbstract) {
             writer.write("abstract ");
         }
@@ -72,7 +72,7 @@ public class TSMethod extends TSComplexTypeMember {
             writer.newLine();
             implementationGenerator.write(writer, this);
             writer.newLine();
-            writer.write("}");
+            writer.write("  }");
         }else{
             writer.write(";");
         }

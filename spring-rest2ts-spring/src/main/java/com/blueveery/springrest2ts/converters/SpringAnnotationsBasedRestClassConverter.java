@@ -3,7 +3,6 @@ package com.blueveery.springrest2ts.converters;
 import com.blueveery.springrest2ts.extensions.RestConversionExtension;
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
-import com.blueveery.springrest2ts.spring.RequestMappingUtility;
 import com.blueveery.springrest2ts.tsmodel.*;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
@@ -61,7 +60,7 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
             Map<String, Type> variableNameToJavaType = new HashMap<>();
             Class<?> declaringClass = method.getDeclaringClass();
             if(declaringClass != javaClass && method.getDeclaringClass().isInterface()){
-                variableNameToJavaType = fillVariableNameToJavaType(javaClass, declaringClass);
+                variableNameToJavaType = fillVariableNameToJavaType(javaClass, declaringClass, new HashMap<>());
             }
 
             Type genericReturnType = handleImplementationSpecificReturnTypes(method);
@@ -106,11 +105,20 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
                 return resolvedType;
             }
         }
+        if (type instanceof ParameterizedType) {
+            for (Type t : ((ParameterizedType) type).getActualTypeArguments()) {
+                if (variableNameToJavaType.get(t.getTypeName()) != null) {
+                    return variableNameToJavaType.get(t.getTypeName());
+                }
+            }
+        }
         return type;
     }
 
-    private Map<String, Type> fillVariableNameToJavaType(Class javaClass, Class<?> declaringClass) {
-        Map<String, Type> typeParametersMap = new HashMap<>();
+    private Map<String, Type> fillVariableNameToJavaType(Class javaClass, Class<?> declaringClass,Map<String, Type> typeParametersMap) {
+        if(typeParametersMap ==  null){
+            typeParametersMap = new HashMap<>();
+        }
         for (Type type:javaClass.getGenericInterfaces()){
             if (type instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) type;
@@ -122,7 +130,7 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
                     }
                     return typeParametersMap;
                 }
-                return fillVariableNameToJavaType(type.getClass(), declaringClass);
+                fillVariableNameToJavaType(type.getClass(), declaringClass,typeParametersMap);
             }
         }
         return typeParametersMap;
