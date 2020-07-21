@@ -91,7 +91,8 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
             boolean isRequestParamDefined = !isStringBuilderEmpty(requestParamsBuilder);
             writer.write(requestParamsBuilder.toString());
 
-            boolean isRequestOptionRequired = isJsonParseRequired(method) || (methodRequestMapping.produces().length > 0 && methodRequestMapping.produces()[0].contains("text"));
+            boolean isJsonParsingRequired = isJsonParseRequired(method);
+            boolean isRequestOptionRequired = isJsonParsingRequired || (methodRequestMapping.produces().length > 0 && methodRequestMapping.produces()[0].contains("text"));
             String contentTypeHeader = getContentTypeHeaderFromRequestMapping(httpMethod, methodRequestMapping, isRequestBodyDefined);
             boolean isRequestHeaderDefined = !contentTypeHeader.isEmpty();
             writeRequestOption(writer, requestHeadersVar, contentTypeHeader, isRequestHeaderDefined);
@@ -102,7 +103,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
             if (!requestBody.contains("id") && path.contains("{id}")) {
                 path = path.replace("{id}", "' + " + requestBody + ".id.split('/')[1] + '");
             }
-            requestOptions = composeRequestBody(requestBody, isRequestBodyDefined, requestOptions, httpMethod, isRequestOptionRequired, methodRequestMapping.consumes());
+            requestOptions = composeRequestBody(requestBody, isRequestBodyDefined, requestOptions, httpMethod, isJsonParsingRequired, methodRequestMapping.consumes());
             requestOptions = composeRequestOptions(requestHeadersVar, requestParamsVar, isRequestParamDefined, isRequestHeaderDefined, requestOptions, isRequestOptionRequired);
 
             tsPath = path;
@@ -110,7 +111,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
                     "    return this." + FIELD_NAME_HTTP_SERVICE + "." + httpMethod.toLowerCase() + getGenericType(method, isRequestOptionRequired) + "("
                             + tsPath
                             + requestOptions
-                            + ")" + getParseResponseFunction(isRequestOptionRequired) + ";");
+                            + ")" + getParseResponseFunction(isJsonParsingRequired) + ";");
 
         }
     }
@@ -160,10 +161,10 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
         }
     }
 
-    private String composeRequestBody(String requestBody, boolean isRequestBodyDefined, String requestOptions, String httpMethod, boolean isRequestOptionRequired, String[] consumes) {
+    private String composeRequestBody(String requestBody, boolean isRequestBodyDefined, String requestOptions, String httpMethod, boolean isJsonParsingRequired, String[] consumes) {
         if (isPutOrPostMethod(httpMethod)) {
             if (isRequestBodyDefined) {
-                requestOptions = appendRequestBodyPart(requestBody, requestOptions, isRequestOptionRequired, consumes);
+                requestOptions = appendRequestBodyPart(requestBody, requestOptions, isJsonParsingRequired, consumes);
             } else {
                 requestOptions += ", null ";
             }
@@ -181,8 +182,8 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
         return requestOptions;
     }
 
-    private String composeRequestOptions(String requestHeadersVar, String requestParamsVar, boolean isRequestParamDefined, boolean isRequestHeaderDefined, String requestOptions, boolean isRequestOptionRequired) {
-        if (isRequestHeaderDefined || isRequestParamDefined || isRequestOptionRequired) {
+    private String composeRequestOptions(String requestHeadersVar, String requestParamsVar, boolean isRequestParamDefined, boolean isRequestHeaderDefined, String requestOptions, boolean isRequestOptionsRequired) {
+        if (isRequestHeaderDefined || isRequestParamDefined || isRequestOptionsRequired) {
             List<String> requestOptionsList = new ArrayList<>();
             if (isRequestHeaderDefined) {
                 requestOptionsList.add(requestHeadersVar);
@@ -190,7 +191,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
             if (isRequestParamDefined) {
                 requestOptionsList.add(requestParamsVar);
             }
-            if (isRequestOptionRequired) {
+            if (isRequestOptionsRequired) {
                 requestOptionsList.add("responseType: 'text'");
             }
             requestOptions += ", {";
