@@ -27,6 +27,7 @@ public class TypeMapper {
     public static TSModule systemModule = new TSModule("system", Paths.get(""), true);
 
     private static Map<Class, TSType> complexTypeMap = new HashMap<>();
+    private static Map<String, Type> genericTypeMapper = new HashMap<>();
 
     public static TSType map(Type javaType){
         return map(javaType, tsAny);
@@ -35,6 +36,9 @@ public class TypeMapper {
     public static TSType map(Type javaType, TSType fallbackType){
         if (javaType instanceof TypeVariable) {
             TypeVariable typeVariable = (TypeVariable) javaType;
+            if (genericTypeMapper.get(typeVariable.getName()) != null) {
+                return map(genericTypeMapper.get(typeVariable.getName()), fallbackType);
+            }
             return new TSFormalTypeParameter(typeVariable.getName());
         }
         Type javaRawType = javaType;
@@ -124,6 +128,10 @@ public class TypeMapper {
             TSScopedElement tsScopedElement = (TSScopedElement) tsType;
             tsScopedElement.getMappedFromJavaTypeSet().add(javaType);
         }
+    }
+
+    public static void addGenericTypeMap(Map<String, Type> genericTypeMap) {
+        genericTypeMapper = genericTypeMap;
     }
 }
 

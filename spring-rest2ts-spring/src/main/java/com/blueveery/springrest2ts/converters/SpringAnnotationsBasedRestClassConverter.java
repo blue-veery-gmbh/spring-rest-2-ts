@@ -65,6 +65,11 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
 
             Type genericReturnType = handleImplementationSpecificReturnTypes(method);
             String methodName = mapMethodName(restMethodList, methodNamesMap,  method);
+
+            if (genericReturnType instanceof ParameterizedType && variableNameToJavaType.size() > 0) {
+                TypeMapper.addGenericTypeMap(variableNameToJavaType);
+            }
+
             TSType methodReturnType = TypeMapper.map(resolveTypeVariable(genericReturnType, variableNameToJavaType));
             tsClass.getModule().scopedTypeUsage(methodReturnType);
             TSMethod tsMethod = new TSMethod(methodName, tsClass, methodReturnType, implementationGenerator, false, false);
@@ -103,13 +108,6 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
             Type resolvedType = variableNameToJavaType.get(typeVariable.getName());
             if (resolvedType != null) {
                 return resolvedType;
-            }
-        }
-        if (type instanceof ParameterizedType) {
-            for (Type t : ((ParameterizedType) type).getActualTypeArguments()) {
-                if (variableNameToJavaType.get(t.getTypeName()) != null) {
-                    return variableNameToJavaType.get(t.getTypeName());
-                }
             }
         }
         return type;
