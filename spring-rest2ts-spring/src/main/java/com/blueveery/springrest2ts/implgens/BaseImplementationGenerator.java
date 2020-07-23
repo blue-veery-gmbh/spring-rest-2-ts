@@ -61,9 +61,12 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
     protected void writeConstructorImplementation(BufferedWriter writer, TSClass tsClass) throws IOException {
 
         if (tsClass.getExtendsClass() == null) {
+            StringBuilder classFieldBuilder = new StringBuilder();
             for (String name : getImplementationSpecificFieldNames()) {
-                writer.write("    this." + name + " = " + name + ";");
+                classFieldBuilder.append("    this." + name + " = " + name + ";\n");
             }
+            String classField = classFieldBuilder.toString();
+            writer.write(classField.length() > 0 ? classField.substring(0,classField.length()-1): "");
         } else {
             writer.write("super(");
             writer.write(String.join(",", getImplementationSpecificFieldNames()));

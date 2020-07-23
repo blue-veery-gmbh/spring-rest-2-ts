@@ -107,16 +107,19 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
             requestOptions = composeRequestOptions(requestHeadersVar, requestParamsVar, isRequestParamDefined, isRequestHeaderDefined, requestOptions, isRequestOptionRequired);
 
             tsPath = path;
-            writer.write(
-                    "    return this." + FIELD_NAME_HTTP_SERVICE + "." + httpMethod.toLowerCase() + getGenericType(method, isRequestOptionRequired) + "("
-                            + tsPath
-                            + requestOptions
-                            + ")" + getParseResponseFunction(isJsonParsingRequired) + ";");
-
+            this.writeReturnStatement(writer, httpMethod.toLowerCase(), method, isRequestOptionRequired, tsPath, requestOptions, isJsonParsingRequired);
         }
     }
 
-    private String getParseResponseFunction(boolean isJsonResponse) {
+    protected void writeReturnStatement(BufferedWriter writer, String httpMethod, TSMethod method, boolean isRequestOptionRequired,
+                                        String tsPath, String requestOptions, boolean isJsonParsingRequired) throws IOException {
+        writer.write("    return this." + FIELD_NAME_HTTP_SERVICE + "." + httpMethod + getGenericType(method, isRequestOptionRequired) + "("
+                + tsPath
+                + requestOptions
+                + ")" + getParseResponseFunction(isJsonParsingRequired) + ";");
+    }
+
+    protected String getParseResponseFunction(boolean isJsonResponse) {
         if (isJsonResponse) {
             ModelSerializerExtension modelSerializerExtension = findModelSerializerExtension(new String[]{"application/json"});
             String parseFunction = modelSerializerExtension.generateDeserializationCode("res");
@@ -125,7 +128,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
         return "";
     }
 
-    private String getGenericType(TSMethod method, boolean isRequestOptionRequired) {
+    protected String getGenericType(TSMethod method, boolean isRequestOptionRequired) {
         return isRequestOptionRequired ? "" : "<" + method.getType().getName() + ">";
     }
 
