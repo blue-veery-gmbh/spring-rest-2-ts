@@ -7,15 +7,22 @@ import com.fasterxml.jackson.annotation.*;
 import java.beans.Introspector;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.function.Function;
 
 public class JacksonObjectMapper implements ObjectMapper {
     private final Map<Class, List<JsonIgnoreProperties>> jsonIgnorePropertiesPerClass = new HashMap<>();
+    protected List<Function<Method, Boolean>> negativeMethodFilters = new ArrayList<>();
     JsonAutoDetect.Visibility fieldsVisibility = JsonAutoDetect.Visibility.NONE;
     JsonAutoDetect.Visibility gettersVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY;
     JsonAutoDetect.Visibility isGetterVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY;
     JsonAutoDetect.Visibility settersVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY;
 
     public JacksonObjectMapper() {
+    }
+
+    @SafeVarargs
+    protected final void registerNegativeMethodFilters(Function<Method, Boolean>... filters){
+        this.negativeMethodFilters.addAll(Arrays.asList(filters));
     }
 
     public JsonAutoDetect.Visibility getFieldsVisibility() {
@@ -108,7 +115,7 @@ public class JacksonObjectMapper implements ObjectMapper {
 
     @Override
     public boolean filter(Method method, boolean isGetter) {
-        if (commonFilter(method)) {
+        if (commonFilter(method) || filterMethodWithCustomizedFilters(method)) {
             return false;
         }
         JsonAutoDetect.Visibility currentGettersVisibility = gettersVisibility;
@@ -154,6 +161,10 @@ public class JacksonObjectMapper implements ObjectMapper {
         }
 
         return true;
+    }
+
+    protected boolean filterMethodWithCustomizedFilters(Method method) {
+        return this.negativeMethodFilters.stream().anyMatch(filter -> filter.apply(method));
     }
 
     private String getJacksonPropertyNameBasedOnAnnnotation(Method method) {
@@ -357,23 +368,15 @@ public class JacksonObjectMapper implements ObjectMapper {
             }
             switch (jsonFormat.shape()) {
                 case ANY:
-                    tsField.setType(TypeMapper.tsAny);
-                    return;
+                case OBJECT:
                 case SCALAR:
                     tsField.setType(TypeMapper.tsAny);
                     return;
                 case ARRAY:
                     tsField.setType(new TSArray(TypeMapper.tsAny));
                     return;
-                case OBJECT:
-                    tsField.setType(TypeMapper.tsAny);
-                    return;
                 case NUMBER:
-                    tsField.setType(TypeMapper.tsNumber);
-                    return;
                 case NUMBER_FLOAT:
-                    tsField.setType(TypeMapper.tsNumber);
-                    return;
                 case NUMBER_INT:
                     tsField.setType(TypeMapper.tsNumber);
                     return;
@@ -382,7 +385,6 @@ public class JacksonObjectMapper implements ObjectMapper {
                     return;
                 case BOOLEAN:
                     tsField.setType(TypeMapper.tsBoolean);
-                    return;
             }
         }
     }
