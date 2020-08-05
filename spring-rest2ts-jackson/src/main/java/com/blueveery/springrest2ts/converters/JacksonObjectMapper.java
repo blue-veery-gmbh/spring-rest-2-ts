@@ -21,7 +21,7 @@ public class JacksonObjectMapper implements ObjectMapper {
     }
 
     @SafeVarargs
-    protected final void registerNegativeMethodFilters(Function<Method, Boolean>... filters){
+    public final void registerNegativeMethodFilters(Function<Method, Boolean>... filters){
         this.negativeMethodFilters.addAll(Arrays.asList(filters));
     }
 

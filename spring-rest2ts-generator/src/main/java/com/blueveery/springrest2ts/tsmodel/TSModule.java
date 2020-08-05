@@ -24,10 +24,10 @@ import static com.blueveery.springrest2ts.tsmodel.ModuleExtensionType.typing;
  * Created by tomaszw on 30.07.2017.
  */
 public class TSModule extends TSElement {
-    private boolean isExternal = false;
-    private Map<TSModule, TSImport> importMap = new TreeMap<>();
-    private SortedSet<TSScopedElement> scopedTypesSet = new TreeSet<>();
-    private Path moduleRelativePath;
+    protected boolean isExternal = false;
+    protected Map<TSModule, TSImport> importMap = new TreeMap<>();
+    protected SortedSet<TSScopedElement> scopedTypesSet = new TreeSet<>();
+    protected Path moduleRelativePath;
     private ModuleExtensionType moduleExtensionType = typing;
 
     public TSModule(String name, Path moduleRelativePath, boolean isExternal) {
@@ -60,12 +60,19 @@ public class TSModule extends TSElement {
 
     @Override
     public void write(BufferedWriter writer) throws IOException {
-        for (TSImport tsImport:importMap.values()) {
+        this.writeImportBlock(writer);
+        writer.newLine();
+        this.writeScopedElements(writer);
+    }
+
+    protected void writeImportBlock(BufferedWriter writer) throws IOException {
+        for (TSImport tsImport : importMap.values()) {
             tsImport.write(writer);
             writer.newLine();
         }
+    }
 
-        writer.newLine();
+    protected void writeScopedElements(BufferedWriter writer) throws IOException {
         for (TSScopedElement tsScopedElement : sort(scopedTypesSet)) {
             tsScopedElement.write(writer);
             writer.newLine();
@@ -73,7 +80,7 @@ public class TSModule extends TSElement {
         }
     }
 
-    private List<? extends TSScopedElement> sort(SortedSet<TSScopedElement> scopedTypesSet) {
+    protected List<? extends TSScopedElement> sort(SortedSet<TSScopedElement> scopedTypesSet) {
         List<TSScopedElement> sortedElements = new ArrayList<>();
         List<TSVariable> tsVariableList = new ArrayList<>();
         for (TSScopedElement tsScopedElement : scopedTypesSet) {
