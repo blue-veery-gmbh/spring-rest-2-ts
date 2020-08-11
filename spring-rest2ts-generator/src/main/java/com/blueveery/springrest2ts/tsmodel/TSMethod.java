@@ -57,6 +57,7 @@ public class TSMethod extends TSComplexTypeMember {
         writer.write("(");
         List<TSParameter> totalTsParametersList = new ArrayList<>(parameterList);
         totalTsParametersList.addAll(implementationGenerator.getImplementationSpecificParameters(this));
+        totalTsParametersList.addAll(implementationGenerator.getSerializationExtension().getImplementationSpecificParameters(this));
 
         int counter = writeParameters(totalTsParametersList, implementationGenerator, writer, false, 0);
         writeParameters(totalTsParametersList, implementationGenerator, writer, true, counter);

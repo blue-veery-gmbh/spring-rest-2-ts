@@ -16,16 +16,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public abstract class BaseImplementationGenerator implements ImplementationGenerator {
 
     protected static final String JSON_CONTENT_TYPE = "application/json";
     protected List<? extends ConversionExtension> extensionSet;
 
-    protected Map<String, ModelSerializerExtension> modelSerializerExtensionsMap = new HashMap<>();
+    protected ModelSerializerExtension modelSerializerExtension = new StandardJsonSerializerExtension();
 
     protected abstract void initializeHttpParams(StringBuilder requestParamsBuilder, String requestParamsVar);
 
@@ -34,7 +32,6 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
     protected abstract String[] getImplementationSpecificFieldNames();
 
     protected BaseImplementationGenerator() {
-        modelSerializerExtensionsMap.put("application/json", new StandardJsonSerializerExtension());
     }
 
     @Override
@@ -43,19 +40,13 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
     }
 
     @Override
-    public void setSerializationExtensions(Map<String, ModelSerializerExtension> modelSerializerExtensionsMap) {
-        this.modelSerializerExtensionsMap = modelSerializerExtensionsMap;
+    public ModelSerializerExtension getSerializationExtension() {
+        return modelSerializerExtension;
     }
 
-    protected ModelSerializerExtension findModelSerializerExtension(String[] mimeTypes) {
-        for (String mimeType : mimeTypes) {
-            ModelSerializerExtension modelSerializerExtension = modelSerializerExtensionsMap.get(mimeType);
-            if(modelSerializerExtension != null) {
-                return modelSerializerExtension;
-            }
-        }
-
-        return modelSerializerExtensionsMap.get("application/json");
+    @Override
+    public void setSerializationExtension(ModelSerializerExtension modelSerializerExtension) {
+        this.modelSerializerExtension = modelSerializerExtension;
     }
 
     protected void writeConstructorImplementation(BufferedWriter writer, TSClass tsClass) throws IOException {

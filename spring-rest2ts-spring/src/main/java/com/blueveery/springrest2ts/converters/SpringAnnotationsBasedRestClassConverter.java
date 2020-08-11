@@ -3,14 +3,34 @@ package com.blueveery.springrest2ts.converters;
 import com.blueveery.springrest2ts.extensions.RestConversionExtension;
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
-import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.tsmodel.TSClass;
+import com.blueveery.springrest2ts.tsmodel.TSMethod;
+import com.blueveery.springrest2ts.tsmodel.TSModule;
+import com.blueveery.springrest2ts.tsmodel.TSParameter;
+import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ValueConstants;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public abstract class SpringAnnotationsBasedRestClassConverter extends RestClassConverter {
@@ -87,6 +107,7 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
         }
 
         implementationGenerator.addComplexTypeUsage(tsClass);
+        implementationGenerator.getSerializationExtension().addComplexTypeUsage(tsClass);
         conversionListener.tsScopedTypeCreated(javaClass, tsClass);
     }
 

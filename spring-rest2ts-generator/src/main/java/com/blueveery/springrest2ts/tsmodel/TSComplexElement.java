@@ -70,6 +70,9 @@ public abstract class TSComplexElement extends TSScopedElement implements IDecor
 
     protected void writeMembers(BufferedWriter writer) throws IOException {
         implementationGenerator.addImplementationSpecificFields(this);
+        if (implementationGenerator.getSerializationExtension() != null) {
+            implementationGenerator.getSerializationExtension().addImplementationSpecificFields(this);
+        }
         writeFields(writer, tsFields);
 
         if (!tsMethods.isEmpty()) {

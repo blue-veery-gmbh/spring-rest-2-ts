@@ -2,7 +2,14 @@ package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.extensions.ModelSerializerExtension;
-import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.tsmodel.TSClass;
+import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
+import com.blueveery.springrest2ts.tsmodel.TSDecorator;
+import com.blueveery.springrest2ts.tsmodel.TSField;
+import com.blueveery.springrest2ts.tsmodel.TSInterface;
+import com.blueveery.springrest2ts.tsmodel.TSMethod;
+import com.blueveery.springrest2ts.tsmodel.TSParameter;
+import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -89,7 +96,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
         } else if (actualType == TypeMapper.tsVoid) {
             return "";
         } else {
-            ModelSerializerExtension modelSerializerExtension = findModelSerializerExtension(new String[]{"application/json"});
+            ModelSerializerExtension modelSerializerExtension = this.modelSerializerExtension;
             parseFunction = modelSerializerExtension.generateDeserializationCode("res");
             return ".then(res => res.text()).then(res =>  " + parseFunction + ")";
         }
@@ -115,7 +122,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
         List<String> requestOptionsList = new ArrayList<>();
         if (("PUT".equals(httpMethod) || "POST".equals(httpMethod)) && isRequestBodyDefined) {
             addContentTypeHeader(consumesContentType, requestOptionsList);
-            requestOptionsList.add("body: " + findModelSerializerExtension(consumesContentType).generateSerializationCode(requestBodyVar));
+            requestOptionsList.add("body: " + modelSerializerExtension.generateSerializationCode(requestBodyVar));
         }
 
         requestOptions += String.join(", ", requestOptionsList);

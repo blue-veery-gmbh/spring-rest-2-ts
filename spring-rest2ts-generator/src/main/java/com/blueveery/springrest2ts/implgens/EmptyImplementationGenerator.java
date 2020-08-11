@@ -2,13 +2,17 @@ package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.extensions.ConversionExtension;
 import com.blueveery.springrest2ts.extensions.ModelSerializerExtension;
-import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.tsmodel.TSClass;
+import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
+import com.blueveery.springrest2ts.tsmodel.TSDecorator;
+import com.blueveery.springrest2ts.tsmodel.TSMethod;
+import com.blueveery.springrest2ts.tsmodel.TSParameter;
+import com.blueveery.springrest2ts.tsmodel.TSType;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class EmptyImplementationGenerator implements ImplementationGenerator {
     @Override
@@ -17,8 +21,13 @@ public class EmptyImplementationGenerator implements ImplementationGenerator {
     }
 
     @Override
-    public void setSerializationExtensions(Map<String, ModelSerializerExtension> modelSerializerExtensionsMap) {
+    public void setSerializationExtension(ModelSerializerExtension modelSerializerExtension) {
 
+    }
+
+    @Override
+    public ModelSerializerExtension getSerializationExtension() {
+        return null;
     }
 
     @Override

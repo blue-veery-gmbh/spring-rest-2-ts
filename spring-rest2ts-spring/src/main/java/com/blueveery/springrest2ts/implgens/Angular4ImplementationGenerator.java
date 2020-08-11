@@ -2,7 +2,15 @@ package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.extensions.ModelSerializerExtension;
-import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.tsmodel.TSClass;
+import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
+import com.blueveery.springrest2ts.tsmodel.TSDecorator;
+import com.blueveery.springrest2ts.tsmodel.TSField;
+import com.blueveery.springrest2ts.tsmodel.TSFunction;
+import com.blueveery.springrest2ts.tsmodel.TSMethod;
+import com.blueveery.springrest2ts.tsmodel.TSModule;
+import com.blueveery.springrest2ts.tsmodel.TSParameter;
+import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -121,7 +129,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
 
     protected String getParseResponseFunction(boolean isJsonResponse) {
         if (isJsonResponse) {
-            ModelSerializerExtension modelSerializerExtension = findModelSerializerExtension(new String[]{"application/json"});
+            ModelSerializerExtension modelSerializerExtension = this.modelSerializerExtension;
             String parseFunction = modelSerializerExtension.generateDeserializationCode("res");
             return ".pipe(map(res => " + parseFunction + "))";
         }
@@ -177,7 +185,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
 
     private String appendRequestBodyPart(String requestBody, String requestOptions, boolean isJsonParsingRequired, String[] consumes) {
         if (isJsonParsingRequired) {
-            ModelSerializerExtension modelSerializerExtension = findModelSerializerExtension(consumes);
+            ModelSerializerExtension modelSerializerExtension = this.modelSerializerExtension;
             requestOptions += ", " + modelSerializerExtension.generateSerializationCode(requestBody) + " ";
         } else {
             requestOptions += ", " + requestBody + " ";
@@ -228,17 +236,16 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
 
     @Override
     public List<TSParameter> getImplementationSpecificParameters(TSMethod method) {
+        List<TSParameter> tsParameters = new ArrayList<>();
         if (method.isConstructor()) {
-            List<TSParameter> tsParameters = new ArrayList<>();
             TSParameter httpServiceParameter = new TSParameter(FIELD_NAME_HTTP_SERVICE, httpClass, method, this);
             tsParameters.add(httpServiceParameter);
             if (useUrlService) {
                 TSParameter urlServiceParameter = new TSParameter(FIELD_NAME_URL_SERVICE, urlServiceClass, method, this);
                 tsParameters.add(urlServiceParameter);
             }
-            return tsParameters;
         }
-        return Collections.emptyList();
+        return tsParameters;
     }
 
 
