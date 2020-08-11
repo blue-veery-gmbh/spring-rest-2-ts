@@ -21,7 +21,7 @@ public class TSMap extends TSType {
 
     @Override
     public String getName() {
-        return "Map<" + keyType.getName() + ", " + valueType.getName() +">";
+        return "{[key: " + keyType.getName() + "] :" + valueType.getName() +"}";
     }
 
     @Override
