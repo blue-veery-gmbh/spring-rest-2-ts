@@ -57,26 +57,22 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
 
         for (Method method: restMethodList) {
 
-            Map<String, Type> variableNameToJavaType = new HashMap<>();
+            Map<TypeVariable, Type> variableToJavaType = new HashMap<>();
             Class<?> declaringClass = method.getDeclaringClass();
-            if(declaringClass != javaClass && method.getDeclaringClass().isInterface()){
-                variableNameToJavaType = fillVariableNameToJavaType(javaClass, declaringClass, new HashMap<>());
+            boolean methodMustBeInlined = declaringClass != javaClass && method.getDeclaringClass().isInterface();
+            if(methodMustBeInlined){
+                variableToJavaType = mapVariableToJavaType(javaClass, declaringClass, new HashMap<>());
             }
 
             Type genericReturnType = handleImplementationSpecificReturnTypes(method);
             String methodName = mapMethodName(restMethodList, methodNamesMap,  method);
-
-            if (genericReturnType instanceof ParameterizedType && variableNameToJavaType.size() > 0) {
-                TypeMapper.addGenericTypeMap(variableNameToJavaType);
-            }
-
-            TSType methodReturnType = TypeMapper.map(resolveTypeVariable(genericReturnType, variableNameToJavaType));
+            TSType methodReturnType = TypeMapper.map(genericReturnType, variableToJavaType);
             tsClass.getModule().scopedTypeUsage(methodReturnType);
             TSMethod tsMethod = new TSMethod(methodName, tsClass, methodReturnType, implementationGenerator, false, false);
             addMethodAnnotations(method, tsMethod);
             for (Parameter parameter:method.getParameters()) {
-                Type parameterType = resolveTypeVariable(parameter.getParameterizedType(), variableNameToJavaType);
-                TSParameter tsParameter = new TSParameter(parameter.getName(), TypeMapper.map(parameterType), tsMethod, implementationGenerator);
+                TSType tsType = TypeMapper.map(parameter.getParameterizedType(), variableToJavaType);
+                TSParameter tsParameter = new TSParameter(parameter.getName(), tsType, tsMethod, implementationGenerator);
                 addParameterAnnotations(parameter, tsParameter);
                 if (parameterIsMapped(tsParameter)) {
                     tsClass.getModule().scopedTypeUsage(tsParameter.getType());
@@ -102,21 +98,7 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
 
     protected abstract Type handleImplementationSpecificReturnTypes(Method method);
 
-    private Type resolveTypeVariable(Type type, Map<String, Type> variableNameToJavaType) {
-        if (type instanceof TypeVariable) {
-            TypeVariable typeVariable = (TypeVariable) type;
-            Type resolvedType = variableNameToJavaType.get(typeVariable.getName());
-            if (resolvedType != null) {
-                return resolvedType;
-            }
-        }
-        return type;
-    }
-
-    private Map<String, Type> fillVariableNameToJavaType(Class javaClass, Class<?> declaringClass,Map<String, Type> typeParametersMap) {
-        if(typeParametersMap ==  null){
-            typeParametersMap = new HashMap<>();
-        }
+    private Map<TypeVariable, Type> mapVariableToJavaType(Class javaClass, Class<?> declaringClass, Map<TypeVariable, Type> typeParametersMap) {
         for (Type type:javaClass.getGenericInterfaces()){
             if (type instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) type;
@@ -124,11 +106,11 @@ public abstract class SpringAnnotationsBasedRestClassConverter extends RestClass
                     for (int i = 0; i < parameterizedType.getActualTypeArguments().length; i++) {
                         TypeVariable typeParameter = declaringClass.getTypeParameters()[i];
                         Type actualTypeArgument = parameterizedType.getActualTypeArguments()[i];
-                        typeParametersMap.put(typeParameter.getName(), actualTypeArgument);
+                        typeParametersMap.put(typeParameter, actualTypeArgument);
                     }
                     return typeParametersMap;
                 }
-                fillVariableNameToJavaType(type.getClass(), declaringClass,typeParametersMap);
+                mapVariableToJavaType(type.getClass(), declaringClass,typeParametersMap);
             }
         }
         return typeParametersMap;

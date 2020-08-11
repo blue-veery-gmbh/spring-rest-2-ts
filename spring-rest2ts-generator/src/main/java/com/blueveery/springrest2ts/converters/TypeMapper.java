@@ -27,18 +27,22 @@ public class TypeMapper {
     public static TSModule systemModule = new TSModule("system", Paths.get(""), true);
 
     private static Map<Class, TSType> complexTypeMap = new HashMap<>();
-    private static Map<String, Type> genericTypeMapper = new HashMap<>();
 
     public static TSType map(Type javaType){
-        return map(javaType, tsAny);
+        return map(javaType, tsAny, Collections.emptyMap());
     }
 
-    public static TSType map(Type javaType, TSType fallbackType){
+    public static TSType map(Type javaType, Map<TypeVariable, Type> typeParametersMap){
+        return map(javaType, tsAny, typeParametersMap);
+    }
+
+    public static TSType map(Type javaType, TSType fallbackType, Map<TypeVariable, Type> typeParametersMap){
         if (javaType instanceof TypeVariable) {
-            TypeVariable typeVariable = (TypeVariable) javaType;
-            if (genericTypeMapper.get(typeVariable.getName()) != null) {
-                return map(genericTypeMapper.get(typeVariable.getName()), fallbackType);
+            Type actualType = typeParametersMap.get(javaType);
+            if(actualType != null) {
+                return map(actualType, fallbackType, typeParametersMap);
             }
+            TypeVariable typeVariable = (TypeVariable) javaType;
             return new TSFormalTypeParameter(typeVariable.getName());
         }
         Type javaRawType = javaType;
@@ -46,7 +50,7 @@ public class TypeMapper {
         if(javaType instanceof ParameterizedType){
             ParameterizedType parameterizedType = (ParameterizedType) javaType;
             javaRawType = parameterizedType.getRawType();
-            actualParameterList = mapActualTypeArguments(actualParameterList, parameterizedType);
+            actualParameterList = mapActualTypeArguments(actualParameterList, parameterizedType, typeParametersMap);
         }
 
         if(complexTypeMap.containsKey(javaRawType)){
@@ -94,27 +98,30 @@ public class TypeMapper {
         if(javaType instanceof ParameterizedType){
             ParameterizedType javaParameterizedType = (ParameterizedType) javaType;
             if(Collection.class.isAssignableFrom((Class<?>) javaParameterizedType.getRawType())){
-                return new TSArray(TypeMapper.map(javaParameterizedType.getActualTypeArguments()[0], fallbackType));
+                return new TSArray(TypeMapper.map(javaParameterizedType.getActualTypeArguments()[0], fallbackType, typeParametersMap));
             }
 
             if(Map.class.isAssignableFrom((Class<?>) javaParameterizedType.getRawType())){
-                return new TSMap(TypeMapper.map(javaParameterizedType.getActualTypeArguments()[1], fallbackType));
+                return new TSMap(TypeMapper.map(javaParameterizedType.getActualTypeArguments()[1], fallbackType, typeParametersMap));
             }
 
             if(Optional.class == javaParameterizedType.getRawType()){
-                return TypeMapper.map(javaParameterizedType.getActualTypeArguments()[0], fallbackType);
+                return TypeMapper.map(javaParameterizedType.getActualTypeArguments()[0], fallbackType, typeParametersMap);
             }
         }
 
         return fallbackType;
     }
 
-    private static List<TSType> mapActualTypeArguments(List<TSType> actualParameterList, ParameterizedType parameterizedType) {
+    private static List<TSType> mapActualTypeArguments(
+            List<TSType> actualParameterList, ParameterizedType parameterizedType,
+            Map<TypeVariable, Type> typeParametersMap
+    ) {
         Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
         if (actualTypeArguments.length > 0) {
             actualParameterList = new ArrayList<>();
             for (Type actualTypeArgument : actualTypeArguments) {
-                actualParameterList.add(map(actualTypeArgument));
+                actualParameterList.add(map(actualTypeArgument, typeParametersMap));
             }
         }
         return actualParameterList;
@@ -128,10 +135,6 @@ public class TypeMapper {
             TSScopedElement tsScopedElement = (TSScopedElement) tsType;
             tsScopedElement.getMappedFromJavaTypeSet().add(javaType);
         }
-    }
-
-    public static void addGenericTypeMap(Map<String, Type> genericTypeMap) {
-        genericTypeMapper = genericTypeMap;
     }
 }
 
