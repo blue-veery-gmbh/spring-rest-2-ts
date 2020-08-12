@@ -58,6 +58,10 @@ public abstract class TSComplexElement extends TSScopedElement implements IDecor
             TSArray tsArray = (TSArray) tsType;
             addScopedTypeUsage(tsArray.getElementType());
         }
+        if (tsType instanceof TSMap) {
+            TSMap tsMap = (TSMap) tsType;
+            addScopedTypeUsage(tsMap.getValueType());
+        }
         if (tsType instanceof TSScopedElement) {
             TSScopedElement tsScopedElement = (TSScopedElement) tsType;
             module.scopedTypeUsage(tsScopedElement);

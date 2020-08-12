@@ -87,7 +87,7 @@ public class TypeMapper {
                 return tsDate;
             }
             if(javaClass.isArray()){
-                return new TSArray(TypeMapper.map(javaClass.getComponentType()));
+                return new TSArray(TypeMapper.map(javaClass.getComponentType(), fallbackType, typeParametersMap));
             }
 
             if(javaClass.isPrimitive()){

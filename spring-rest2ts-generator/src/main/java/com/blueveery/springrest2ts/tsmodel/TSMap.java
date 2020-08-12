@@ -19,6 +19,10 @@ public class TSMap extends TSType {
         this.valueType = valueType;
     }
 
+    public TSType getValueType() {
+        return valueType;
+    }
+
     @Override
     public String getName() {
         return "{[key: " + keyType.getName() + "] :" + valueType.getName() +"}";
