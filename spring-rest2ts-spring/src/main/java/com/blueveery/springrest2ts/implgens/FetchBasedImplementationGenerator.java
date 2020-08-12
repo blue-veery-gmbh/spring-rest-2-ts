@@ -23,11 +23,11 @@ import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getReques
 
 public class FetchBasedImplementationGenerator extends BaseImplementationGenerator {
 
-    private final String baseURLFieldName = "baseURL";
-    private final String[] implementationSpecificFieldsSet = {baseURLFieldName};
-    private final TSInterface baseUrlTsFieldType = new TSInterface("URL", TypeMapper.systemModule);
-    private final TSInterface promiseInterface = new TSInterface("Promise", TypeMapper.systemModule);
-    private final TSInterface responseInterface = new TSInterface("Response", TypeMapper.systemModule);
+    protected final String baseURLFieldName = "baseURL";
+    protected final String[] implementationSpecificFieldsSet = {baseURLFieldName};
+    protected final TSInterface baseUrlTsFieldType = new TSInterface("URL", TypeMapper.systemModule);
+    protected final TSInterface promiseInterface = new TSInterface("Promise", TypeMapper.systemModule);
+    protected final TSInterface responseInterface = new TSInterface("Response", TypeMapper.systemModule);
 
     @Override
     protected String[] getImplementationSpecificFieldNames() {
@@ -76,14 +76,16 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
 
     }
 
-    private void writeRequestUrl(BufferedWriter writer, String requestUrlVar, StringBuilder pathStringBuilder) throws IOException {
+    protected void writeRequestUrl(
+            BufferedWriter writer, String requestUrlVar, StringBuilder pathStringBuilder
+    ) throws IOException {
         String tsPath = pathStringBuilder.toString();
         tsPath = tsPath.startsWith("/") ? tsPath : "/" + tsPath;
         writer.write("const " + requestUrlVar + " = " + " new URL('" + tsPath + ", this." + baseURLFieldName + ");");
         writer.newLine();
     }
 
-    private String getContentFromResponseFunction(TSMethod method) {
+    protected String getContentFromResponseFunction(TSMethod method) {
         TSType actualType = method.getType();
 
         String parseFunction = "";
@@ -117,7 +119,9 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
                 .append(");");
     }
 
-    private String composeRequestOptions(String requestBodyVar, boolean isRequestBodyDefined, String httpMethod, String[] consumesContentType) {
+    protected String composeRequestOptions(
+            String requestBodyVar, boolean isRequestBodyDefined, String httpMethod, String[] consumesContentType
+    ) {
         String requestOptions = "";
         List<String> requestOptionsList = new ArrayList<>();
         if (("PUT".equals(httpMethod) || "POST".equals(httpMethod)) && isRequestBodyDefined) {
@@ -129,7 +133,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
         return requestOptions;
     }
 
-    private void addContentTypeHeader(String[] consumesContentType, List<String> requestOptionsList) {
+    protected void addContentTypeHeader(String[] consumesContentType, List<String> requestOptionsList) {
         String contentType = getContentType(consumesContentType);
         String headers = "headers: {";
         headers += "'Content-Type': '" + contentType + "'";

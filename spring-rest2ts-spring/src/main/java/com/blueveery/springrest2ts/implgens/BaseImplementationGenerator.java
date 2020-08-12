@@ -98,8 +98,10 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
         return tsParameterName;
     }
 
-
-    protected void assignMethodParameters(TSMethod method, String requestParamsVar, StringBuilder pathStringBuilder, StringBuilder requestBodyBuilder, StringBuilder requestParamsBuilder) {
+    protected void assignMethodParameters(
+            TSMethod method, String requestParamsVar, StringBuilder pathStringBuilder,
+            StringBuilder requestBodyBuilder, StringBuilder requestParamsBuilder
+    ) {
         StringBuilder queryParamsListBuilder = new StringBuilder();
         String queryParamsListVar = "queryParamsList";
 
