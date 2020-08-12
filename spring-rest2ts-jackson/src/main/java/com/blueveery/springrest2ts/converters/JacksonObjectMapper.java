@@ -1,28 +1,47 @@
 package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
-import com.blueveery.springrest2ts.tsmodel.*;
-import com.fasterxml.jackson.annotation.*;
+import com.blueveery.springrest2ts.tsmodel.TSArray;
+import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
+import com.blueveery.springrest2ts.tsmodel.TSField;
+import com.blueveery.springrest2ts.tsmodel.TSType;
+import com.blueveery.springrest2ts.tsmodel.TSUnion;
+import com.fasterxml.jackson.annotation.JacksonInject;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.beans.Introspector;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.function.Function;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class JacksonObjectMapper implements ObjectMapper {
     private final Map<Class, List<JsonIgnoreProperties>> jsonIgnorePropertiesPerClass = new HashMap<>();
-    protected List<Function<Method, Boolean>> negativeMethodFilters = new ArrayList<>();
     JsonAutoDetect.Visibility fieldsVisibility = JsonAutoDetect.Visibility.NONE;
     JsonAutoDetect.Visibility gettersVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY;
     JsonAutoDetect.Visibility isGetterVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY;
     JsonAutoDetect.Visibility settersVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY;
 
     public JacksonObjectMapper() {
-    }
-
-    @SafeVarargs
-    public final void registerNegativeMethodFilters(Function<Method, Boolean>... filters){
-        this.negativeMethodFilters.addAll(Arrays.asList(filters));
     }
 
     public JsonAutoDetect.Visibility getFieldsVisibility() {
@@ -115,7 +134,7 @@ public class JacksonObjectMapper implements ObjectMapper {
 
     @Override
     public boolean filter(Method method, boolean isGetter) {
-        if (commonFilter(method) || filterMethodWithCustomizedFilters(method)) {
+        if (commonFilter(method)) {
             return false;
         }
         JsonAutoDetect.Visibility currentGettersVisibility = gettersVisibility;
@@ -161,10 +180,6 @@ public class JacksonObjectMapper implements ObjectMapper {
         }
 
         return true;
-    }
-
-    protected boolean filterMethodWithCustomizedFilters(Method method) {
-        return this.negativeMethodFilters.stream().anyMatch(filter -> filter.apply(method));
     }
 
     private String getJacksonPropertyNameBasedOnAnnnotation(Method method) {
