@@ -23,11 +23,19 @@ import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getReques
 
 public class FetchBasedImplementationGenerator extends BaseImplementationGenerator {
 
+    protected boolean useAsync;
     protected final String baseURLFieldName = "baseURL";
     protected final String[] implementationSpecificFieldsSet = {baseURLFieldName};
     protected final TSInterface baseUrlTsFieldType = new TSInterface("URL", TypeMapper.systemModule);
     protected final TSInterface promiseInterface = new TSInterface("Promise", TypeMapper.systemModule);
     protected final TSInterface responseInterface = new TSInterface("Response", TypeMapper.systemModule);
+
+    public FetchBasedImplementationGenerator() {
+    }
+
+    public FetchBasedImplementationGenerator(boolean useAsync) {
+        this.useAsync = useAsync;
+    }
 
     @Override
     protected String[] getImplementationSpecificFieldNames() {
@@ -142,8 +150,16 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     }
 
     @Override
+    public void changeMethodBeforeImplementationGeneration(TSMethod tsMethod) {
+        if (isRestClass(tsMethod.getOwner()) && !tsMethod.isConstructor()) {
+            tsMethod.setAsync(useAsync);
+        }
+    }
+
+    @Override
     public TSType mapReturnType(TSMethod tsMethod, TSType tsType) {
         if (isRestClass(tsMethod.getOwner())) {
+            tsMethod.setAsync(useAsync);
             if (tsType == TypeMapper.tsVoid) {
                 return new TSInterfaceReference(promiseInterface, responseInterface);
             }

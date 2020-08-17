@@ -20,6 +20,7 @@ import com.blueveery.springrest2ts.filters.JavaTypeSetFilter;
 import com.blueveery.springrest2ts.filters.OrFilterOperator;
 import com.blueveery.springrest2ts.filters.RegexpJavaTypeFilter;
 import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
+import com.blueveery.springrest2ts.implgens.FetchBasedImplementationGenerator;
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.SubstringClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
@@ -143,6 +144,15 @@ public class ExtendedTsCodeGenerationsTest extends TsCodeGenerationsTest{
     public void json5ModelSerializerExtension() throws IOException {
         ImplementationGenerator implementationGenerator = new Angular4ImplementationGenerator();
         implementationGenerator.setSerializationExtension(new Json5ModelSerializerExtension());
+        restClassesConverter = new SpringRestToTsConverter(implementationGenerator);
+        tsGenerator.setRestClassesConverter(restClassesConverter);
+
+        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
+    }
+
+    @Test
+    public void fetchBasedImplGeneratorWithAsyncMethods() throws IOException {
+        ImplementationGenerator implementationGenerator = new FetchBasedImplementationGenerator(true);
         restClassesConverter = new SpringRestToTsConverter(implementationGenerator);
         tsGenerator.setRestClassesConverter(restClassesConverter);
 

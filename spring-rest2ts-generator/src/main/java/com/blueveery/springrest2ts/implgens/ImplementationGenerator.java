@@ -25,6 +25,9 @@ public interface ImplementationGenerator {
 
     void write(BufferedWriter writer, TSMethod method) throws IOException;
 
+    default void changeMethodBeforeImplementationGeneration(TSMethod tsMethod) {
+
+    }
     TSType mapReturnType(TSMethod tsMethod, TSType tsType);
 
     List<TSParameter> getImplementationSpecificParameters(TSMethod method);
