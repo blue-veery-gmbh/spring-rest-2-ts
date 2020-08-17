@@ -107,14 +107,11 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
 
             String requestOptions = "";
             String requestBody = requestBodyBuilder.toString();
-            String path = pathStringBuilder.toString();
-            if (!requestBody.contains("id") && path.contains("{id}")) {
-                path = path.replace("{id}", "' + " + requestBody + ".id.split('/')[1] + '");
-            }
+
             requestOptions = composeRequestBody(requestBody, isRequestBodyDefined, requestOptions, httpMethod, isJsonParsingRequired, methodRequestMapping.consumes());
             requestOptions = composeRequestOptions(requestHeadersVar, requestParamsVar, isRequestParamDefined, isRequestHeaderDefined, requestOptions, isRequestOptionRequired);
 
-            tsPath = path;
+            tsPath = pathStringBuilder.toString();
             writeReturnStatement(writer, httpMethod.toLowerCase(), method, isRequestOptionRequired, tsPath, requestOptions, isJsonParsingRequired);
         }
     }
