@@ -34,6 +34,7 @@ generated code will reflect these changes which will avoid compile-time error in
    + spring data support (Pageable & Page types) : since ver 1.2.2
    + JAX-RS annotation support : since ver 1.2.4
    + model converter which generates TypeScript classes aligned with angular2-jsonapi library       
+   + model serializers extension which allows to configure custom JSON serializers/deserializers : since ver 1.2.6       
    
 ## Installation 
 To add a dependency on spring-rest2ts-generator using Maven, use the following:
@@ -41,34 +42,34 @@ To add a dependency on spring-rest2ts-generator using Maven, use the following:
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-generator</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-spring</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-spring-data</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
     <!-- only if spring data is used-->
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-jackson</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-jax-rs</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
     <!-- only if JAX-RS is used-->
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-angular2json-impl</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
     <!-- only if angular2json is used-->
 </dependency>
 ```          
@@ -346,7 +347,7 @@ type name, Java model class must be annotated with `JsonApiModelConfig` annotati
     <dependency>
         <groupId>com.blue-veery</groupId>
         <artifactId>spring-rest2ts-angular2json-api</artifactId>
-        <version>1.2.5</version>
+        <version>1.2.6</version>
     </dependency>
 ```
 which needs to be included in Java project. 
@@ -467,6 +468,22 @@ situation generator has map of custom mapping which allows to define such new ma
 ```
 Class TypeMapper has static fields for all base TypeScript types, and for other cases types could be created using TS model
 like for array of numbers `new TSArray(TypeMapper.tsNumber)`
+
+## Model serializers extensions : since ver 1.2.6
+Since ver 1.2.6 there is a possibility to use a custom JSON serializers/deserializers in generated code. By default, there is used
+`StandardJsonSerializerExtension` which is generating code based on standard JavaScript `JSON` object (`JSON.stringify` & `JSON.parse`).
+`Json5ModelSerializerExtension` extension allows to use `JSON5` serializer. Following code snippet is showing how to configure generator:
+
+```
+    ImplementationGenerator implementationGenerator = new Angular4ImplementationGenerator();
+    implementationGenerator.setSerializationExtension(new Json5ModelSerializerExtension());
+    restClassesConverter = new SpringRestToTsConverter(implementationGenerator);
+    tsGenerator.setRestClassesConverter(restClassesConverter);
+
+    tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
+``` 
+To provide own JSON serializers/deserializers extension, user should implement `ModelSerializerExtension` interface  
+
 
 ## Nullable types
 TypeScript has s great feature to warn about cases where value could be null. To use it TS compiler option must be set
