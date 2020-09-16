@@ -159,15 +159,10 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     @Override
     public TSType mapReturnType(TSMethod tsMethod, TSType tsType) {
         if (isRestClass(tsMethod.getOwner())) {
-            tsMethod.setAsync(useAsync);
-            if (useAsync) {
-                return tsType;
-            } else {
-                if (tsType == TypeMapper.tsVoid) {
-                    return new TSInterfaceReference(promiseInterface, responseInterface);
-                }
-                return new TSInterfaceReference(promiseInterface, tsType);
+            if (tsType == TypeMapper.tsVoid) {
+                return new TSInterfaceReference(promiseInterface, responseInterface);
             }
+            return new TSInterfaceReference(promiseInterface, tsType);
         }
         return tsType;
     }
