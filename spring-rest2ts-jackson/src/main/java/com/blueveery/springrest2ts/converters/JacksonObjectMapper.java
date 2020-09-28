@@ -1,12 +1,38 @@
 package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
-import com.blueveery.springrest2ts.tsmodel.*;
-import com.fasterxml.jackson.annotation.*;
+import com.blueveery.springrest2ts.tsmodel.TSArray;
+import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
+import com.blueveery.springrest2ts.tsmodel.TSField;
+import com.blueveery.springrest2ts.tsmodel.TSType;
+import com.blueveery.springrest2ts.tsmodel.TSUnion;
+import com.fasterxml.jackson.annotation.JacksonInject;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.beans.Introspector;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class JacksonObjectMapper implements ObjectMapper {
     private final Map<Class, List<JsonIgnoreProperties>> jsonIgnorePropertiesPerClass = new HashMap<>();
@@ -357,23 +383,15 @@ public class JacksonObjectMapper implements ObjectMapper {
             }
             switch (jsonFormat.shape()) {
                 case ANY:
-                    tsField.setType(TypeMapper.tsAny);
-                    return;
+                case OBJECT:
                 case SCALAR:
                     tsField.setType(TypeMapper.tsAny);
                     return;
                 case ARRAY:
                     tsField.setType(new TSArray(TypeMapper.tsAny));
                     return;
-                case OBJECT:
-                    tsField.setType(TypeMapper.tsAny);
-                    return;
                 case NUMBER:
-                    tsField.setType(TypeMapper.tsNumber);
-                    return;
                 case NUMBER_FLOAT:
-                    tsField.setType(TypeMapper.tsNumber);
-                    return;
                 case NUMBER_INT:
                     tsField.setType(TypeMapper.tsNumber);
                     return;
@@ -382,7 +400,6 @@ public class JacksonObjectMapper implements ObjectMapper {
                     return;
                 case BOOLEAN:
                     tsField.setType(TypeMapper.tsBoolean);
-                    return;
             }
         }
     }

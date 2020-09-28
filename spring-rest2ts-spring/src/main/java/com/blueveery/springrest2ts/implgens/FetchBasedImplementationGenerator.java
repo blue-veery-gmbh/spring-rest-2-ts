@@ -1,7 +1,15 @@
 package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.converters.TypeMapper;
-import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.extensions.ModelSerializerExtension;
+import com.blueveery.springrest2ts.tsmodel.TSClass;
+import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
+import com.blueveery.springrest2ts.tsmodel.TSDecorator;
+import com.blueveery.springrest2ts.tsmodel.TSField;
+import com.blueveery.springrest2ts.tsmodel.TSInterface;
+import com.blueveery.springrest2ts.tsmodel.TSMethod;
+import com.blueveery.springrest2ts.tsmodel.TSParameter;
+import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -15,11 +23,19 @@ import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getReques
 
 public class FetchBasedImplementationGenerator extends BaseImplementationGenerator {
 
-    private final String baseURLFieldName = "baseURL";
-    private final String[] implementationSpecificFieldsSet = {baseURLFieldName};
-    private final TSInterface baseUrlTsFieldType = new TSInterface("URL", TypeMapper.systemModule);
-    private final TSInterface promiseInterface = new TSInterface("Promise", TypeMapper.systemModule);
-    private final TSInterface responseInterface = new TSInterface("Response", TypeMapper.systemModule);
+    protected boolean useAsync;
+    protected final String baseURLFieldName = "baseURL";
+    protected final String[] implementationSpecificFieldsSet = {baseURLFieldName};
+    protected final TSInterface baseUrlTsFieldType = new TSInterface("URL", TypeMapper.systemModule);
+    protected final TSInterface promiseInterface = new TSInterface("Promise", TypeMapper.systemModule);
+    protected final TSInterface responseInterface = new TSInterface("Response", TypeMapper.systemModule);
+
+    public FetchBasedImplementationGenerator() {
+    }
+
+    public FetchBasedImplementationGenerator(boolean useAsync) {
+        this.useAsync = useAsync;
+    }
 
     @Override
     protected String[] getImplementationSpecificFieldNames() {
@@ -68,14 +84,16 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
 
     }
 
-    private void writeRequestUrl(BufferedWriter writer, String requestUrlVar, StringBuilder pathStringBuilder) throws IOException {
+    protected void writeRequestUrl(
+            BufferedWriter writer, String requestUrlVar, StringBuilder pathStringBuilder
+    ) throws IOException {
         String tsPath = pathStringBuilder.toString();
         tsPath = tsPath.startsWith("/") ? tsPath : "/" + tsPath;
         writer.write("const " + requestUrlVar + " = " + " new URL('" + tsPath + ", this." + baseURLFieldName + ");");
         writer.newLine();
     }
 
-    private String getContentFromResponseFunction(TSMethod method) {
+    protected String getContentFromResponseFunction(TSMethod method) {
         TSType actualType = method.getType();
 
         String parseFunction = "";
@@ -88,7 +106,9 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
         } else if (actualType == TypeMapper.tsVoid) {
             return "";
         } else {
-            parseFunction = "res.json()";
+            ModelSerializerExtension modelSerializerExtension = this.modelSerializerExtension;
+            parseFunction = modelSerializerExtension.generateDeserializationCode("res");
+            return ".then(res => res.text()).then(res =>  " + parseFunction + ")";
         }
         return ".then(res =>  " + parseFunction + ")";
     }
@@ -107,24 +127,33 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
                 .append(");");
     }
 
-    private String composeRequestOptions(String requestBodyVar, boolean isRequestBodyDefined, String httpMethod, String[] consumesContentType) {
+    protected String composeRequestOptions(
+            String requestBodyVar, boolean isRequestBodyDefined, String httpMethod, String[] consumesContentType
+    ) {
         String requestOptions = "";
         List<String> requestOptionsList = new ArrayList<>();
         if (("PUT".equals(httpMethod) || "POST".equals(httpMethod)) && isRequestBodyDefined) {
             addContentTypeHeader(consumesContentType, requestOptionsList);
-            requestOptionsList.add("body: JSON.stringify(" + requestBodyVar + ")");
+            requestOptionsList.add("body: " + modelSerializerExtension.generateSerializationCode(requestBodyVar));
         }
 
         requestOptions += String.join(", ", requestOptionsList);
         return requestOptions;
     }
 
-    private void addContentTypeHeader(String[] consumesContentType, List<String> requestOptionsList) {
-        String contentType = getConsumesContentType(consumesContentType);
+    protected void addContentTypeHeader(String[] consumesContentType, List<String> requestOptionsList) {
+        String contentType = getContentType(consumesContentType);
         String headers = "headers: {";
         headers += "'Content-Type': '" + contentType + "'";
         headers += "}";
         requestOptionsList.add(headers);
+    }
+
+    @Override
+    public void changeMethodBeforeImplementationGeneration(TSMethod tsMethod) {
+        if (isRestClass(tsMethod.getOwner()) && !tsMethod.isConstructor()) {
+            tsMethod.setAsync(useAsync);
+        }
     }
 
     @Override

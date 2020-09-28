@@ -1,6 +1,7 @@
 package com.blueveery.springrest2ts.examples.model;
 
 import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
+import com.blueveery.springrest2ts.examples.model.tags.TagDTO;
 import com.fasterxml.jackson.annotation.*;
 
 import javax.annotation.Nullable;
@@ -72,7 +73,7 @@ public class CategoryDTO extends BaseDTO implements Named{
         @JsonFormat(shape = JsonFormat.Shape.STRING)
         public Date expirationDate;
         private ManufacturerDTO manufacturer;
-        private Map<String, String> tags;
+        private Map<String, TagDTO> tags;
 
     //    @JsonManagedReference
         public CategoryDTO categoryDTO;

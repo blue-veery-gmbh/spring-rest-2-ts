@@ -1,10 +1,27 @@
 package com.blueveery.springrest2ts.examples.test;
 
-import com.blueveery.springrest2ts.converters.*;
+import com.blueveery.springrest2ts.converters.ConfigurableTsModulesConverter;
+import com.blueveery.springrest2ts.converters.DefaultNullableTypesStrategy;
+import com.blueveery.springrest2ts.converters.JavaEnumToTsEnumConverter;
+import com.blueveery.springrest2ts.converters.JavaEnumToTsUnionConverter;
+import com.blueveery.springrest2ts.converters.SpringRestToTsConverter;
+import com.blueveery.springrest2ts.converters.SwaggerConversionListener;
+import com.blueveery.springrest2ts.converters.TsModuleCreatorConverter;
 import com.blueveery.springrest2ts.examples.ctrls.spring.core.BaseCtrl;
 import com.blueveery.springrest2ts.examples.model.Named;
 import com.blueveery.springrest2ts.examples.model.core.BaseDTO;
-import com.blueveery.springrest2ts.filters.*;
+import com.blueveery.springrest2ts.extensions.Json5ModelSerializerExtension;
+import com.blueveery.springrest2ts.filters.AndFilterOperator;
+import com.blueveery.springrest2ts.filters.ContainsSubStringJavaTypeFilter;
+import com.blueveery.springrest2ts.filters.ExtendsJavaTypeFilter;
+import com.blueveery.springrest2ts.filters.HasAnnotationJavaTypeFilter;
+import com.blueveery.springrest2ts.filters.JavaTypeFilter;
+import com.blueveery.springrest2ts.filters.JavaTypeSetFilter;
+import com.blueveery.springrest2ts.filters.OrFilterOperator;
+import com.blueveery.springrest2ts.filters.RegexpJavaTypeFilter;
+import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
+import com.blueveery.springrest2ts.implgens.FetchBasedImplementationGenerator;
+import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.naming.SubstringClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import org.junit.Test;
@@ -119,6 +136,25 @@ public class ExtendedTsCodeGenerationsTest extends TsCodeGenerationsTest{
     public void interfaceInModelClassesCondition() throws IOException {
         JavaTypeFilter namedInterfacesIncluded = new JavaTypeSetFilter(Collections.singleton(Named.class));
         tsGenerator.setModelClassesCondition(new OrFilterOperator(Arrays.asList(new ExtendsJavaTypeFilter(BaseDTO.class), namedInterfacesIncluded)));
+
+        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
+    }
+
+    @Test
+    public void json5ModelSerializerExtension() throws IOException {
+        ImplementationGenerator implementationGenerator = new Angular4ImplementationGenerator();
+        implementationGenerator.setSerializationExtension(new Json5ModelSerializerExtension());
+        restClassesConverter = new SpringRestToTsConverter(implementationGenerator);
+        tsGenerator.setRestClassesConverter(restClassesConverter);
+
+        tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
+    }
+
+    @Test
+    public void fetchBasedImplGeneratorWithAsyncMethods() throws IOException {
+        ImplementationGenerator implementationGenerator = new FetchBasedImplementationGenerator(true);
+        restClassesConverter = new SpringRestToTsConverter(implementationGenerator);
+        tsGenerator.setRestClassesConverter(restClassesConverter);
 
         tsGenerator.generate(javaPackageSet, OUTPUT_DIR_PATH);
     }

@@ -38,7 +38,7 @@ public class TSField extends TSComplexTypeMember {
         if(readOnly){
             writer.write("readonly ");
         }
-        writer.write(getName());
+        writer.write("  "+getName());
         TSType type = getType();
         if(type != null) {
             if (optional) {

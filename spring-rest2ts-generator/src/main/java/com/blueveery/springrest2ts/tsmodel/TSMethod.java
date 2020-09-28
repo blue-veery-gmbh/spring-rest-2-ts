@@ -15,6 +15,7 @@ public class TSMethod extends TSComplexTypeMember {
     private ImplementationGenerator implementationGenerator;
     private boolean isConstructor;
     private boolean isAbstract;
+    private boolean isAsync;
     private List<TSParameter> parameterList = new ArrayList<>();
 
     public TSMethod(String name, TSComplexElement owner, TSType type, ImplementationGenerator implementationGenerator, boolean isAbstract, boolean isConstructor) {
@@ -39,17 +40,25 @@ public class TSMethod extends TSComplexTypeMember {
         isAbstract = anAbstract;
     }
 
+    public void setAsync(boolean async) {
+        isAsync = async;
+    }
+
     public List<TSParameter> getParameterList() {
         return parameterList;
     }
 
     @Override
     public void write(BufferedWriter writer) throws IOException {
+        implementationGenerator.changeMethodBeforeImplementationGeneration(this);
         tsComment.write(writer);
         List<TSDecorator> decorators = implementationGenerator.getDecorators(this);
         writeDecorators(writer, decorators);
 
-        writer.write("public ");
+        writer.write(" public ");
+        if (isAsync) {
+            writer.write(" async ");
+        }
         if(isAbstract) {
             writer.write("abstract ");
         }
@@ -57,6 +66,7 @@ public class TSMethod extends TSComplexTypeMember {
         writer.write("(");
         List<TSParameter> totalTsParametersList = new ArrayList<>(parameterList);
         totalTsParametersList.addAll(implementationGenerator.getImplementationSpecificParameters(this));
+        totalTsParametersList.addAll(implementationGenerator.getSerializationExtension().getImplementationSpecificParameters(this));
 
         int counter = writeParameters(totalTsParametersList, implementationGenerator, writer, false, 0);
         writeParameters(totalTsParametersList, implementationGenerator, writer, true, counter);
@@ -72,7 +82,7 @@ public class TSMethod extends TSComplexTypeMember {
             writer.newLine();
             implementationGenerator.write(writer, this);
             writer.newLine();
-            writer.write("}");
+            writer.write("  }");
         }else{
             writer.write(";");
         }

@@ -2,7 +2,9 @@ package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.extensions.ConversionExtension;
+import com.blueveery.springrest2ts.extensions.ModelSerializerExtension;
 import com.blueveery.springrest2ts.extensions.RestConversionExtension;
+import com.blueveery.springrest2ts.extensions.StandardJsonSerializerExtension;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSMethod;
@@ -18,7 +20,10 @@ import java.util.List;
 
 public abstract class BaseImplementationGenerator implements ImplementationGenerator {
 
+    protected static final String JSON_CONTENT_TYPE = "application/json";
     protected List<? extends ConversionExtension> extensionSet;
+
+    protected ModelSerializerExtension modelSerializerExtension = new StandardJsonSerializerExtension();
 
     protected abstract void initializeHttpParams(StringBuilder requestParamsBuilder, String requestParamsVar);
 
@@ -26,17 +31,33 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
 
     protected abstract String[] getImplementationSpecificFieldNames();
 
+    protected BaseImplementationGenerator() {
+    }
+
     @Override
     public void setExtensions(List<? extends ConversionExtension> conversionExtensionSet) {
         this.extensionSet = conversionExtensionSet;
     }
 
+    @Override
+    public ModelSerializerExtension getSerializationExtension() {
+        return modelSerializerExtension;
+    }
+
+    @Override
+    public void setSerializationExtension(ModelSerializerExtension modelSerializerExtension) {
+        this.modelSerializerExtension = modelSerializerExtension;
+    }
+
     protected void writeConstructorImplementation(BufferedWriter writer, TSClass tsClass) throws IOException {
 
         if (tsClass.getExtendsClass() == null) {
+            StringBuilder classFieldBuilder = new StringBuilder();
             for (String name : getImplementationSpecificFieldNames()) {
-                writer.write("this." + name + " = " + name + ";");
+                classFieldBuilder.append("    this." + name + " = " + name + ";\n");
             }
+            String classField = classFieldBuilder.toString();
+            writer.write(classField.length() > 0 ? classField.substring(0,classField.length()-1): "");
         } else {
             writer.write("super(");
             writer.write(String.join(",", getImplementationSpecificFieldNames()));
@@ -77,8 +98,10 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
         return tsParameterName;
     }
 
-
-    protected void assignMethodParameters(TSMethod method, String requestParamsVar, StringBuilder pathStringBuilder, StringBuilder requestBodyBuilder, StringBuilder requestParamsBuilder) {
+    protected void assignMethodParameters(
+            TSMethod method, String requestParamsVar, StringBuilder pathStringBuilder,
+            StringBuilder requestBodyBuilder, StringBuilder requestParamsBuilder
+    ) {
         StringBuilder queryParamsListBuilder = new StringBuilder();
         String queryParamsListVar = "queryParamsList";
 
@@ -101,15 +124,15 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
                 if (tsParameter.isOptional() || isNullableType) {
                     queryParamsListBuilder
                             .append("\n")
-                            .append("if (")
+                            .append("    if (")
                             .append(tsParameterName)
                             .append(" !== undefined && ")
                             .append(tsParameterName)
-                            .append(" !== null) {");
-                    queryParamsListBuilder.append(String.format("%s.push({name: '%s', value: %s});", queryParamsListVar, requestParamName, callToStringOnParameterIfRequired(tsParameter)));
-                    queryParamsListBuilder.append("}");
+                            .append(" !== null) {\n");
+                    queryParamsListBuilder.append(String.format("      %s.push({name: '%s', value: %s});\n", queryParamsListVar, requestParamName, callToStringOnParameterIfRequired(tsParameter)));
+                    queryParamsListBuilder.append("    }\n");
                 } else {
-                    queryParamsListBuilder.append(String.format("%s.push({name: '%s', value: %s});", queryParamsListVar, requestParamName, callToStringOnParameterIfRequired(tsParameter)));
+                    queryParamsListBuilder.append(String.format("\n    %s.push({name: '%s', value: %s});\n  ", queryParamsListVar, requestParamName, callToStringOnParameterIfRequired(tsParameter)));
                 }
             }
             for (ConversionExtension conversionExtension : extensionSet) {
@@ -125,13 +148,13 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
     }
 
     private void fillUpRequestParamsBuilder(String requestParamsVar, StringBuilder requestParamsBuilder, StringBuilder queryParamsListBuilder, String queryParamsListVar) {
-        queryParamsListBuilder.insert(0, "const " + queryParamsListVar + " : { name: string, value: string }[] = [];");
+        queryParamsListBuilder.insert(0, "    const " + queryParamsListVar + ": { name: string, value: string }[] = [];");
         requestParamsBuilder.append(queryParamsListBuilder);
         initializeHttpParams(requestParamsBuilder, requestParamsVar);
         String queryParamVar = "queryParam";
-        requestParamsBuilder.append(String.format("for(const %s of %s) {", queryParamVar, queryParamsListVar));
+        requestParamsBuilder.append(String.format("\n    for (const %s of %s) {", queryParamVar, queryParamsListVar));
         addRequestParameter(requestParamsBuilder, requestParamsVar, queryParamVar);
-        requestParamsBuilder.append("}");
+        requestParamsBuilder.append("\n    }\n");
     }
 
     private String getRequestParamName(TSParameter tsParameter, RequestParam requestParam) {
@@ -160,11 +183,11 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
         return requestParamsBuilder.length() == 0;
     }
 
-    protected String getConsumesContentType(String[] consumesContentType) {
-        if (consumesContentType.length > 0) {
-            return consumesContentType[0];
+    protected String getContentType(String[] contentTypes) {
+        if (contentTypes.length > 0) {
+            return contentTypes[0];
         } else {
-            return "application/json";
+            return JSON_CONTENT_TYPE;
         }
     }
 
