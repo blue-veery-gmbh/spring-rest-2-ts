@@ -45,6 +45,7 @@
 
     <properties>
         <spring-rest2ts.version>1.2.7</spring-rest2ts.version>
+        <com.fasterxml.jackson.version>2.12.3</com.fasterxml.jackson.version>
     </properties>
 
 
