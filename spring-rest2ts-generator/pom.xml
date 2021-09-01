@@ -6,11 +6,11 @@
     <parent>
         <groupId>com.blue-veery</groupId>
         <artifactId>spring-rest2ts</artifactId>
-        <version>1.2.6</version>
+        <version>1.2.7</version>
     </parent>
 
     <artifactId>spring-rest2ts-generator</artifactId>
-    <version>1.2.6</version>
+    <version>1.2.7</version>
     <description>
         Typescript data model and services from rest generator for java spring. It supports generation for Angular and React
     </description>
@@ -42,7 +42,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
