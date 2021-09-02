@@ -50,6 +50,7 @@
         <module>spring-rest2ts-jax-rs</module>
         <module>spring-rest2ts-angular2json</module>
         <module>spring-rest2ts-spring-data</module>
+        <module>spring-rest2ts-gson</module>
     </modules>
     <profiles>
         <profile>
