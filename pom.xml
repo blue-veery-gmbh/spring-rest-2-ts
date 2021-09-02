@@ -6,7 +6,7 @@
 
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts</artifactId>
-    <version>1.2.7</version>
+    <version>1.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>spring-rest2ts</name>
@@ -42,12 +42,6 @@
             <organizationUrl>https://github.com/blue-veery-gmbh</organizationUrl>
         </developer>
     </developers>
-
-    <properties>
-        <spring-rest2ts.version>1.2.7</spring-rest2ts.version>
-        <com.fasterxml.jackson.version>2.12.3</com.fasterxml.jackson.version>
-    </properties>
-
 
     <modules>
         <module>spring-rest2ts-generator</module>
