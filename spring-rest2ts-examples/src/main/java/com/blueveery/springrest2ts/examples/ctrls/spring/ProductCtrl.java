@@ -5,7 +5,16 @@ import com.blueveery.springrest2ts.examples.ctrls.spring.core.GetObjectCtrl;
 import com.blueveery.springrest2ts.examples.model.CategoryDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -41,5 +50,11 @@ public class ProductCtrl extends BaseCtrlImpl<CategoryDTO.ProductDTO> implements
     @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<Void> deleteOrder(@PathVariable("id") int id) {
         return ResponseEntity.noContent().build();
+    }
+
+    @RequestMapping(path = "/count", method = RequestMethod.POST, produces = {"text/plain"})
+    @ResponseBody
+    public long countProductsLike(@RequestBody  CategoryDTO.ProductDTO product) {
+        return 0;
     }
 }
