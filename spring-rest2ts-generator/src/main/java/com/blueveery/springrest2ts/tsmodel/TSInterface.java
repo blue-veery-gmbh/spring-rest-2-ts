@@ -25,6 +25,10 @@ public class TSInterface extends TSComplexElement {
         extendsInterfaces.add(tsInterface);
     }
 
+    public SortedSet<TSInterfaceReference> getExtendsInterfaces() {
+        return extendsInterfaces;
+    }
+
     @Override
     public boolean isInstanceOf(TSComplexElement tsComplexType) {
         for (TSInterfaceReference extendedInterface : extendsInterfaces) {

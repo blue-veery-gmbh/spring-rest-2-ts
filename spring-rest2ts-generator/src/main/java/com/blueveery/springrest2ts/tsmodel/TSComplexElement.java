@@ -29,12 +29,17 @@ public abstract class TSComplexElement extends TSScopedElement implements IDecor
         this.implementationGenerator = implementationGenerator;
     }
 
-    public List<TSDecorator> getTsDecoratorList() {
-        return tsDecoratorList;
-    }
 
     public SortedSet<TSField> getTsFields() {
         return tsFields;
+    }
+
+    public SortedSet<TSMethod> getTsMethods() {
+        return tsMethods;
+    }
+
+    public List<TSDecorator> getTsDecoratorList() {
+        return tsDecoratorList;
     }
 
     @Override

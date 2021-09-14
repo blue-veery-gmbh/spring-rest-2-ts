@@ -46,6 +46,10 @@ public class TSClass extends TSComplexElement {
         implementsInterfaces.add(tsInterfaceReference);
     }
 
+    public boolean isAbstract() {
+        return isAbstract;
+    }
+
     @Override
     public boolean isInstanceOf(TSComplexElement tsComplexType) {
         if (tsComplexType instanceof TSClass) {

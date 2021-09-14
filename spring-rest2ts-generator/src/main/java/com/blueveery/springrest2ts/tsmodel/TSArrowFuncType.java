@@ -26,6 +26,10 @@ public class TSArrowFuncType extends TSType {
         return parameterList;
     }
 
+    public TSType getReturnType() {
+        return returnType;
+    }
+
     @Override
     public void write(BufferedWriter writer) throws IOException {
         writer.write("(");
