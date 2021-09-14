@@ -3,6 +3,7 @@ package com.blueveery.springrest2ts.converters;
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSField;
+import com.google.gson.ExclusionStrategy;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -11,6 +12,11 @@ import java.util.Collections;
 import java.util.List;
 
 public class GsonObjectMapper implements ObjectMapper {
+
+    private boolean excludeFieldsWithoutExposeAnnotation;
+    private double forVersion;
+    private ExclusionStrategy ExclusionStrategy;
+
     @Override
     public List<TSField> addTypeLevelSpecificFields(
             Class javaType, TSComplexElement tsComplexType
@@ -47,7 +53,8 @@ public class GsonObjectMapper implements ObjectMapper {
             Property property, TSComplexElement tsComplexType, ComplexTypeConverter complexTypeConverter,
             ImplementationGenerator implementationGenerator, NullableTypesStrategy nullableTypesStrategy
     ) {
-        throw new UnsupportedOperationException();
+        TSField tsField = new TSField(property.getName(), tsComplexType, TypeMapper.map(property.getField().getType()));
+        return Collections.singletonList(tsField);
     }
 
     @Override
