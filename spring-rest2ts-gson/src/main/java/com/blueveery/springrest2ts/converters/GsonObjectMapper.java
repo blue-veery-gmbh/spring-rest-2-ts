@@ -3,7 +3,10 @@ package com.blueveery.springrest2ts.converters;
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSField;
+import com.blueveery.springrest2ts.tsmodel.TSType;
+import com.blueveery.springrest2ts.tsmodel.TSUnion;
 import com.google.gson.ExclusionStrategy;
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.lang.reflect.AnnotatedElement;
@@ -17,6 +20,42 @@ public class GsonObjectMapper implements ObjectMapper {
     private boolean excludeFieldsWithoutExposeAnnotation;
     private double forVersion;
     private ExclusionStrategy ExclusionStrategy;
+
+    public GsonObjectMapper() {
+    }
+
+    public GsonObjectMapper(
+            boolean excludeFieldsWithoutExposeAnnotation, double forVersion,
+            ExclusionStrategy exclusionStrategy
+    ) {
+        this.excludeFieldsWithoutExposeAnnotation = excludeFieldsWithoutExposeAnnotation;
+        this.forVersion = forVersion;
+        ExclusionStrategy = exclusionStrategy;
+    }
+
+    public boolean isExcludeFieldsWithoutExposeAnnotation() {
+        return excludeFieldsWithoutExposeAnnotation;
+    }
+
+    public void setExcludeFieldsWithoutExposeAnnotation(boolean excludeFieldsWithoutExposeAnnotation) {
+        this.excludeFieldsWithoutExposeAnnotation = excludeFieldsWithoutExposeAnnotation;
+    }
+
+    public double getForVersion() {
+        return forVersion;
+    }
+
+    public void setForVersion(double forVersion) {
+        this.forVersion = forVersion;
+    }
+
+    public com.google.gson.ExclusionStrategy getExclusionStrategy() {
+        return ExclusionStrategy;
+    }
+
+    public void setExclusionStrategy(com.google.gson.ExclusionStrategy exclusionStrategy) {
+        ExclusionStrategy = exclusionStrategy;
+    }
 
     @Override
     public List<TSField> addTypeLevelSpecificFields(
@@ -32,6 +71,10 @@ public class GsonObjectMapper implements ObjectMapper {
 
     @Override
     public boolean filter(Field field) {
+        if(excludeFieldsWithoutExposeAnnotation) {
+            Expose exposeAnnotation = field.getAnnotation(Expose.class);
+            return exposeAnnotation != null && (exposeAnnotation.serialize() || exposeAnnotation.deserialize());
+        }
         return true;
     }
 
@@ -55,8 +98,23 @@ public class GsonObjectMapper implements ObjectMapper {
             Property property, TSComplexElement tsComplexType, ComplexTypeConverter complexTypeConverter,
             ImplementationGenerator implementationGenerator, NullableTypesStrategy nullableTypesStrategy
     ) {
-        TSField tsField = new TSField(property.getName(), tsComplexType, TypeMapper.map(property.getField().getType()));
+        TSType fieldBaseType = TypeMapper.map(property.getField().getType());
+        TSField tsField = new TSField(property.getName(), tsComplexType, fieldBaseType);
+        applyExpose(tsField, property);
         return Collections.singletonList(tsField);
+    }
+
+    private void applyExpose(TSField tsField, Property property) {
+        Expose exposeAnnotation = property.getDeclaredAnnotation(Expose.class);
+        if (exposeAnnotation != null) {
+            if(!exposeAnnotation.deserialize()) {
+                tsField.setReadOnly(true);
+            }
+            if(!exposeAnnotation.serialize()) {
+                TSType fieldType = tsField.getType();
+                tsField.setType(new TSUnion(TypeMapper.tsUndefined, fieldType));
+            }
+        }
     }
 
     @Override
