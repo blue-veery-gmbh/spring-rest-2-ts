@@ -42,15 +42,25 @@ public class GsonObjectMapperTest {
 
     @Test
     public void transientFieldsAreSkippedInTsCode() throws IOException {
-        SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        TSInterface productTsInterface = (TSInterface) tsModules.first().getScopedTypesSet().first();
+        TSInterface productTsInterface = convertProductToTsInterface();
         assertTrue(productTsInterface.getTsFields().stream().allMatch(f -> !"tempName".equals(f.getName())));
     }
 
     @Test
     public void nonTransientFieldsAreIncludedInTsCode() throws IOException {
-        SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        TSInterface productTsInterface = (TSInterface) tsModules.first().getScopedTypesSet().first();
+        TSInterface productTsInterface = convertProductToTsInterface();
         assertTrue(productTsInterface.getTsFields().stream().anyMatch(f -> "name".equals(f.getName())));
+    }
+
+    @Test
+    public void serializedNameChangesFieldName() throws IOException {
+        TSInterface productTsInterface = convertProductToTsInterface();
+        assertTrue(productTsInterface.getTsFields().stream().anyMatch(f -> "year".equals(f.getName())));
+        assertTrue(productTsInterface.getTsFields().stream().noneMatch(f -> "productionYear".equals(f.getName())));
+    }
+
+    private TSInterface convertProductToTsInterface() throws IOException {
+        SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
+        return (TSInterface) tsModules.first().getScopedTypesSet().first();
     }
 }

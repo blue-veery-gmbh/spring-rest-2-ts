@@ -4,6 +4,7 @@ import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.google.gson.ExclusionStrategy;
+import com.google.gson.annotations.SerializedName;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -41,7 +42,8 @@ public class GsonObjectMapper implements ObjectMapper {
 
     @Override
     public String getPropertyName(Field field) {
-        return field.getName();
+        SerializedName serializedNameAnnotation = field.getAnnotation(SerializedName.class);
+        return serializedNameAnnotation != null? serializedNameAnnotation.value() : field.getName();
     }
 
     @Override
