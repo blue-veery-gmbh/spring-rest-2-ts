@@ -98,7 +98,57 @@ public class GsonObjectMapperTest {
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
         Optional<TSField> deserializedOnlyField = tsFields.stream().filter(f -> "deserializedOnly".equals(f.getName())).findFirst();
-        assertEquals(deserializedOnlyField.get().getType(), new TSUnion(TypeMapper.tsUndefined ,TypeMapper.tsString));
+        assertEquals(deserializedOnlyField.get().getType(), new TSUnion(TypeMapper.tsUndefined, TypeMapper.tsString));
+    }
+
+    @Test
+    public void sinceAndForVersionFiltersOutFieldsWithNewerVersion() throws IOException {
+        gsonObjectMapper.setForVersion(1.0);
+        TSInterface productTsInterface = convertProductToTsInterface();
+        SortedSet<TSField> tsFields = productTsInterface.getTsFields();
+        assertTrue(tsFields.stream().noneMatch(f -> "sinceField".equals(f.getName())));
+    }
+
+    @Test
+    public void sinceAndForVersionKeepsFieldsWithOlderVersion() throws IOException {
+        gsonObjectMapper.setForVersion(2.0);
+        TSInterface productTsInterface = convertProductToTsInterface();
+        SortedSet<TSField> tsFields = productTsInterface.getTsFields();
+        assertTrue(tsFields.stream().anyMatch(f -> "sinceField".equals(f.getName())));
+    }
+
+    @Test
+    public void untilAndForVersionFiltersOutFieldsWithOlderVersion() throws IOException {
+        gsonObjectMapper.setForVersion(6.0);
+        TSInterface productTsInterface = convertProductToTsInterface();
+        SortedSet<TSField> tsFields = productTsInterface.getTsFields();
+        assertTrue(tsFields.stream().noneMatch(f -> "untilField".equals(f.getName())));
+    }
+
+    @Test
+    public void untilAndForVersionKeepsFieldsWithNewerVersion() throws IOException {
+        gsonObjectMapper.setForVersion(3.0);
+        TSInterface productTsInterface = convertProductToTsInterface();
+        SortedSet<TSField> tsFields = productTsInterface.getTsFields();
+        assertTrue(tsFields.stream().anyMatch(f -> "untilField".equals(f.getName())));
+    }
+
+    @Test
+    public void sinceAndUntilWithoutVersionAreNotFiltered() throws IOException {
+        TSInterface productTsInterface = convertProductToTsInterface();
+        SortedSet<TSField> tsFields = productTsInterface.getTsFields();
+        assertTrue(tsFields.stream().anyMatch(f -> "sinceField".equals(f.getName())));
+        assertTrue(tsFields.stream().anyMatch(f -> "untilField".equals(f.getName())));
+    }
+
+    @Test
+    public void sinceIsAddedToComment() throws IOException {
+        TSInterface productTsInterface = convertProductToTsInterface();
+        SortedSet<TSField> tsFields = productTsInterface.getTsFields();
+        Optional<TSField> untilField = tsFields.stream().filter(f -> "untilField".equals(f.getName())).findFirst();
+
+        String comment = untilField.get().getTsComment().getTsCommentSection("version").getCommentText().toString();
+        assertEquals("Until version: 4.0", comment);
     }
 
     private TSInterface convertProductToTsInterface() throws IOException {
