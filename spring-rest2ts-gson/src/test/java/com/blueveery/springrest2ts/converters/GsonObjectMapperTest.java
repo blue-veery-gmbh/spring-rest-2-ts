@@ -181,6 +181,26 @@ public class GsonObjectMapperTest {
         assertEquals(keyboardField.get().getType(), TypeMapper.tsNumber);
     }
 
+    @Test
+    public void nullableStrategyIsAppliedBasedOnNullableAnnotation() throws IOException {
+        TSInterface productTsInterface = convertProductToTsInterface();
+        SortedSet<TSField> tsFields = productTsInterface.getTsFields();
+        TSField nullableField = tsFields.stream().filter(f -> "nullableField".equals(f.getName())).findFirst().get();
+        assertTrue(nullableField.getType() instanceof TSUnion);
+        TSUnion tsUnion = (TSUnion) nullableField.getType();
+        assertTrue(tsUnion.getJoinedTsElementList().contains(TypeMapper.tsNull));
+    }
+
+    @Test
+    public void nullableStrategyIsAppliedBasedOnPrimitiveWrapperTypes() throws IOException {
+        TSInterface productTsInterface = convertProductToTsInterface();
+        SortedSet<TSField> tsFields = productTsInterface.getTsFields();
+        TSField intWrapperField = tsFields.stream().filter(f -> "intWrapperField".equals(f.getName())).findFirst().get();
+        assertTrue(intWrapperField.getType() instanceof TSUnion);
+        TSUnion tsUnion = (TSUnion) intWrapperField.getType();
+        assertTrue(tsUnion.getJoinedTsElementList().contains(TypeMapper.tsNull));
+    }
+
     private TSInterface convertProductToTsInterface() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
         return (TSInterface) tsModules.first().getScopedTypesSet().first();

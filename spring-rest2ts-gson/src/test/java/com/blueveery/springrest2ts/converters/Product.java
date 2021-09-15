@@ -9,6 +9,7 @@ import com.google.gson.annotations.Until;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 
 class Product {
@@ -40,6 +41,11 @@ class Product {
     public int doors = 5;
 
     public Keyboard keyboard = new Keyboard();
+
+    @Nullable
+    int nullableField;
+
+    Integer intWrapperField;
 }
 
 class KeyboardTypeAdapter extends TypeAdapter<Keyboard>{
