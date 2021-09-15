@@ -5,8 +5,9 @@ import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.TSUnion;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.FieldNamingStrategy;
 import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 import com.google.gson.annotations.Since;
 import com.google.gson.annotations.Until;
 import com.google.gson.internal.Excluder;
@@ -20,6 +21,7 @@ import java.util.List;
 public class GsonObjectMapper implements ObjectMapper {
 
     private Excluder excluder = Excluder.DEFAULT;
+    private FieldNamingStrategy fieldNamingPolicy = FieldNamingPolicy.IDENTITY;
 
     public GsonObjectMapper() {
     }
@@ -30,6 +32,14 @@ public class GsonObjectMapper implements ObjectMapper {
 
     public void setExcluder(Excluder excluder) {
         this.excluder = excluder;
+    }
+
+    public FieldNamingStrategy getFieldNamingPolicy() {
+        return fieldNamingPolicy;
+    }
+
+    public void setFieldNamingPolicy(FieldNamingStrategy fieldNamingPolicy) {
+        this.fieldNamingPolicy = fieldNamingPolicy;
     }
 
     @Override
@@ -56,8 +66,7 @@ public class GsonObjectMapper implements ObjectMapper {
 
     @Override
     public String getPropertyName(Field field) {
-        SerializedName serializedNameAnnotation = field.getAnnotation(SerializedName.class);
-        return serializedNameAnnotation != null ? serializedNameAnnotation.value() : field.getName();
+        return fieldNamingPolicy.translateName(field);
     }
 
     @Override

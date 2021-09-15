@@ -21,6 +21,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 
+import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_DOTS;
+import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -48,7 +50,7 @@ public class GsonObjectMapperTest {
     @Test
     public void testGson() {
         GsonBuilder builder = new GsonBuilder();
-        builder.setVersion(6.0);
+        builder.setFieldNamingStrategy(LOWER_CASE_WITH_DOTS);
         Gson gson = builder.create();
         System.out.println(gson.toJson(new Product()));
     }
@@ -150,6 +152,15 @@ public class GsonObjectMapperTest {
 
         String comment = untilField.get().getTsComment().getTsCommentSection("version").getCommentText().toString();
         assertEquals("Until version: 4.0", comment);
+    }
+
+    @Test
+    public void fieldNamingPolicyIsAppliedToFields() throws IOException, NoSuchFieldException {
+        gsonObjectMapper.setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES);
+        TSInterface productTsInterface = convertProductToTsInterface();
+        SortedSet<TSField> tsFields = productTsInterface.getTsFields();
+        String translatedName = LOWER_CASE_WITH_UNDERSCORES.translateName(Product.class.getField("untilField"));
+        assertTrue(tsFields.stream().anyMatch(f -> translatedName.equals(f.getName())));
     }
 
     private TSInterface convertProductToTsInterface() throws IOException {
