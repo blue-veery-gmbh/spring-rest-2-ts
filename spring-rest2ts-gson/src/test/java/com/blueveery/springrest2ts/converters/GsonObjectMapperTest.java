@@ -16,12 +16,12 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 
-import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_DOTS;
 import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -35,7 +35,7 @@ public class GsonObjectMapperTest {
     @Before
     public void setUp() {
         tsGenerator = new Rest2tsGenerator();
-        tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(Collections.singleton(Product.class)));
+        tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(new HashSet<>(Arrays.asList(Product.class, Keyboard.class))));
         gsonObjectMapper = new GsonObjectMapper();
         ModelClassesAbstractConverter modelClassesConverter = new ModelClassesToTsInterfacesConverter(gsonObjectMapper);
         tsGenerator.setModelClassesConverter(modelClassesConverter);
@@ -50,7 +50,6 @@ public class GsonObjectMapperTest {
     @Test
     public void testGson() {
         GsonBuilder builder = new GsonBuilder();
-        builder.setFieldNamingStrategy(LOWER_CASE_WITH_DOTS);
         Gson gson = builder.create();
         System.out.println(gson.toJson(new Product()));
     }
@@ -161,6 +160,25 @@ public class GsonObjectMapperTest {
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
         String translatedName = LOWER_CASE_WITH_UNDERSCORES.translateName(Product.class.getField("untilField"));
         assertTrue(tsFields.stream().anyMatch(f -> translatedName.equals(f.getName())));
+    }
+
+    @Test
+    public void jsonAdapterIsHandledCorrectlyEvenWithoutTypeMapping() throws IOException {
+        SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
+        assertEquals(tsModules.first().getScopedTypesSet().size(), 1);
+        TSInterface product = (TSInterface) tsModules.first().getScopedTypesSet().first();
+        Optional<TSField> keyboardField = product.getTsFields().stream().filter(f -> "keyboard".equals(f.getName())).findFirst();
+        assertEquals(keyboardField.get().getType(), TypeMapper.tsAny);
+    }
+
+    @Test
+    public void jsonAdapterIsHandledCorrectlyWithTypeMapping() throws IOException {
+        TypeMapper.registerTsType(Keyboard.class, TypeMapper.tsNumber);
+        SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
+        assertEquals(tsModules.first().getScopedTypesSet().size(), 1);
+        TSInterface product = (TSInterface) tsModules.first().getScopedTypesSet().first();
+        Optional<TSField> keyboardField = product.getTsFields().stream().filter(f -> "keyboard".equals(f.getName())).findFirst();
+        assertEquals(keyboardField.get().getType(), TypeMapper.tsNumber);
     }
 
     private TSInterface convertProductToTsInterface() throws IOException {
