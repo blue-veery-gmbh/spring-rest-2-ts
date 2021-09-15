@@ -119,7 +119,7 @@ public class GsonObjectMapperTest {
 
     @Test
     public void untilAndForVersionFiltersOutFieldsWithOlderVersion() throws IOException {
-        gsonObjectMapper.setForVersion(6.0);
+        gsonObjectMapper.setForVersion(4.0);
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
         assertTrue(tsFields.stream().noneMatch(f -> "untilField".equals(f.getName())));

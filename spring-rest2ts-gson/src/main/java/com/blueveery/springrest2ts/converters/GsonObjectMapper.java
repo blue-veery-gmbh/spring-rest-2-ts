@@ -70,7 +70,7 @@ public class GsonObjectMapper implements ObjectMapper {
                 return false;
             }
             Until until = field.getAnnotation(Until.class);
-            if (until != null && until.value() < forVersion) {
+            if (until != null && until.value() <= forVersion) {
                 return false;
             }
         }
