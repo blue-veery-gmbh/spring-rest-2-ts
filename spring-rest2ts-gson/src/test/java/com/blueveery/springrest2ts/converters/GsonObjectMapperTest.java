@@ -8,6 +8,7 @@ import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSUnion;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.internal.Excluder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +48,7 @@ public class GsonObjectMapperTest {
     @Test
     public void testGson() {
         GsonBuilder builder = new GsonBuilder();
-        builder.excludeFieldsWithoutExposeAnnotation();
+        builder.setVersion(6.0);
         Gson gson = builder.create();
         System.out.println(gson.toJson(new Product()));
     }
@@ -74,7 +75,7 @@ public class GsonObjectMapperTest {
     @Test
     public void exposeFiltersFields() throws IOException {
         List<String> exposedFields = Arrays.asList("exposedName", "serializedOnly", "deserializedOnly");
-        gsonObjectMapper.setExcludeFieldsWithoutExposeAnnotation(true);
+        gsonObjectMapper.setExcluder(Excluder.DEFAULT.excludeFieldsWithoutExposeAnnotation());
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
         assertTrue(tsFields.stream().allMatch(f -> exposedFields.contains(f.getName())));
@@ -84,7 +85,7 @@ public class GsonObjectMapperTest {
 
     @Test
     public void serializedOnlyFieldIsReadonly() throws IOException {
-        gsonObjectMapper.setExcludeFieldsWithoutExposeAnnotation(true);
+        gsonObjectMapper.setExcluder(Excluder.DEFAULT.excludeFieldsWithoutExposeAnnotation());
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
         Optional<TSField> serializedOnlyField = tsFields.stream().filter(f -> "serializedOnly".equals(f.getName())).findFirst();
@@ -94,7 +95,7 @@ public class GsonObjectMapperTest {
 
     @Test
     public void deserializedOnlyFieldIsOptional() throws IOException {
-        gsonObjectMapper.setExcludeFieldsWithoutExposeAnnotation(true);
+        gsonObjectMapper.setExcluder(Excluder.DEFAULT.excludeFieldsWithoutExposeAnnotation());
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
         Optional<TSField> deserializedOnlyField = tsFields.stream().filter(f -> "deserializedOnly".equals(f.getName())).findFirst();
@@ -103,7 +104,7 @@ public class GsonObjectMapperTest {
 
     @Test
     public void sinceAndForVersionFiltersOutFieldsWithNewerVersion() throws IOException {
-        gsonObjectMapper.setForVersion(1.0);
+        gsonObjectMapper.setExcluder(Excluder.DEFAULT.withVersion(1.0));
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
         assertTrue(tsFields.stream().noneMatch(f -> "sinceField".equals(f.getName())));
@@ -111,7 +112,7 @@ public class GsonObjectMapperTest {
 
     @Test
     public void sinceAndForVersionKeepsFieldsWithOlderVersion() throws IOException {
-        gsonObjectMapper.setForVersion(2.0);
+        gsonObjectMapper.setExcluder(Excluder.DEFAULT.withVersion(2.0));
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
         assertTrue(tsFields.stream().anyMatch(f -> "sinceField".equals(f.getName())));
@@ -119,7 +120,7 @@ public class GsonObjectMapperTest {
 
     @Test
     public void untilAndForVersionFiltersOutFieldsWithOlderVersion() throws IOException {
-        gsonObjectMapper.setForVersion(4.0);
+        gsonObjectMapper.setExcluder(Excluder.DEFAULT.withVersion(4.0));
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
         assertTrue(tsFields.stream().noneMatch(f -> "untilField".equals(f.getName())));
@@ -127,7 +128,7 @@ public class GsonObjectMapperTest {
 
     @Test
     public void untilAndForVersionKeepsFieldsWithNewerVersion() throws IOException {
-        gsonObjectMapper.setForVersion(3.0);
+        gsonObjectMapper.setExcluder(Excluder.DEFAULT.withVersion(3.0));
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
         assertTrue(tsFields.stream().anyMatch(f -> "untilField".equals(f.getName())));

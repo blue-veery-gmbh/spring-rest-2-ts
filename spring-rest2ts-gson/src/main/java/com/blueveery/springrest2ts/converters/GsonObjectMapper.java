@@ -5,11 +5,11 @@ import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.TSUnion;
-import com.google.gson.ExclusionStrategy;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.annotations.Since;
 import com.google.gson.annotations.Until;
+import com.google.gson.internal.Excluder;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -19,35 +19,17 @@ import java.util.List;
 
 public class GsonObjectMapper implements ObjectMapper {
 
-    private boolean excludeFieldsWithoutExposeAnnotation;
-    private Double forVersion;
-    private ExclusionStrategy ExclusionStrategy;
+    private Excluder excluder = Excluder.DEFAULT;
 
     public GsonObjectMapper() {
     }
 
-    public boolean isExcludeFieldsWithoutExposeAnnotation() {
-        return excludeFieldsWithoutExposeAnnotation;
+    public Excluder getExcluder() {
+        return excluder;
     }
 
-    public void setExcludeFieldsWithoutExposeAnnotation(boolean excludeFieldsWithoutExposeAnnotation) {
-        this.excludeFieldsWithoutExposeAnnotation = excludeFieldsWithoutExposeAnnotation;
-    }
-
-    public Double getForVersion() {
-        return forVersion;
-    }
-
-    public void setForVersion(Double forVersion) {
-        this.forVersion = forVersion;
-    }
-
-    public ExclusionStrategy getExclusionStrategy() {
-        return ExclusionStrategy;
-    }
-
-    public void setExclusionStrategy(ExclusionStrategy exclusionStrategy) {
-        ExclusionStrategy = exclusionStrategy;
+    public void setExcluder(Excluder excluder) {
+        this.excluder = excluder;
     }
 
     @Override
@@ -59,26 +41,12 @@ public class GsonObjectMapper implements ObjectMapper {
 
     @Override
     public boolean filterClass(Class clazz) {
-        return true;
+        return !(excluder.excludeClass(clazz, true) && excluder.excludeClass(clazz, true));
     }
 
     @Override
     public boolean filter(Field field) {
-        if (forVersion != null) {
-            Since since = field.getAnnotation(Since.class);
-            if (since != null && since.value() > forVersion) {
-                return false;
-            }
-            Until until = field.getAnnotation(Until.class);
-            if (until != null && until.value() <= forVersion) {
-                return false;
-            }
-        }
-        if (excludeFieldsWithoutExposeAnnotation) {
-            Expose exposeAnnotation = field.getAnnotation(Expose.class);
-            return exposeAnnotation != null && (exposeAnnotation.serialize() || exposeAnnotation.deserialize());
-        }
-        return true;
+        return !(excluder.excludeField(field, true) && excluder.excludeField(field, false));
     }
 
     @Override
