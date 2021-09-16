@@ -2,9 +2,11 @@ package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.Rest2tsGenerator;
 import com.blueveery.springrest2ts.filters.JavaTypeSetFilter;
+import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.blueveery.springrest2ts.tsmodel.TSInterface;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
+import com.blueveery.springrest2ts.tsmodel.TSScopedElement;
 import com.blueveery.springrest2ts.tsmodel.TSUnion;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -31,13 +33,14 @@ public class GsonObjectMapperTest {
     private Rest2tsGenerator tsGenerator;
     private GsonObjectMapper gsonObjectMapper;
     private Set<String> javaPackageSet;
+    private ModelClassesAbstractConverter modelClassesConverter;
 
     @Before
     public void setUp() {
         tsGenerator = new Rest2tsGenerator();
         tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(new HashSet<>(Arrays.asList(Product.class, Keyboard.class))));
         gsonObjectMapper = new GsonObjectMapper();
-        ModelClassesAbstractConverter modelClassesConverter = new ModelClassesToTsInterfacesConverter(gsonObjectMapper);
+        modelClassesConverter = new ModelClassesToTsInterfacesConverter(gsonObjectMapper);
         tsGenerator.setModelClassesConverter(modelClassesConverter);
         javaPackageSet = Collections.singleton("com.blueveery.springrest2ts.converters");
     }
@@ -165,10 +168,10 @@ public class GsonObjectMapperTest {
     @Test
     public void jsonAdapterIsHandledCorrectlyEvenWithoutTypeMapping() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        assertEquals(tsModules.first().getScopedTypesSet().size(), 1);
-        TSInterface product = (TSInterface) tsModules.first().getScopedTypesSet().first();
+        assertEquals(tsModules.first().getScopedTypesSet().size(), 2);
+        TSInterface product = findTsInterface(tsModules, "Product");
         Optional<TSField> keyboardField = product.getTsFields().stream().filter(f -> "keyboard".equals(f.getName())).findFirst();
-        assertEquals(keyboardField.get().getType(), TypeMapper.tsAny);
+        assertEquals(keyboardField.get().getType().getName(), "Keyboard");
     }
 
     @Test
@@ -201,8 +204,33 @@ public class GsonObjectMapperTest {
         assertTrue(tsUnion.getJoinedTsElementList().contains(TypeMapper.tsNull));
     }
 
+    @Test
+    public void conversionListenerAllowsToAddTypeFieldToHandleInheritance() throws IOException {
+        modelClassesConverter.getConversionListener().getConversionListenerSet().add(new ConversionListener() {
+            @Override
+            public void tsScopedTypeCreated(Class javaType, TSScopedElement tsScopedElement) {
+                if (javaType == Keyboard.class) {
+                    TSComplexElement keyboardClass = (TSComplexElement) tsScopedElement;
+                    keyboardClass.getTsFields().add(new TSField("type", keyboardClass, TypeMapper.tsString));
+                }
+            }
+        });
+        SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
+        TSInterface keyboard = findTsInterface(tsModules, "Keyboard");
+        SortedSet<TSField> tsFields = keyboard.getTsFields();
+        assertTrue(tsFields.stream().anyMatch(f -> "type".equals(f.getName())));
+    }
+
     private TSInterface convertProductToTsInterface() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        return (TSInterface) tsModules.first().getScopedTypesSet().first();
+        return findTsInterface(tsModules, "Product");
+    }
+
+    private TSInterface findTsInterface(SortedSet<TSModule> tsModules, String interfaceName) {
+        return (TSInterface) tsModules.first().
+                getScopedTypesSet()
+                .stream()
+                .filter(t -> interfaceName.equals(t.getName()))
+                .findFirst().get();
     }
 }

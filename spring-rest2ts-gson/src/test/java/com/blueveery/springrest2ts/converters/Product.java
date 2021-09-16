@@ -71,3 +71,7 @@ class Keyboard {
 
     public int keyNumber = 2;
 }
+
+class ExtendedKeyboard extends Keyboard {
+    public int numberOfLights = 2;
+}

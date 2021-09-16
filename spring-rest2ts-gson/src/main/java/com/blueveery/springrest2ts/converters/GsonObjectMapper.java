@@ -8,7 +8,6 @@ import com.blueveery.springrest2ts.tsmodel.TSUnion;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.FieldNamingStrategy;
 import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.annotations.Since;
 import com.google.gson.annotations.Until;
@@ -53,9 +52,6 @@ public class GsonObjectMapper implements ObjectMapper {
 
     @Override
     public boolean filterClass(Class clazz) {
-        if (clazz.getDeclaredAnnotation(JsonAdapter.class) != null) {
-            return false;
-        }
         return !(excluder.excludeClass(clazz, true) && excluder.excludeClass(clazz, true));
     }
 
