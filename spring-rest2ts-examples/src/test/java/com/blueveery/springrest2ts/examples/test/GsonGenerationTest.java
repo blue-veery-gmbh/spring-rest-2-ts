@@ -20,7 +20,7 @@ import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
 public class GsonGenerationTest extends TsCodeGenerationsTest {
 
     @Test
-    public void gsonObjectMapperWithAngula() throws IOException {
+    public void gsonObjectMapperWithAngular() throws IOException {
         tsGenerator = new Rest2tsGenerator();
 
         //set java type filters
