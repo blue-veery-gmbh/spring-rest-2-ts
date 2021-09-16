@@ -2,7 +2,7 @@
 spring-rest2ts-generator generates TypeScript code based on Spring MVC REST controllers and data model for HTTP requests and responses.
  
 spring-rest2ts-generator started from Spring MVC but we noticed that it is easy to support also JAX-RS annotations and such support
-has been added in version 1.2.4
+has been added in version 1.2.4. For model conversion Jackson or Gson annotations could be used.
 
 In version 1.2.4 we also added support for [angular2-jsonapi](https://github.com/ghidoz/angular2-jsonapi) which is a lightweight Angular2+ adapter for JSON API 
  
@@ -278,8 +278,8 @@ Gson object mapper is configured by Gson excluder so it gives all possibilities 
 Mapper can be also configured with `FieldNamingStrategy` to change fields names.
 In Gson there is a problem with `@JsonAdapter` which could changes completely how object looks after serialization. This
 problem could be divided in two cases:
-+ when complex type is changed into primitive one for Example Date into number, such case could be solved by [Custom type mapping](#Custom type mapping) When custom type naming is defined Java class is not converted into typescript type
-+ when complex type is converted into Typescript type with some modifications, in that case do not define Custom type mapping, normal conversion will be applied and register [Conversion Listener](#Conversion Listeners) to modify class as it is required
++ when complex type is changed into primitive one for Example Date into number, such case could be solved by [Custom type mapping](#custom-type-mapping) When custom type naming is defined Java class is not converted into typescript type
++ when complex type is converted into Typescript type with some modifications, in that case do not define Custom type mapping, normal conversion will be applied and register [Conversion Listener](#conversion-listeners) to modify class as it is required
 
 Gson doesn't support natively polymorphic types, in such case in root class there is required an additional field which will be a type denominator, such field could be also added by Conversion Listener 
 To use Gson Object mapper you need to pass it to modelClassesConverter in the configuration
