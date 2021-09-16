@@ -83,7 +83,7 @@ public class GsonObjectMapper implements ObjectMapper {
             Property property, TSComplexElement tsComplexType, ComplexTypeConverter complexTypeConverter,
             ImplementationGenerator implementationGenerator, NullableTypesStrategy nullableTypesStrategy
     ) {
-        TSType fieldBaseType = TypeMapper.map(property.getField().getType());
+        TSType fieldBaseType = TypeMapper.map(property.getField().getGenericType());
         TSField tsField = new TSField(property.getName(), tsComplexType, fieldBaseType);
         tsField.addAllAnnotations(property.getDeclaredAnnotations());
 
