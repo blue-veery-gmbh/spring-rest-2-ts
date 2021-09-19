@@ -539,11 +539,15 @@ which adds comments to TypeScript types based on swagger 2.0 `io.swagger.oas.ann
 ```
 ## TypeScript code formatting
 Generated TypeScript code is not formatted. Code formatting from project to project
-could have totally different requirements and it is suggested to use dedicated formatting library 
+could have totally different requirements, and it is suggested to use dedicated formatting library 
 for this purpose like:
   + [prettier.io](https://prettier.io/docs/en/index.html) 
   + [typescript-formatter](https://github.com/vvakame/typescript-formatter) 
-    
+
+## Integration with build tools
+Many elements of rest2ts generator are based on the interfaces which allows for further code generation customization, so intentionally
+we don't provide any plugin for maven or gradle which will limit possible customizations. We encourage using maven exec plugin
+in which code configuration can be executed, in gradle it is even more straightforward.
 
 ## Java compiler setup
 Java compiler by default optimizes methods parameters names, to have readable parameters names in Typescript at least for 
