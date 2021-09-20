@@ -16,6 +16,14 @@ public class TSLiteral extends TSElement implements ILiteral{
         this.value = value;
     }
 
+    public TSType getTsType() {
+        return tsType;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
     public String toTsValue(){
         StringBuilder stringValue = new StringBuilder();
         if(tsType == TypeMapper.tsString){

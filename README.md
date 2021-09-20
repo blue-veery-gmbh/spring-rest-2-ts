@@ -2,7 +2,7 @@
 spring-rest2ts-generator generates TypeScript code based on Spring MVC REST controllers and data model for HTTP requests and responses.
  
 spring-rest2ts-generator started from Spring MVC but we noticed that it is easy to support also JAX-RS annotations and such support
-has been added in version 1.2.4
+has been added in version 1.2.4. For model conversion Jackson or Gson annotations could be used.
 
 In version 1.2.4 we also added support for [angular2-jsonapi](https://github.com/ghidoz/angular2-jsonapi) which is a lightweight Angular2+ adapter for JSON API 
  
@@ -30,11 +30,12 @@ generated code will reflect these changes which will avoid compile-time error in
    + TS services for ReactJS framework   
    + Java class filtering for TS code generation
    + Java generic types mapped to TS generics : since ver 1.2.2    
-   + Java interfaces implemented by model classes which contains getters and setter are mapped to TS interfaces to have common types to diffrent TS model classes : since ver 1.2.2    
+   + Java interfaces implemented by model classes which contains getters and setter are mapped to TS interfaces to have common types to different TS model classes : since ver 1.2.2    
    + spring data support (Pageable & Page types) : since ver 1.2.2
    + JAX-RS annotation support : since ver 1.2.4
    + model converter which generates TypeScript classes aligned with angular2-jsonapi library       
    + model serializers extension which allows to configure custom JSON serializers/deserializers : since ver 1.2.6       
+   + Gson serializer support since version 1.3.0
    
 ## Installation 
 To add a dependency on spring-rest2ts-generator using Maven, use the following:
@@ -42,35 +43,41 @@ To add a dependency on spring-rest2ts-generator using Maven, use the following:
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-generator</artifactId>
-    <version>1.2.7</version>
+    <version>1.3.0</version>
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-spring</artifactId>
-    <version>1.2.7</version>
+    <version>1.3.0</version>
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-spring-data</artifactId>
-    <version>1.2.7</version>
+    <version>1.3.0</version>
     <!-- only if spring data is used-->
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-jackson</artifactId>
-    <version>1.2.7</version>
+    <version>1.3.0</version>
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-jax-rs</artifactId>
-    <version>1.2.7</version>
+    <version>1.3.0</version>
     <!-- only if JAX-RS is used-->
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-angular2json-impl</artifactId>
-    <version>1.2.7</version>
+    <version>1.3.0</version>
     <!-- only if angular2json is used-->
+</dependency>
+<dependency>
+    <groupId>com.blue-veery</groupId>
+    <artifactId>spring-rest2ts-gson</artifactId>
+    <version>1.3.0-SNAPSHOT</version>
+    <!-- only if Gson is used-->
 </dependency>
 ```          
            
@@ -236,11 +243,15 @@ There are following filters which allows to build complex conditions:
    + NotFilterOperator
     
 ## Java model classes converter
-Java classes which describe payload model are generated to TypeScript interfaces. During model serialization to JSON, 
-object mapper is applying some mappings(some of them are required for example in JSON, Date type must be
-represented as string or number) based on some default configuration or dedicated annotations. Currently Jackson Object
-mapper is supported. JacksonObjectMapper allows to set fields, getters and setters visibility. Based on this Typescript 
-interface fields are generated. There are supported following Jackson annotations  :
+Java classes which describe payload model are generated to TypeScript interfaces. Java collections are converted into 
+JavaScript arrays, Java Map is converted into object where key has a string type and value is converted Typescript Type
+During model serialization to JSON, object mapper is applying some mappings(some of them are required for example in JSON, Date type must be
+represented as string or number) based on some default configuration or dedicated annotations. Currently, Jackson Object
+mapper and Gson Object mapper are supported. 
+
+### Jackson Object mapper
+JacksonObjectMapper allows to set fields, getters and setters visibility. Based on this Typescript 
+interface fields are generated. Following Jackson annotations are supported :
    + JsonTypeInfo - TS property is added if type info is serialized to property
    + JsonAutoDetect - overrides default visibility 
    + JsonIgnoreType - properties which have type marked as ignored are skipped 
@@ -255,9 +266,24 @@ interface fields are generated. There are supported following Jackson annotation
    + JsonFormat - changes TS property type, add to TS comment pattern if given
    + JacksonInject - marks TS property as readonly
    + JsonRawValue - changes TS property type to any
-   
-Java collections are converted into JavaScript arrays, Java Map is converted into object where key has a string type and value is converted 
-Typescript Type
+
+### Gson Object mapper
+Following Gson annotations are supported:
+  + Expose - when used with `exluder.excludeFieldsWithoutExposeAnnotation()` only fields with this annotation are added to Typescript
+  + Since - when used with `exluder..withVersion(...)` only fields witch matches version are added to Typescript, there is also added comment to Typescript field
+  + Until - when used with `exluder..withVersion(...)` only fields witch matches version are added to Typescript, there is also added comment to Typescript field
+  + SerializedName - changes field name in Typescript type
+
+Gson object mapper is configured by Gson excluder so it gives all possibilities to filter classes and fields given by gson excluder.
+Mapper can be also configured with `FieldNamingStrategy` to change fields names.
+In Gson there is a problem with `@JsonAdapter` which could changes completely how object looks after serialization. This
+problem could be divided in two cases:
++ when complex type is changed into primitive one for Example Date into number, such case could be solved by [Custom type mapping](#custom-type-mapping) When custom type naming is defined Java class is not converted into typescript type
++ when complex type is converted into Typescript type with some modifications, in that case do not define Custom type mapping, normal conversion will be applied and register [Conversion Listener](#conversion-listeners) to modify class as it is required
+
+Gson doesn't support natively polymorphic types, in such case in root class there is required an additional field which will be a type denominator, such field could be also added by Conversion Listener 
+To use Gson Object mapper you need to pass it to modelClassesConverter in the configuration
+
 
 ## Spring REST controllers converter
 From REST classes there is generated working implementation in TypeScript which based on Spring annotations builds complete 
@@ -347,7 +373,7 @@ type name, Java model class must be annotated with `JsonApiModelConfig` annotati
     <dependency>
         <groupId>com.blue-veery</groupId>
         <artifactId>spring-rest2ts-angular2json-api</artifactId>
-        <version>1.2.7</version>
+        <version>1.3.0</version>
     </dependency>
 ```
 which needs to be included in Java project. 

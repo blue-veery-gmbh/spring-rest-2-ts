@@ -28,6 +28,10 @@ public class TypeMapper {
 
     private static Map<Class, TSType> complexTypeMap = new HashMap<>();
 
+    public static void resetTypeMapping() {
+        complexTypeMap.clear();
+    }
+
     public static TSType map(Type javaType){
         return map(javaType, tsAny, Collections.emptyMap());
     }

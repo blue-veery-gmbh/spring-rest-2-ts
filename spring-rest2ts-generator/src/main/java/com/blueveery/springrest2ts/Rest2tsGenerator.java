@@ -1,7 +1,14 @@
 package com.blueveery.springrest2ts;
 
-import com.blueveery.springrest2ts.converters.*;
-import com.blueveery.springrest2ts.extensions.ConversionExtension;
+import com.blueveery.springrest2ts.converters.ComplexTypeConverter;
+import com.blueveery.springrest2ts.converters.DefaultNullableTypesStrategy;
+import com.blueveery.springrest2ts.converters.JavaEnumToTsEnumConverter;
+import com.blueveery.springrest2ts.converters.JavaPackageToTsModuleConverter;
+import com.blueveery.springrest2ts.converters.ModelClassesAbstractConverter;
+import com.blueveery.springrest2ts.converters.NullableTypesStrategy;
+import com.blueveery.springrest2ts.converters.RestClassConverter;
+import com.blueveery.springrest2ts.converters.TsModuleCreatorConverter;
+import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.extensions.ModelConversionExtension;
 import com.blueveery.springrest2ts.extensions.RestConversionExtension;
 import com.blueveery.springrest2ts.filters.JavaTypeFilter;
@@ -17,8 +24,19 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * Created by tomaszw on 30.07.2017.
@@ -77,7 +95,7 @@ public class Rest2tsGenerator {
         this.nullableTypesStrategy = nullableTypesStrategy;
     }
 
-    public SortedSet<TSModule> generate(Set<String> inputPackagesNames, Path outputDir) throws IOException {
+    public SortedSet<TSModule> convert(Set<String> inputPackagesNames) throws IOException {
         Set<Class> modelClasses = new HashSet<>();
         Set<Class> restClasses = new HashSet<>();
         Set<Class> enumClasses = new HashSet<>();
@@ -115,10 +133,19 @@ public class Rest2tsGenerator {
             convertTypes(restClasses, javaPackageToTsModuleConverter, restClassesConverter);
         }
 
-
-        writeTSModules(javaPackageToTsModuleConverter.getTsModules(), outputDir, logger);
-
         return javaPackageToTsModuleConverter.getTsModules();
+    }
+
+    public SortedSet<TSModule> generate(Set<String> inputPackagesNames, Path outputDir) throws IOException {
+        SortedSet<TSModule> tsModules = convert(inputPackagesNames);
+        writeTSModules(javaPackageToTsModuleConverter.getTsModules(), outputDir, logger);
+        return tsModules;
+    }
+
+    public void writeTSModules(SortedSet<TSModule> tsModuleSortedSet, Path outputDir, Logger logger) throws IOException {
+        for (TSModule tsModule : tsModuleSortedSet) {
+            tsModule.writeModule(outputDir, logger);
+        }
     }
 
     private void applyConversionExtension(Set<String> packagesNames) {
@@ -186,12 +213,6 @@ public class Rest2tsGenerator {
         for (Class nextJavaType : customTypeMapping.keySet()) {
             TSType tsType = customTypeMapping.get(nextJavaType);
             TypeMapper.registerTsType(nextJavaType, tsType);
-        }
-    }
-
-    private void writeTSModules(SortedSet<TSModule> tsModuleSortedSet, Path outputDir, Logger logger) throws IOException {
-        for (TSModule tsModule : tsModuleSortedSet) {
-            tsModule.writeModule(outputDir, logger);
         }
     }
 
