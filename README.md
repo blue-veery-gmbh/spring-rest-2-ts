@@ -76,7 +76,7 @@ To add a dependency on spring-rest2ts-generator using Maven, use the following:
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-gson</artifactId>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.3.0</version>
     <!-- only if Gson is used-->
 </dependency>
 ```          
