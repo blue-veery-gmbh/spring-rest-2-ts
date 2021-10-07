@@ -2,6 +2,12 @@ package com.blueveery.springrest2ts.filters;
 
 import org.slf4j.Logger;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.Arrays;
+
 public class HasAnnotationJavaTypeFilter implements JavaTypeFilter {
     Class annotation;
 
@@ -9,12 +15,16 @@ public class HasAnnotationJavaTypeFilter implements JavaTypeFilter {
         if (!annotation.isAnnotation()) {
             throw new IllegalStateException("Annotation required");
         }
-//        @Target({ElementType.METHOD, ElementType.TYPE})
-//        @Retention(RetentionPolicy.RUNTIME)
-//        Target targetAnnotation = (Target) annotation.getAnnotation(Target.class);
-//        if (targetAnnotation != null) {
-//            Arrays.binarySearch(targetAnnotation.value(), ElementType.TYPE).
-//        }
+
+        Target targetAnnotation = (Target) annotation.getAnnotation(Target.class);
+        if (targetAnnotation != null && Arrays.binarySearch(targetAnnotation.value(), ElementType.TYPE) == -1) {
+            throw new IllegalStateException(annotation.getSimpleName() + " is not a type annotation");
+        }
+
+        Retention retentionAnnotation = (Retention) annotation.getAnnotation(Retention.class);
+        if (retentionAnnotation != null && retentionAnnotation.value() != RetentionPolicy.RUNTIME) {
+            throw new IllegalStateException(annotation.getSimpleName() + " is not a runtime annotation");
+        }
 
         this.annotation = annotation;
     }
