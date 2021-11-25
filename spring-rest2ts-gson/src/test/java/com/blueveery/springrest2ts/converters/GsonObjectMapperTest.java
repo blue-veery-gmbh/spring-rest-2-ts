@@ -25,8 +25,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class GsonObjectMapperTest {
 
@@ -60,20 +59,20 @@ public class GsonObjectMapperTest {
     @Test
     public void transientFieldsAreSkippedInTsCode() throws IOException {
         TSInterface productTsInterface = convertProductToTsInterface();
-        assertTrue(productTsInterface.getTsFields().stream().allMatch(f -> !"tempName".equals(f.getName())));
+        assertThat(productTsInterface.getTsFields().stream().noneMatch(f -> "tempName".equals(f.getName()))).isTrue();
     }
 
     @Test
     public void nonTransientFieldsAreIncludedInTsCode() throws IOException {
         TSInterface productTsInterface = convertProductToTsInterface();
-        assertTrue(productTsInterface.getTsFields().stream().anyMatch(f -> "name".equals(f.getName())));
+        assertThat(productTsInterface.getTsFields().stream().anyMatch(f -> "name".equals(f.getName()))).isTrue();
     }
 
     @Test
     public void serializedNameChangesFieldName() throws IOException {
         TSInterface productTsInterface = convertProductToTsInterface();
-        assertTrue(productTsInterface.getTsFields().stream().anyMatch(f -> "year".equals(f.getName())));
-        assertTrue(productTsInterface.getTsFields().stream().noneMatch(f -> "productionYear".equals(f.getName())));
+        assertThat(productTsInterface.getTsFields().stream().anyMatch(f -> "year".equals(f.getName()))).isTrue();
+        assertThat(productTsInterface.getTsFields().stream().noneMatch(f -> "productionYear".equals(f.getName()))).isTrue();
     }
 
     @Test
@@ -82,9 +81,9 @@ public class GsonObjectMapperTest {
         gsonObjectMapper.setExcluder(Excluder.DEFAULT.excludeFieldsWithoutExposeAnnotation());
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
-        assertTrue(tsFields.stream().allMatch(f -> exposedFields.contains(f.getName())));
+        assertThat(tsFields.stream().allMatch(f -> exposedFields.contains(f.getName()))).isTrue();
         Optional<TSField> exposedNameField = tsFields.stream().filter(f -> "exposedName".equals(f.getName())).findFirst();
-        assertEquals(exposedNameField.get().getType(), TypeMapper.tsString);
+        assertThat(TypeMapper.tsString).isEqualTo(exposedNameField.get().getType());
     }
 
     @Test
@@ -93,8 +92,8 @@ public class GsonObjectMapperTest {
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
         Optional<TSField> serializedOnlyField = tsFields.stream().filter(f -> "serializedOnly".equals(f.getName())).findFirst();
-        assertEquals(serializedOnlyField.get().getType(), TypeMapper.tsString);
-        assertTrue(serializedOnlyField.get().getReadOnly());
+        assertThat(TypeMapper.tsString).isEqualTo(serializedOnlyField.get().getType());
+        assertThat(serializedOnlyField.get().getReadOnly()).isTrue();
     }
 
     @Test
@@ -103,7 +102,7 @@ public class GsonObjectMapperTest {
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
         Optional<TSField> deserializedOnlyField = tsFields.stream().filter(f -> "deserializedOnly".equals(f.getName())).findFirst();
-        assertEquals(deserializedOnlyField.get().getType(), new TSUnion(TypeMapper.tsUndefined, TypeMapper.tsString));
+        assertThat(deserializedOnlyField.get().getType()).isEqualTo(new TSUnion(TypeMapper.tsUndefined, TypeMapper.tsString));
     }
 
     @Test
@@ -111,7 +110,7 @@ public class GsonObjectMapperTest {
         gsonObjectMapper.setExcluder(Excluder.DEFAULT.withVersion(1.0));
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
-        assertTrue(tsFields.stream().noneMatch(f -> "sinceField".equals(f.getName())));
+        assertThat(tsFields.stream().noneMatch(f -> "sinceField".equals(f.getName()))).isTrue();
     }
 
     @Test
@@ -119,7 +118,7 @@ public class GsonObjectMapperTest {
         gsonObjectMapper.setExcluder(Excluder.DEFAULT.withVersion(2.0));
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
-        assertTrue(tsFields.stream().anyMatch(f -> "sinceField".equals(f.getName())));
+        assertThat(tsFields.stream().anyMatch(f -> "sinceField".equals(f.getName()))).isTrue();
     }
 
     @Test
@@ -127,7 +126,7 @@ public class GsonObjectMapperTest {
         gsonObjectMapper.setExcluder(Excluder.DEFAULT.withVersion(4.0));
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
-        assertTrue(tsFields.stream().noneMatch(f -> "untilField".equals(f.getName())));
+        assertThat(tsFields.stream().noneMatch(f -> "untilField".equals(f.getName()))).isTrue();
     }
 
     @Test
@@ -135,15 +134,15 @@ public class GsonObjectMapperTest {
         gsonObjectMapper.setExcluder(Excluder.DEFAULT.withVersion(3.0));
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
-        assertTrue(tsFields.stream().anyMatch(f -> "untilField".equals(f.getName())));
+        assertThat(tsFields.stream().anyMatch(f -> "untilField".equals(f.getName()))).isTrue();
     }
 
     @Test
     public void sinceAndUntilWithoutVersionAreNotFiltered() throws IOException {
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
-        assertTrue(tsFields.stream().anyMatch(f -> "sinceField".equals(f.getName())));
-        assertTrue(tsFields.stream().anyMatch(f -> "untilField".equals(f.getName())));
+        assertThat(tsFields.stream().anyMatch(f -> "sinceField".equals(f.getName()))).isTrue();
+        assertThat(tsFields.stream().anyMatch(f -> "untilField".equals(f.getName()))).isTrue();
     }
 
     @Test
@@ -153,7 +152,7 @@ public class GsonObjectMapperTest {
         Optional<TSField> untilField = tsFields.stream().filter(f -> "untilField".equals(f.getName())).findFirst();
 
         String comment = untilField.get().getTsComment().getTsCommentSection("version").getCommentText().toString();
-        assertEquals("Until version: 4.0", comment);
+        assertThat(comment).isEqualTo("Until version: 4.0");
     }
 
     @Test
@@ -162,26 +161,26 @@ public class GsonObjectMapperTest {
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
         String translatedName = LOWER_CASE_WITH_UNDERSCORES.translateName(Product.class.getField("untilField"));
-        assertTrue(tsFields.stream().anyMatch(f -> translatedName.equals(f.getName())));
+        assertThat(tsFields.stream().anyMatch(f -> translatedName.equals(f.getName()))).isTrue();
     }
 
     @Test
     public void jsonAdapterIsHandledCorrectlyEvenWithoutTypeMapping() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        assertEquals(tsModules.first().getScopedTypesSet().size(), 2);
+        assertThat(2).isEqualTo(tsModules.first().getScopedTypesSet().size());
         TSInterface product = findTsInterface(tsModules, "Product");
         Optional<TSField> keyboardField = product.getTsFields().stream().filter(f -> "keyboard".equals(f.getName())).findFirst();
-        assertEquals(keyboardField.get().getType().getName(), "Keyboard");
+        assertThat("Keyboard").isEqualTo(keyboardField.get().getType().getName());
     }
 
     @Test
     public void jsonAdapterIsHandledCorrectlyWithTypeMapping() throws IOException {
         TypeMapper.registerTsType(Keyboard.class, TypeMapper.tsNumber);
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        assertEquals(tsModules.first().getScopedTypesSet().size(), 1);
+        assertThat(1).isEqualTo(tsModules.first().getScopedTypesSet().size());
         TSInterface product = (TSInterface) tsModules.first().getScopedTypesSet().first();
         Optional<TSField> keyboardField = product.getTsFields().stream().filter(f -> "keyboard".equals(f.getName())).findFirst();
-        assertEquals(keyboardField.get().getType(), TypeMapper.tsNumber);
+        assertThat(TypeMapper.tsNumber).isEqualTo(keyboardField.get().getType());
     }
 
     @Test
@@ -189,9 +188,9 @@ public class GsonObjectMapperTest {
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
         TSField nullableField = tsFields.stream().filter(f -> "nullableField".equals(f.getName())).findFirst().get();
-        assertTrue(nullableField.getType() instanceof TSUnion);
+        assertThat(nullableField.getType() instanceof TSUnion).isTrue();
         TSUnion tsUnion = (TSUnion) nullableField.getType();
-        assertTrue(tsUnion.getJoinedTsElementList().contains(TypeMapper.tsNull));
+        assertThat(tsUnion.getJoinedTsElementList().contains(TypeMapper.tsNull)).isTrue();
     }
 
     @Test
@@ -199,9 +198,9 @@ public class GsonObjectMapperTest {
         TSInterface productTsInterface = convertProductToTsInterface();
         SortedSet<TSField> tsFields = productTsInterface.getTsFields();
         TSField intWrapperField = tsFields.stream().filter(f -> "intWrapperField".equals(f.getName())).findFirst().get();
-        assertTrue(intWrapperField.getType() instanceof TSUnion);
+        assertThat(intWrapperField.getType() instanceof TSUnion).isTrue();
         TSUnion tsUnion = (TSUnion) intWrapperField.getType();
-        assertTrue(tsUnion.getJoinedTsElementList().contains(TypeMapper.tsNull));
+        assertThat(tsUnion.getJoinedTsElementList().contains(TypeMapper.tsNull)).isTrue();
     }
 
     @Test
@@ -218,7 +217,7 @@ public class GsonObjectMapperTest {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
         TSInterface keyboard = findTsInterface(tsModules, "Keyboard");
         SortedSet<TSField> tsFields = keyboard.getTsFields();
-        assertTrue(tsFields.stream().anyMatch(f -> "type".equals(f.getName())));
+        assertThat(tsFields.stream().anyMatch(f -> "type".equals(f.getName()))).isTrue();
     }
 
     private TSInterface convertProductToTsInterface() throws IOException {
