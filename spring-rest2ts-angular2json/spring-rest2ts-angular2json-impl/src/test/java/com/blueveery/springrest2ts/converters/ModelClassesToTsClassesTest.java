@@ -37,6 +37,16 @@ public class ModelClassesToTsClassesTest extends BaseTest {
     }
 
     @Test
+    public void tsClassesHaveCorrectInheritanceHierarchy() throws IOException {
+        SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
+        TSClass keyboard = (TSClass) findTSComplexElement(tsModules, Keyboard.class.getSimpleName());
+        assertThat(keyboard.getExtendsClass()).isNull();
+
+        TSClass extendedKeyboard = (TSClass) findTSComplexElement(tsModules, ExtendedKeyboard.class.getSimpleName());
+        assertThat(extendedKeyboard.getExtendsClass().getName()).isEqualTo("Keyboard");
+    }
+
+    @Test
     public void javaInheritanceIsMappedToTsInheritance() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
         TSClass keyboard = (TSClass) findTSComplexElement(tsModules, Keyboard.class.getSimpleName());

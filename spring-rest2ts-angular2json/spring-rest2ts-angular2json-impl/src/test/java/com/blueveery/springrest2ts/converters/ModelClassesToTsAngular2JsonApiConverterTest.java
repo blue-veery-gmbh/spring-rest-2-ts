@@ -23,6 +23,11 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ModelClassesToTsAngular2JsonApiConverterTest extends BaseTest {
+
+    protected ModelClassesAbstractConverter getModelClassesConverter() {
+        return new ModelClassesToTsAngular2JsonApiConverter(objectMapper);
+    }
+
     @Test
     public void everyModelClassShouldHaveJsonApiModelConfigDecorator() throws IOException {
         TSModule tsModule = tsGenerator.convert(javaPackageSet).first();
