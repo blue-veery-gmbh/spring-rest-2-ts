@@ -3,6 +3,8 @@ package com.blueveery.springrest2ts.filters;
 import org.slf4j.Logger;
 
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class JavaTypeSetFilter implements JavaTypeFilter {
 
@@ -10,6 +12,10 @@ public class JavaTypeSetFilter implements JavaTypeFilter {
 
     public JavaTypeSetFilter(Set<Class> classSet) {
         this.classSet = classSet;
+    }
+
+    public JavaTypeSetFilter(Class... javaClasses) {
+        this.classSet = Stream.of(javaClasses).collect(Collectors.toSet());
     }
 
     @Override

@@ -5,8 +5,10 @@ import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.naming.NoChangeClassNameMapper;
 import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.tsmodel.generics.IParameterizedWithFormalTypes;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
+import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference;
 
 import java.lang.reflect.AnnotatedType;
 import java.util.Collections;
@@ -82,8 +84,7 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
 
     @Override
     public void convertInheritance(Class javaClass) {
-        TSClassReference tsClassReference = (TSClassReference) TypeMapper.map(javaClass);
-        TSClass tsClass = tsClassReference.getReferencedType();
+        TSType tsType = TypeMapper.map(javaClass);
         if (!javaClass.isInterface()) {
             TSType superClass = TypeMapper.map(javaClass.getAnnotatedSuperclass().getType());
             TSClassReference tsSuperClassReference;
@@ -92,52 +93,66 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
             }else{
                 tsSuperClassReference = tsJsonApiModelClassReference;
             }
+            TSClassReference tsClassReference = (TSClassReference) tsType;
+            TSClass tsClass = tsClassReference.getReferencedType();
             tsClass.setExtendsClass(tsSuperClassReference);
+
             TSDecorator jsonApiModelConfigDecorator = createJsonApiModelConfigDecorator(javaClass, tsClass);
             tsClass.getTsDecoratorList().add(jsonApiModelConfigDecorator);
             tsClass.addScopedTypeUsage(jsonApiModelConfigFunction);
-        }
 
-        for (AnnotatedType annotatedInterface : javaClass.getAnnotatedInterfaces()) {
-            TSType superClass = TypeMapper.map(annotatedInterface.getType());
-            if (superClass instanceof TSInterfaceReference) {
-                TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) superClass;
-                tsClass.addImplementsInterfaces(tsSuperClassInterface);
+            for (AnnotatedType annotatedInterface : javaClass.getAnnotatedInterfaces()) {
+                TSType implementedInterface = TypeMapper.map(annotatedInterface.getType());
+                if (implementedInterface instanceof TSInterfaceReference) {
+                    TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) implementedInterface;
+                    tsClass.addImplementsInterfaces(tsSuperClassInterface);
+                }
+            }
+        } else {
+            TSInterfaceReference tsInterfaceReference = (TSInterfaceReference) tsType;
+            TSInterface tsInterface = tsInterfaceReference.getReferencedType();
+            for (AnnotatedType annotatedInterface : javaClass.getAnnotatedInterfaces()) {
+                TSType extendedInterface = TypeMapper.map(annotatedInterface.getType());
+                if (extendedInterface instanceof TSInterfaceReference) {
+                    TSInterfaceReference tsSuperClassInterface = (TSInterfaceReference) extendedInterface;
+                    tsInterface.addExtendsInterfaces(tsSuperClassInterface);
+                }
             }
         }
+
+
     }
 
     @Override
     public void convert(Class javaClass, NullableTypesStrategy nullableTypesStrategy) {
         ObjectMapper objectMapper = selectObjectMapper(javaClass);
-        TSClassReference tsClassReference = (TSClassReference) TypeMapper.map(javaClass);
-        TSClass tsClass = tsClassReference.getReferencedType();
-        if (!tsClass.isConverted()) {
-            tsClass.setConverted(true);
-            convertFormalTypeParameters(javaClass.getTypeParameters(), tsClassReference);
+        TSParameterizedTypeReference<IParameterizedWithFormalTypes> typeReference = (TSParameterizedTypeReference<IParameterizedWithFormalTypes>) TypeMapper.map(javaClass);
+        TSComplexElement tsComplexElement = (TSComplexElement) typeReference.getReferencedType();
+        if (!tsComplexElement.isConverted()) {
+            tsComplexElement.setConverted(true);
+            convertFormalTypeParameters(javaClass.getTypeParameters(), typeReference);
             SortedSet<Property> propertySet = getClassProperties(javaClass, objectMapper);
 
             for (Property property : propertySet) {
-                List<TSField> tsFieldList = objectMapper.mapJavaPropertyToField(property, tsClass, this, implementationGenerator, nullableTypesStrategy);
+                List<TSField> tsFieldList = objectMapper.mapJavaPropertyToField(property, tsComplexElement, this, implementationGenerator, nullableTypesStrategy);
                 if (tsFieldList.size() == 1) {
                     setAsNullableType(property, tsFieldList.get(0), nullableTypesStrategy);
                 }
                 for (TSField tsField : tsFieldList) {
-                    tsClass.addTsField(tsField);
+                    tsComplexElement.addTsField(tsField);
                     addAngular2JsonApiDecorators(property, tsField);
                     conversionListener.tsFieldCreated(property, tsField);
                 }
             }
 
-            for (TSField typeLevelSpecificField : objectMapper.addTypeLevelSpecificFields(javaClass, tsClass)) {
+            for (TSField typeLevelSpecificField : objectMapper.addTypeLevelSpecificFields(javaClass, tsComplexElement)) {
                 Property property = new Property(typeLevelSpecificField.getName(), 0);
                 addAngular2JsonApiDecorators(property, typeLevelSpecificField);
                 conversionListener.tsFieldCreated(property, typeLevelSpecificField);
             }
-            tsClass.addAllAnnotations(javaClass.getAnnotations());
-            conversionListener.tsScopedTypeCreated(javaClass, tsClass);
+            tsComplexElement.addAllAnnotations(javaClass.getAnnotations());
+            conversionListener.tsScopedTypeCreated(javaClass, tsComplexElement);
         }
-
     }
 
     private TSDecorator createJsonApiModelConfigDecorator(Class javaClass, TSClass tsClass) {
