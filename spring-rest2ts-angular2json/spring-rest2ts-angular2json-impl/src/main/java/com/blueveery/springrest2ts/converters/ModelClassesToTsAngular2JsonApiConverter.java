@@ -4,7 +4,19 @@ import com.blueveery.springrest2ts.angular2jsonapi.JsonApiModelConfig;
 import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
 import com.blueveery.springrest2ts.naming.ClassNameMapper;
 import com.blueveery.springrest2ts.naming.NoChangeClassNameMapper;
-import com.blueveery.springrest2ts.tsmodel.*;
+import com.blueveery.springrest2ts.tsmodel.TSArray;
+import com.blueveery.springrest2ts.tsmodel.TSClass;
+import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
+import com.blueveery.springrest2ts.tsmodel.TSDeclarationType;
+import com.blueveery.springrest2ts.tsmodel.TSDecorator;
+import com.blueveery.springrest2ts.tsmodel.TSField;
+import com.blueveery.springrest2ts.tsmodel.TSFunction;
+import com.blueveery.springrest2ts.tsmodel.TSInterface;
+import com.blueveery.springrest2ts.tsmodel.TSJsonLiteral;
+import com.blueveery.springrest2ts.tsmodel.TSLiteral;
+import com.blueveery.springrest2ts.tsmodel.TSModule;
+import com.blueveery.springrest2ts.tsmodel.TSType;
+import com.blueveery.springrest2ts.tsmodel.TSVariable;
 import com.blueveery.springrest2ts.tsmodel.generics.IParameterizedWithFormalTypes;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
@@ -119,8 +131,6 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
                 }
             }
         }
-
-
     }
 
     @Override
@@ -179,22 +189,24 @@ public class ModelClassesToTsAngular2JsonApiConverter extends ModelClassesAbstra
     }
 
     private void addAngular2JsonApiDecorators(Property fromProperty, TSField tsField) {
-        if(tsField.getType() instanceof TSArray){
-            tsField.getTsDecoratorList().add(hasManyDecorator);
-            tsField.getOwner().addScopedTypeUsage(hasManyDecorator.getTsFunction());
-            return;
-        }
-
-        if(tsField.getType() instanceof TSClassReference){
-            TSClassReference tsClassReference = (TSClassReference) tsField.getType();
-            if(tsClassReference.getReferencedType().isInstanceOf(jsonApiModelClass)){
-                tsField.getTsDecoratorList().add(belongsToDecorator);
-                tsField.getOwner().addScopedTypeUsage(belongsToDecorator.getTsFunction());
+        if (tsField.getOwner() instanceof TSClass) {
+            if (tsField.getType() instanceof TSArray) {
+                tsField.getTsDecoratorList().add(hasManyDecorator);
+                tsField.getOwner().addScopedTypeUsage(hasManyDecorator.getTsFunction());
                 return;
             }
-        }
 
-        tsField.getTsDecoratorList().add(attributeDecorator);
-        tsField.getOwner().addScopedTypeUsage(attributeDecorator.getTsFunction());
+            if (tsField.getType() instanceof TSClassReference) {
+                TSClassReference tsClassReference = (TSClassReference) tsField.getType();
+                if (tsClassReference.getReferencedType().isInstanceOf(jsonApiModelClass)) {
+                    tsField.getTsDecoratorList().add(belongsToDecorator);
+                    tsField.getOwner().addScopedTypeUsage(belongsToDecorator.getTsFunction());
+                    return;
+                }
+            }
+
+            tsField.getTsDecoratorList().add(attributeDecorator);
+            tsField.getOwner().addScopedTypeUsage(attributeDecorator.getTsFunction());
+        }
     }
 }

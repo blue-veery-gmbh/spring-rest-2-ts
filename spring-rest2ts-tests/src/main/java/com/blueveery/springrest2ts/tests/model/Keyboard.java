@@ -1,4 +1,4 @@
-package com.blueveery.springrest2ts.converters.tests.model;
+package com.blueveery.springrest2ts.tests.model;
 
 public class Keyboard implements KeyboardInterface {
     public Keyboard(int keyNumber) {

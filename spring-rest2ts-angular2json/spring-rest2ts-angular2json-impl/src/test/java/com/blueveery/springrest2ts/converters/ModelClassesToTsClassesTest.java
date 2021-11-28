@@ -1,11 +1,10 @@
 package com.blueveery.springrest2ts.converters;
 
-import com.blueveery.springrest2ts.Rest2tsGenerator;
-import com.blueveery.springrest2ts.converters.tests.model.ExtendedKeyboard;
-import com.blueveery.springrest2ts.converters.tests.model.Keyboard;
-import com.blueveery.springrest2ts.converters.tests.model.KeyboardInterface;
-import com.blueveery.springrest2ts.converters.tests.model.Product;
 import com.blueveery.springrest2ts.filters.JavaTypeSetFilter;
+import com.blueveery.springrest2ts.tests.model.ExtendedKeyboard;
+import com.blueveery.springrest2ts.tests.model.Keyboard;
+import com.blueveery.springrest2ts.tests.model.KeyboardInterface;
+import com.blueveery.springrest2ts.tests.model.Product;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSField;
@@ -14,61 +13,34 @@ import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSUnion;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Optional;
-import java.util.Set;
 import java.util.SortedSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ModelClassesToTsClassesTest {
-
-    private Rest2tsGenerator tsGenerator;
-    private JacksonObjectMapper objectMapper;
-    private Set<String> javaPackageSet;
-    private ModelClassesAbstractConverter modelClassesConverter;
-
-    @Before
-    public void setUp() {
-        tsGenerator = new Rest2tsGenerator();
-        tsGenerator.setModelClassesCondition(
-                new JavaTypeSetFilter(Product.class, Keyboard.class, ExtendedKeyboard.class, KeyboardInterface.class)
-        );
-        objectMapper = new JacksonObjectMapper();
-        modelClassesConverter = new ModelClassesToTsAngular2JsonApiConverter(objectMapper);
-        tsGenerator.setModelClassesConverter(modelClassesConverter);
-        javaPackageSet = Collections.singleton("com.blueveery.springrest2ts.converters.tests.model");
-    }
-
-    @After
-    public void cleanUp() {
-        TypeMapper.resetTypeMapping();
-    }
-
+public class ModelClassesToTsClassesTest extends BaseTest {
     @Test
     public void productJavaClassIsConvertedToClass() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        TSComplexElement product = findTSComplexElement(tsModules, "Product");
+        TSComplexElement product = findTSComplexElement(tsModules, Product.class.getSimpleName());
         assertThat(product).isInstanceOf(TSClass.class);
     }
 
     @Test
     public void keyboardJavaClassIsConvertedToClass() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        TSComplexElement keyboard = findTSComplexElement(tsModules, "Keyboard");
+        TSComplexElement keyboard = findTSComplexElement(tsModules, Keyboard.class.getSimpleName());
         assertThat(keyboard).isInstanceOf(TSClass.class);
     }
 
     @Test
     public void javaInheritanceIsMappedToTsInheritance() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        TSClass keyboard = (TSClass) findTSComplexElement(tsModules, "Keyboard");
-        TSComplexElement extendedKeyboard = findTSComplexElement(tsModules, "ExtendedKeyboard");
+        TSClass keyboard = (TSClass) findTSComplexElement(tsModules, Keyboard.class.getSimpleName());
+        TSComplexElement extendedKeyboard = findTSComplexElement(tsModules, ExtendedKeyboard.class.getSimpleName());
         assertThat(extendedKeyboard).isInstanceOf(TSClass.class);
         assertThat(((TSClass) extendedKeyboard).getExtendsClass().getReferencedType()).isEqualTo(keyboard);
     }
@@ -76,14 +48,14 @@ public class ModelClassesToTsClassesTest {
     @Test
     public void javaInterfaceIsMappedToTsInterface() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        TSComplexElement keyboardInterface = findTSComplexElement(tsModules, "KeyboardInterface");
+        TSComplexElement keyboardInterface = findTSComplexElement(tsModules, KeyboardInterface.class.getSimpleName());
         assertThat(keyboardInterface).isInstanceOf(TSInterface.class);
     }
 
     @Test
     public void tsClassImplementsTsInterface() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        TSClass keyboard = (TSClass) findTSComplexElement(tsModules, "Keyboard");
+        TSClass keyboard = (TSClass) findTSComplexElement(tsModules, Keyboard.class.getSimpleName());
         TSInterfaceReference keyboardInterface = (TSInterfaceReference) TypeMapper.map(KeyboardInterface.class);
         assertThat(keyboard.getImplementsInterfaces()).containsExactly(keyboardInterface);
     }
@@ -99,17 +71,17 @@ public class ModelClassesToTsClassesTest {
     public void ifInterfacesAreExcludedFromGenerationSetTsClassesDontImplementThem() throws IOException {
         tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(Product.class, Keyboard.class, ExtendedKeyboard.class));
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        TSClass keyboard = (TSClass) findTSComplexElement(tsModules, "Keyboard");
+        TSClass keyboard = (TSClass) findTSComplexElement(tsModules, Keyboard.class.getSimpleName());
         assertThat(keyboard.getImplementsInterfaces()).isEmpty();
     }
 
     @Test
     public void ifObjectMapperGeneratesFieldsFromGettersTsClassHasOnlySuchFields() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        TSComplexElement product = findTSComplexElement(tsModules, "Product");
+        TSComplexElement product = findTSComplexElement(tsModules, Product.class.getSimpleName());
         assertThat(product.getTsFields()).isEmpty();
 
-        TSComplexElement Keyboard = findTSComplexElement(tsModules, "Keyboard");
+        TSComplexElement Keyboard = findTSComplexElement(tsModules, Keyboard.class.getSimpleName());
         assertThat(Keyboard.getTsFields().stream().map(TSField::getName)).containsExactly("keyNumber");
     }
 
@@ -118,12 +90,12 @@ public class ModelClassesToTsClassesTest {
         objectMapper.setFieldsVisibility(JsonAutoDetect.Visibility.ANY);
         objectMapper.setAllAccessMethodsVisibility(JsonAutoDetect.Visibility.NONE);
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        TSComplexElement product = findTSComplexElement(tsModules, "Product");
-        assertThat(product.getTsFields().stream().map(TSField::getName)).containsExactly(
-                "intWrapperField", "name", "nullableField", "productionYear"
+        TSComplexElement product = findTSComplexElement(tsModules, Product.class.getSimpleName());
+        assertThat(product.getTsFields().stream().map(TSField::getName)).containsExactlyInAnyOrder(
+                "intWrapperField", "name", "nullableField", "productionYear", "extendedKeyboards", "keyboard"
         );
 
-        TSComplexElement Keyboard = findTSComplexElement(tsModules, "Keyboard");
+        TSComplexElement Keyboard = findTSComplexElement(tsModules, Keyboard.class.getSimpleName());
         assertThat(Keyboard.getTsFields().stream().map(TSField::getName)).containsExactly("fKeyNumber");
     }
 
@@ -132,7 +104,7 @@ public class ModelClassesToTsClassesTest {
         objectMapper.setFieldsVisibility(JsonAutoDetect.Visibility.ANY);
         objectMapper.setAllAccessMethodsVisibility(JsonAutoDetect.Visibility.NONE);
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        TSComplexElement product = findTSComplexElement(tsModules, "Product");
+        TSComplexElement product = findTSComplexElement(tsModules, Product.class.getSimpleName());
 
         Optional<TSField> nullableField = product.getTsFields()
                 .stream().filter(f -> f.getName().equals("nullableField")).findFirst();
@@ -143,13 +115,5 @@ public class ModelClassesToTsClassesTest {
                 .stream().filter(f -> f.getName().equals("intWrapperField")).findFirst();
         assertThat(intWrapperField.get().getType()).isInstanceOf(TSUnion.class);
         assertThat(((TSUnion) nullableField.get().getType()).getJoinedTsElementList()).contains(TypeMapper.tsNumber, TypeMapper.tsNull);
-    }
-
-    private TSComplexElement findTSComplexElement(SortedSet<TSModule> tsModules, String name) {
-        return (TSComplexElement) tsModules.first().
-                getScopedTypesSet()
-                .stream()
-                .filter(t -> name.equals(t.getName()))
-                .findFirst().get();
     }
 }

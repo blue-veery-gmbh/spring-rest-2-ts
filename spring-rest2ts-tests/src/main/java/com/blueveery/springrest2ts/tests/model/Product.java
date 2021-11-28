@@ -1,6 +1,7 @@
-package com.blueveery.springrest2ts.converters.tests.model;
+package com.blueveery.springrest2ts.tests.model;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class Product {
     public transient String tempName = "phone";
@@ -13,5 +14,9 @@ public class Product {
     int nullableField;
 
     Integer intWrapperField;
+
+    Keyboard keyboard;
+
+    List<ExtendedKeyboard> extendedKeyboards;
 }
 
