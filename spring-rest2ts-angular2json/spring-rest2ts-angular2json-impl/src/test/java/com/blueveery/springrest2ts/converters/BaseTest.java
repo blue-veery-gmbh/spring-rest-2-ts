@@ -2,6 +2,7 @@ package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.Rest2tsGenerator;
 import com.blueveery.springrest2ts.filters.JavaTypeSetFilter;
+import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
 import com.blueveery.springrest2ts.tests.model.ExtendedKeyboard;
 import com.blueveery.springrest2ts.tests.model.Keyboard;
 import com.blueveery.springrest2ts.tests.model.KeyboardInterface;
@@ -26,9 +27,13 @@ public class BaseTest {
         tsGenerator = new Rest2tsGenerator();
         tsGenerator.setModelClassesCondition(createClassFilter());
         objectMapper = new JacksonObjectMapper();
-        modelClassesConverter = new ModelClassesToTsAngular2JsonApiConverter(objectMapper);
+        modelClassesConverter = getModelClassesConverter();
         tsGenerator.setModelClassesConverter(modelClassesConverter);
         javaPackageSet = Collections.singleton("com.blueveery.springrest2ts.tests.model");
+    }
+
+    protected ModelClassesAbstractConverter getModelClassesConverter() {
+        return new ModelClassesToTsClassesConverter(new EmptyImplementationGenerator(), objectMapper);
     }
 
     protected JavaTypeSetFilter createClassFilter() {
