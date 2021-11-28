@@ -56,6 +56,12 @@ public class JacksonObjectMapper implements ObjectMapper {
         return gettersVisibility;
     }
 
+    public void setAllAccessMethodsVisibility(JsonAutoDetect.Visibility visibility) {
+        this.gettersVisibility = visibility;
+        this.isGetterVisibility = visibility;
+        this.settersVisibility = visibility;
+    }
+
     public void setGettersVisibility(JsonAutoDetect.Visibility gettersVisibility) {
         this.gettersVisibility = gettersVisibility;
     }
