@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.tests.BaseTest;
 import com.blueveery.springrest2ts.tests.model.ExtendedKeyboard;
 import com.blueveery.springrest2ts.tests.model.Keyboard;
 import com.blueveery.springrest2ts.tests.model.KeyboardInterface;
@@ -22,8 +23,14 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ModelClassesToTsAngular2JsonApiConverterTest extends BaseTest {
+public class ModelClassesToTsAngular2JsonApiConverterTest extends BaseTest<JacksonObjectMapper> {
 
+    @Override
+    protected JacksonObjectMapper createObjectMapper() {
+        return new JacksonObjectMapper();
+    }
+
+    @Override
     protected ModelClassesAbstractConverter getModelClassesConverter() {
         return new ModelClassesToTsAngular2JsonApiConverter(objectMapper);
     }
@@ -115,6 +122,5 @@ public class ModelClassesToTsAngular2JsonApiConverterTest extends BaseTest {
                 .collect(Collectors.toList());
         TSVariable modelsVariable = modelClassesToTsAngular2JsonApiConverter.getModelsVariable();
         assertThat(((TSJsonLiteral) modelsVariable.getValue()).getFieldMap().keySet()).containsAll(classNames);
-
     }
 }

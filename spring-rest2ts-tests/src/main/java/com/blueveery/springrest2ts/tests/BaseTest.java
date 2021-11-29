@@ -1,6 +1,10 @@
-package com.blueveery.springrest2ts.converters;
+package com.blueveery.springrest2ts.tests;
 
 import com.blueveery.springrest2ts.Rest2tsGenerator;
+import com.blueveery.springrest2ts.converters.ModelClassesAbstractConverter;
+import com.blueveery.springrest2ts.converters.ModelClassesToTsClassesConverter;
+import com.blueveery.springrest2ts.converters.ObjectMapper;
+import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.filters.JavaTypeSetFilter;
 import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
 import com.blueveery.springrest2ts.tests.model.ExtendedKeyboard;
@@ -16,28 +20,26 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.SortedSet;
 
-public class BaseTest {
+public abstract class BaseTest<M extends ObjectMapper> {
     protected Rest2tsGenerator tsGenerator;
-    protected JacksonObjectMapper objectMapper;
+    protected M objectMapper;
     protected Set<String> javaPackageSet;
     protected ModelClassesAbstractConverter modelClassesConverter;
 
     @Before
     public void setUp() {
         tsGenerator = new Rest2tsGenerator();
-        tsGenerator.setModelClassesCondition(createClassFilter());
-        objectMapper = new JacksonObjectMapper();
+        tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(Product.class, Keyboard.class, ExtendedKeyboard.class, KeyboardInterface.class));
+        objectMapper = createObjectMapper();
         modelClassesConverter = getModelClassesConverter();
         tsGenerator.setModelClassesConverter(modelClassesConverter);
         javaPackageSet = Collections.singleton("com.blueveery.springrest2ts.tests.model");
     }
 
+    protected abstract M createObjectMapper();
+
     protected ModelClassesAbstractConverter getModelClassesConverter() {
         return new ModelClassesToTsClassesConverter(new EmptyImplementationGenerator(), objectMapper);
-    }
-
-    protected JavaTypeSetFilter createClassFilter() {
-        return new JavaTypeSetFilter(Product.class, Keyboard.class, ExtendedKeyboard.class, KeyboardInterface.class);
     }
 
     @After

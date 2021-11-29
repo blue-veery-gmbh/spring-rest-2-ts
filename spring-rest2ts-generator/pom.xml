@@ -39,11 +39,5 @@
             <version>1.7.28</version>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>com.blue-veery</groupId>
-            <artifactId>spring-rest2ts-tests</artifactId>
-            <version>1.3.0-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>
