@@ -1,6 +1,7 @@
 package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.filters.JavaTypeSetFilter;
+import com.blueveery.springrest2ts.tests.BaseTest;
 import com.blueveery.springrest2ts.tests.model.ExtendedKeyboard;
 import com.blueveery.springrest2ts.tests.model.Keyboard;
 import com.blueveery.springrest2ts.tests.model.KeyboardInterface;
@@ -21,7 +22,13 @@ import java.util.SortedSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ModelClassesToTsClassesTest extends BaseTest {
+public class ModelClassesToTsClassesConverterTest extends BaseTest<JacksonObjectMapper> {
+
+    @Override
+    protected JacksonObjectMapper createObjectMapper() {
+        return new JacksonObjectMapper();
+    }
+
     @Test
     public void productJavaClassIsConvertedToClass() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
