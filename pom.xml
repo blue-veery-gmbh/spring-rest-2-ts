@@ -52,6 +52,7 @@
         <module>spring-rest2ts-spring-data</module>
         <module>spring-rest2ts-gson</module>
         <module>spring-rest2ts-tests</module>
+        <module>spring-rest2ts-jackson-js</module>
     </modules>
     <dependencies>
             <dependency>
