@@ -34,6 +34,10 @@ public abstract class TSComplexElement extends TSScopedElement implements IDecor
         return tsFields;
     }
 
+     public TSField getFieldByName(String name) {
+        return tsFields.stream().filter(f -> name.equals(f.getName())).findFirst().get();
+    }
+
     public SortedSet<TSMethod> getTsMethods() {
         return tsMethods;
     }

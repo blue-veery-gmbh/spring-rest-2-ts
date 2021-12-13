@@ -24,6 +24,11 @@ public class TypeMapper {
     public static TSType tsAny = new TSSimpleType("any");
     public static TSType tsNull = new TSSimpleType("null");
     public static TSType tsUndefined = new TSSimpleType("undefined");
+
+    public static TSType tsObjectNumber = new TSSimpleType("Number");
+    public static TSType tsObjectString = new TSSimpleType("String");
+    public static TSType tsObjectBoolean  = new TSSimpleType("Boolean");
+
     public static TSModule systemModule = new TSModule("system", Paths.get(""), true);
 
     private static Map<Class, TSType> complexTypeMap = new HashMap<>();
@@ -116,6 +121,27 @@ public class TypeMapper {
 
         return fallbackType;
     }
+
+    public static TSType getTypeObjectTypeVersion(TSType tsType) {
+        if (tsType instanceof TSSimpleType) {
+            if (tsType == tsNumber) {
+                return tsObjectNumber;
+            }
+
+            if (tsType == tsBoolean) {
+                return tsObjectBoolean;
+            }
+
+            if (tsType == tsString) {
+                return tsObjectString;
+            }
+        }
+        return tsType;
+    }
+
+
+
+
 
     private static List<TSType> mapActualTypeArguments(
             List<TSType> actualParameterList, ParameterizedType parameterizedType,
