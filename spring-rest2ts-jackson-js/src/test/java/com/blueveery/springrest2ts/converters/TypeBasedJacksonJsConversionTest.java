@@ -105,6 +105,14 @@ public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapp
         checkJsonClassType("roleList", User.class, expectedTypeLiteral);
     }
 
+    @Test
+    public void objectArrayFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
+        SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
+        TSComplexElement tsExtendedKeyboard = findTSComplexElement(tsModules, ExtendedKeyboard.class.getSimpleName());
+        ILiteral[] expectedTypeLiteral = {new TSTypeLiteral(new TSArray(tsExtendedKeyboard)), new TSLiteralArray(new TSTypeLiteral(tsExtendedKeyboard))};
+        checkJsonClassType("extendedKeyboards", Product.class, expectedTypeLiteral);
+    }
+
     private void checkJsonClassType(
             String fieldName, Class javaClass, ILiteral... expectedTypeLiteral
     ) throws IOException {
@@ -115,8 +123,8 @@ public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapp
     private void checkJsonClassType(
             SortedSet<TSModule> tsModules, String fieldName, Class javaClass, ILiteral... expectedTypeLiteral
     ) throws IOException {
-        TSClass tsField = (TSClass) findTSComplexElement(tsModules, javaClass.getSimpleName());
-        Optional<TSDecorator> jsonClassType = tsField.getFieldByName(fieldName).getTsDecoratorList()
+        TSClass tsClass = (TSClass) findTSComplexElement(tsModules, javaClass.getSimpleName());
+        Optional<TSDecorator> jsonClassType = tsClass.getFieldByName(fieldName).getTsDecoratorList()
                 .stream()
                 .filter(d -> d.getTsFunction() == typeBasedJacksonJsConversion.jsonClassTypeFunction)
                 .findFirst();
@@ -127,7 +135,7 @@ public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapp
         ILiteral typesArray = ((TSArrowFunctionLiteral) actual.getFieldMap().get("type")).getReturnValue();
         assertThat(typesArray).isInstanceOf(TSLiteralArray.class);
         assertThat(((TSLiteralArray) typesArray).getLiteralList()).containsExactly(expectedTypeLiteral);
-        printClass(tsField);
+        printClass(tsClass);
     }
 
     private void printClass(TSClass tsClass) throws IOException {
