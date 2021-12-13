@@ -67,23 +67,17 @@ public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapp
 
     @Test
     public void numberFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
-        checkJsonClassType(
-                "keyNumber", Keyboard.class, new TSTypeLiteral(TypeMapper.tsObjectNumber), tsGenerator.convert(javaPackageSet)
-        );
+        checkJsonClassType("keyNumber", Keyboard.class, new TSTypeLiteral(TypeMapper.tsObjectNumber));
     }
 
     @Test
     public void stringFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
-        checkJsonClassType(
-                "name", Product.class, new TSTypeLiteral(TypeMapper.tsObjectString), tsGenerator.convert(javaPackageSet)
-        );
+        checkJsonClassType("name", Product.class, new TSTypeLiteral(TypeMapper.tsObjectString));
     }
 
     @Test
     public void booleanFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
-        checkJsonClassType(
-                "isAdmin", User.class, new TSTypeLiteral(TypeMapper.tsObjectBoolean), tsGenerator.convert(javaPackageSet)
-        );
+        checkJsonClassType("isAdmin", User.class, new TSTypeLiteral(TypeMapper.tsObjectBoolean));
     }
 
     @Test
@@ -93,6 +87,18 @@ public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapp
         checkJsonClassType(
                 "keyboard", Product.class, new TSTypeLiteral(tsKeyboard), tsModules
         );
+    }
+
+    @Test
+    public void nullableFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
+        checkJsonClassType("nullableField", Product.class, new TSTypeLiteral(TypeMapper.tsObjectNumber));
+    }
+
+    private void checkJsonClassType(
+            String fieldName, Class javaClass, ILiteral expectedTypeLiteral
+    ) throws IOException {
+        SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
+        checkJsonClassType(fieldName, javaClass, expectedTypeLiteral, tsModules);
     }
 
     private void checkJsonClassType(

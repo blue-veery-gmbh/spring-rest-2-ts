@@ -31,4 +31,9 @@ public class TSTypeLiteral implements ILiteral {
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        return tsType.getName();
+    }
 }
