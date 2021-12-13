@@ -28,6 +28,7 @@ import java.io.OutputStreamWriter;
 import java.util.Optional;
 import java.util.SortedSet;
 
+import static com.blueveery.springrest2ts.converters.TypeMapper.tsDate;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsObjectBoolean;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsObjectNumber;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsObjectString;
@@ -111,6 +112,11 @@ public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapp
         TSComplexElement tsExtendedKeyboard = findTSComplexElement(tsModules, ExtendedKeyboard.class.getSimpleName());
         ILiteral[] expectedTypeLiteral = {new TSTypeLiteral(new TSArray(tsExtendedKeyboard)), new TSLiteralArray(new TSTypeLiteral(tsExtendedKeyboard))};
         checkJsonClassType("extendedKeyboards", Product.class, expectedTypeLiteral);
+    }
+
+    @Test
+    public void dateFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
+        checkJsonClassType("joinDate", User.class, new TSTypeLiteral(tsDate));
     }
 
     private void checkJsonClassType(
