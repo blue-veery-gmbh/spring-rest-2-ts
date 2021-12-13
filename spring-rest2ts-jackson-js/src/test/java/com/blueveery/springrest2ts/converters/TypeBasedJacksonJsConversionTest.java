@@ -1,9 +1,13 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.filters.JavaTypeSetFilter;
 import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
 import com.blueveery.springrest2ts.tests.BaseTest;
+import com.blueveery.springrest2ts.tests.model.ExtendedKeyboard;
 import com.blueveery.springrest2ts.tests.model.Keyboard;
+import com.blueveery.springrest2ts.tests.model.KeyboardInterface;
 import com.blueveery.springrest2ts.tests.model.Product;
+import com.blueveery.springrest2ts.tests.model.User;
 import com.blueveery.springrest2ts.tsmodel.ILiteral;
 import com.blueveery.springrest2ts.tsmodel.TSArrowFunctionLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
@@ -13,6 +17,7 @@ import com.blueveery.springrest2ts.tsmodel.TSLiteralArray;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSTypeLiteral;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.BufferedWriter;
@@ -26,6 +31,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapper> {
 
     private TypeBasedJacksonJsConversion typeBasedJacksonJsConversion;
+
+    @Override
+    @Before
+    public void setUp() {
+        super.setUp();
+        tsGenerator.setModelClassesCondition(
+                new JavaTypeSetFilter(Product.class, Keyboard.class, ExtendedKeyboard.class, KeyboardInterface.class, User.class)
+        );
+    }
 
     @Override
     protected JacksonObjectMapper createObjectMapper() {
@@ -61,6 +75,13 @@ public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapp
     public void stringFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
         checkJsonClassType(
                 "name", Product.class, new TSTypeLiteral(TypeMapper.tsObjectString)
+        );
+    }
+
+    @Test
+    public void booleanFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
+        checkJsonClassType(
+                "isAdmin", User.class, new TSTypeLiteral(TypeMapper.tsObjectBoolean)
         );
     }
 
