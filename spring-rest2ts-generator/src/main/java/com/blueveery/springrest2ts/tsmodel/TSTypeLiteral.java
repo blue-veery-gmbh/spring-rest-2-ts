@@ -16,7 +16,11 @@ public class TSTypeLiteral implements ILiteral {
 
     @Override
     public void write(BufferedWriter writer) throws IOException {
-        writer.write(tsType.getName());
+        if (tsType instanceof TSArray) {
+            writer.write("Array");
+        } else {
+            writer.write(tsType.getName());
+        }
     }
 
     @Override

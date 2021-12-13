@@ -9,6 +9,7 @@ import com.blueveery.springrest2ts.tests.model.KeyboardInterface;
 import com.blueveery.springrest2ts.tests.model.Product;
 import com.blueveery.springrest2ts.tests.model.User;
 import com.blueveery.springrest2ts.tsmodel.ILiteral;
+import com.blueveery.springrest2ts.tsmodel.TSArray;
 import com.blueveery.springrest2ts.tsmodel.TSArrowFunctionLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
@@ -27,6 +28,10 @@ import java.io.OutputStreamWriter;
 import java.util.Optional;
 import java.util.SortedSet;
 
+import static com.blueveery.springrest2ts.converters.TypeMapper.tsObjectBoolean;
+import static com.blueveery.springrest2ts.converters.TypeMapper.tsObjectNumber;
+import static com.blueveery.springrest2ts.converters.TypeMapper.tsObjectString;
+import static com.blueveery.springrest2ts.converters.TypeMapper.tsString;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapper> {
@@ -67,17 +72,17 @@ public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapp
 
     @Test
     public void numberFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
-        checkJsonClassType("keyNumber", Keyboard.class, new TSTypeLiteral(TypeMapper.tsObjectNumber));
+        checkJsonClassType("keyNumber", Keyboard.class, new TSTypeLiteral(tsObjectNumber));
     }
 
     @Test
     public void stringFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
-        checkJsonClassType("name", Product.class, new TSTypeLiteral(TypeMapper.tsObjectString));
+        checkJsonClassType("name", Product.class, new TSTypeLiteral(tsObjectString));
     }
 
     @Test
     public void booleanFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
-        checkJsonClassType("isAdmin", User.class, new TSTypeLiteral(TypeMapper.tsObjectBoolean));
+        checkJsonClassType("isAdmin", User.class, new TSTypeLiteral(tsObjectBoolean));
     }
 
     @Test
@@ -85,24 +90,30 @@ public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapp
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
         TSComplexElement tsKeyboard = findTSComplexElement(tsModules, Keyboard.class.getSimpleName());
         checkJsonClassType(
-                "keyboard", Product.class, new TSTypeLiteral(tsKeyboard), tsModules
+                tsModules, "keyboard", Product.class, new TSTypeLiteral(tsKeyboard)
         );
     }
 
     @Test
     public void nullableFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
-        checkJsonClassType("nullableField", Product.class, new TSTypeLiteral(TypeMapper.tsObjectNumber));
+        checkJsonClassType("nullableField", Product.class, new TSTypeLiteral(tsObjectNumber));
+    }
+
+    @Test
+    public void stringArrayFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
+        ILiteral[] expectedTypeLiteral = {new TSTypeLiteral(new TSArray(tsString)), new TSLiteralArray(new TSTypeLiteral(tsObjectString))};
+        checkJsonClassType("roleList", User.class, expectedTypeLiteral);
     }
 
     private void checkJsonClassType(
-            String fieldName, Class javaClass, ILiteral expectedTypeLiteral
+            String fieldName, Class javaClass, ILiteral... expectedTypeLiteral
     ) throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        checkJsonClassType(fieldName, javaClass, expectedTypeLiteral, tsModules);
+        checkJsonClassType(tsModules, fieldName, javaClass, expectedTypeLiteral);
     }
 
     private void checkJsonClassType(
-            String fieldName, Class javaClass, ILiteral expectedTypeLiteral, SortedSet<TSModule> tsModules
+            SortedSet<TSModule> tsModules, String fieldName, Class javaClass, ILiteral... expectedTypeLiteral
     ) throws IOException {
         TSClass tsField = (TSClass) findTSComplexElement(tsModules, javaClass.getSimpleName());
         Optional<TSDecorator> jsonClassType = tsField.getFieldByName(fieldName).getTsDecoratorList()
