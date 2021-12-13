@@ -3,14 +3,16 @@ package com.blueveery.springrest2ts.converters;
 import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
 import com.blueveery.springrest2ts.tests.BaseTest;
 import com.blueveery.springrest2ts.tests.model.Keyboard;
+import com.blueveery.springrest2ts.tests.model.Product;
 import com.blueveery.springrest2ts.tsmodel.ILiteral;
 import com.blueveery.springrest2ts.tsmodel.TSArrowFunctionLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
 import com.blueveery.springrest2ts.tsmodel.TSDecorator;
 import com.blueveery.springrest2ts.tsmodel.TSJsonLiteral;
-import com.blueveery.springrest2ts.tsmodel.TSLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSLiteralArray;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
+import com.blueveery.springrest2ts.tsmodel.TSTypeLiteral;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.junit.Test;
 
 import java.io.BufferedWriter;
@@ -27,7 +29,9 @@ public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapp
 
     @Override
     protected JacksonObjectMapper createObjectMapper() {
-        return new JacksonObjectMapper();
+        JacksonObjectMapper jacksonObjectMapper = new JacksonObjectMapper();
+        jacksonObjectMapper.setFieldsVisibility(JsonAutoDetect.Visibility.ANY);
+        return jacksonObjectMapper;
     }
 
     @Override
@@ -49,11 +53,18 @@ public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapp
     @Test
     public void numberFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
         checkJsonClassType(
-                "keyNumber", Keyboard.class, new TSLiteral("", TypeMapper.tsObjectNumber, TypeMapper.tsObjectNumber.getName())
+                "keyNumber", Keyboard.class, new TSTypeLiteral(TypeMapper.tsObjectNumber)
         );
     }
 
-    private void checkJsonClassType(String fieldName, Class javaClass, TSLiteral expectedTypeLiteral) throws IOException {
+    @Test
+    public void stringFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
+        checkJsonClassType(
+                "name", Product.class, new TSTypeLiteral(TypeMapper.tsObjectString)
+        );
+    }
+
+    private void checkJsonClassType(String fieldName, Class javaClass, ILiteral expectedTypeLiteral) throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
         TSClass tsField = (TSClass) findTSComplexElement(tsModules, javaClass.getSimpleName());
         Optional<TSDecorator> jsonClassType = tsField.getFieldByName(fieldName).getTsDecoratorList()
