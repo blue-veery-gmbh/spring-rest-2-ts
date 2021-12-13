@@ -9,6 +9,7 @@ import com.blueveery.springrest2ts.tsmodel.TSLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSLiteralArray;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
+import com.blueveery.springrest2ts.tsmodel.TSTypeLiteral;
 
 public class TypeBasedJacksonJsConversion implements ConversionListener {
     protected TSModule jacksonJSModule;
@@ -33,9 +34,7 @@ public class TypeBasedJacksonJsConversion implements ConversionListener {
         TSType type = TypeMapper.getTypeObjectTypeVersion(tsField.getType());
         classTypeLiteral.getFieldMap().put("type",
                 new TSArrowFunctionLiteral(
-                        new TSLiteralArray(
-                                new TSLiteral("", type, type.getName())
-                        )
+                        new TSLiteralArray(new TSTypeLiteral(type))
                 )
         );
         TSDecorator jsonClassTypeDecorator = new TSDecorator(jsonClassTypeFunction);
