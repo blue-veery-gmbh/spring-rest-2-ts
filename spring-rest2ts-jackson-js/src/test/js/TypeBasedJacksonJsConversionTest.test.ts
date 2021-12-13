@@ -77,3 +77,18 @@ test("array of strings field should be deserialized with proper type", () => {
     expect(user).toBeInstanceOf(User)
     expect(user.roleList).toBeInstanceOf(Array)
 })
+
+test("date field should be deserialized with proper type", () => {
+
+    class User {
+        @JsonProperty()
+        @JsonClassType({
+            type: () => [Date]
+        })
+        joinDate: Date;
+    }
+
+    const user = objectMapper.parse<User>('{"joinDate": 1639434853477}', {mainCreator: () => [User]});
+    expect(user).toBeInstanceOf(User)
+    expect(user.joinDate).toBeInstanceOf(Date)
+})
