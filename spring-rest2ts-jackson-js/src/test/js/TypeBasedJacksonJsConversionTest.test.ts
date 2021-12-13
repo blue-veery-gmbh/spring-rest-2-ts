@@ -22,7 +22,7 @@ test("field with json property should be deserialized", () => {
         keyNumber: number;
     }
 
-    let keyboard = objectMapper.parse<Keyboard>('{"keyNumber": 1}', {mainCreator: () => [Keyboard]})
+    const keyboard = objectMapper.parse<Keyboard>('{"keyNumber": 1}', {mainCreator: () => [Keyboard]});
     expect(keyboard).toEqual({keyNumber: 1})
     expect(keyboard).toBeInstanceOf(Keyboard)
 })
@@ -38,4 +38,27 @@ test("field serialization with number JsonClassType should succeed", () => {
     }
 
     expect(objectMapper.parse<Keyboard>('{"keyNumber": 1}')).toEqual({keyNumber: 1})
+})
+
+test("object field should be deserialized with proper type", () => {
+
+    class Product {
+        @JsonProperty()
+        @JsonClassType({
+            type:() => [Keyboard]
+        })
+        keyboard: Keyboard;
+    }
+
+    class Keyboard {
+        @JsonProperty()
+        @JsonClassType({
+            type:() => [Number]
+        })
+        keyNumber: number;
+    }
+
+    const product = objectMapper.parse<Product>('{"keyboard": {"keyNumber": 1}}', {mainCreator: () => [Product]});
+    expect(product).toBeInstanceOf(Product)
+    expect(product.keyboard).toBeInstanceOf(Keyboard)
 })

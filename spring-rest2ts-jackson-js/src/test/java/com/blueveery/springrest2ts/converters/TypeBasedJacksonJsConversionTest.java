@@ -11,6 +11,7 @@ import com.blueveery.springrest2ts.tests.model.User;
 import com.blueveery.springrest2ts.tsmodel.ILiteral;
 import com.blueveery.springrest2ts.tsmodel.TSArrowFunctionLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
+import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSDecorator;
 import com.blueveery.springrest2ts.tsmodel.TSJsonLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSLiteralArray;
@@ -67,26 +68,36 @@ public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapp
     @Test
     public void numberFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
         checkJsonClassType(
-                "keyNumber", Keyboard.class, new TSTypeLiteral(TypeMapper.tsObjectNumber)
+                "keyNumber", Keyboard.class, new TSTypeLiteral(TypeMapper.tsObjectNumber), tsGenerator.convert(javaPackageSet)
         );
     }
 
     @Test
     public void stringFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
         checkJsonClassType(
-                "name", Product.class, new TSTypeLiteral(TypeMapper.tsObjectString)
+                "name", Product.class, new TSTypeLiteral(TypeMapper.tsObjectString), tsGenerator.convert(javaPackageSet)
         );
     }
 
     @Test
     public void booleanFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
         checkJsonClassType(
-                "isAdmin", User.class, new TSTypeLiteral(TypeMapper.tsObjectBoolean)
+                "isAdmin", User.class, new TSTypeLiteral(TypeMapper.tsObjectBoolean), tsGenerator.convert(javaPackageSet)
         );
     }
 
-    private void checkJsonClassType(String fieldName, Class javaClass, ILiteral expectedTypeLiteral) throws IOException {
+    @Test
+    public void objectFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
+        TSComplexElement tsKeyboard = findTSComplexElement(tsModules, Keyboard.class.getSimpleName());
+        checkJsonClassType(
+                "keyboard", Product.class, new TSTypeLiteral(tsKeyboard), tsModules
+        );
+    }
+
+    private void checkJsonClassType(
+            String fieldName, Class javaClass, ILiteral expectedTypeLiteral, SortedSet<TSModule> tsModules
+    ) throws IOException {
         TSClass tsField = (TSClass) findTSComplexElement(tsModules, javaClass.getSimpleName());
         Optional<TSDecorator> jsonClassType = tsField.getFieldByName(fieldName).getTsDecoratorList()
                 .stream()
