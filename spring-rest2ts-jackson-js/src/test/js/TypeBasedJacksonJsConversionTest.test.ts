@@ -62,3 +62,18 @@ test("object field should be deserialized with proper type", () => {
     expect(product).toBeInstanceOf(Product)
     expect(product.keyboard).toBeInstanceOf(Keyboard)
 })
+
+test("array of strings field should be deserialized with proper type", () => {
+
+    class User {
+        @JsonProperty()
+        @JsonClassType({
+            type:() => [Array, [String]]
+        })
+        roleList: string[];
+    }
+
+    const user = objectMapper.parse<User>('{"roleList": ["admin", "hr"]}', {mainCreator: () => [User]});
+    expect(user).toBeInstanceOf(User)
+    expect(user.roleList).toBeInstanceOf(Array)
+})

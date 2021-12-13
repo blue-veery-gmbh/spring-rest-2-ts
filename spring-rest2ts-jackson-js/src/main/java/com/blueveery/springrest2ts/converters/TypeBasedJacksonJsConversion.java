@@ -1,5 +1,7 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.tsmodel.ILiteral;
+import com.blueveery.springrest2ts.tsmodel.TSArray;
 import com.blueveery.springrest2ts.tsmodel.TSArrowFunctionLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSDecorator;
 import com.blueveery.springrest2ts.tsmodel.TSElement;
@@ -35,18 +37,15 @@ public class TypeBasedJacksonJsConversion implements ConversionListener {
 
     private void addJsonClassTypeDecorator(TSField tsField) {
         TSJsonLiteral classTypeLiteral = new TSJsonLiteral();
-        TSType type = extractType(tsField.getType());
         classTypeLiteral.getFieldMap().put("type",
-                new TSArrowFunctionLiteral(
-                        new TSLiteralArray(new TSTypeLiteral(type))
-                )
+                new TSArrowFunctionLiteral(convertToTypeLiteral(tsField.getType()))
         );
         TSDecorator jsonClassTypeDecorator = new TSDecorator(jsonClassTypeFunction);
         jsonClassTypeDecorator.getTsLiteralList().add(classTypeLiteral);
         tsField.getTsDecoratorList().add(jsonClassTypeDecorator);
     }
 
-    private TSType extractType(TSType type) {
+    private ILiteral convertToTypeLiteral(TSType type) {
         TSType sourceType = type;
         if (type instanceof TSUnion) {
             TSUnion tsUnion = (TSUnion) type;
@@ -63,6 +62,11 @@ public class TypeBasedJacksonJsConversion implements ConversionListener {
             sourceType = typeList.size() == 1 ? (TSType) typeList.get(0) : TypeMapper.tsObject;
         }
 
-        return TypeMapper.getTypeObjectTypeVersion(sourceType);
+        if (sourceType instanceof TSArray) {
+            TSArray tsArray = (TSArray) sourceType;
+            return new TSLiteralArray(new TSTypeLiteral(tsArray), convertToTypeLiteral(tsArray.getElementType()));
+        }
+
+        return new TSLiteralArray(new TSTypeLiteral(TypeMapper.getTypeObjectTypeVersion(sourceType)));
     }
 }

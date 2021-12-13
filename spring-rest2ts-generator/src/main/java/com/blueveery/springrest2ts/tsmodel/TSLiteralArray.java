@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class TSLiteralArray implements ILiteral {
     private List<ILiteral> literalList;
@@ -27,5 +28,18 @@ public class TSLiteralArray implements ILiteral {
             }
         }
         writer.append("]");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TSLiteralArray that = (TSLiteralArray) o;
+        return Objects.equals(literalList, that.literalList);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(literalList);
     }
 }
