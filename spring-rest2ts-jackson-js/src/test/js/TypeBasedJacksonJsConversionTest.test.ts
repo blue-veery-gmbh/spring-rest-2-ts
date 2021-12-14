@@ -92,3 +92,20 @@ test("date field should be deserialized with proper type", () => {
     expect(user).toBeInstanceOf(User)
     expect(user.joinDate).toBeInstanceOf(Date)
 })
+
+
+test("set of strings field should be deserialized with proper type", () => {
+
+    class User {
+        @JsonProperty()
+        @JsonClassType({
+            type:() => [Set, [String]]
+        })
+        tagsSet: Set<string> ;
+    }
+
+    const user = objectMapper.parse<User>('{"tagsSet": ["green", "blue", "green"]}', {mainCreator: () => [User]});
+    expect(user).toBeInstanceOf(User)
+    expect(user.tagsSet).toBeInstanceOf(Set)
+    expect(user.tagsSet.size).toEqual(2)
+})

@@ -42,4 +42,9 @@ public class TSLiteralArray implements ILiteral {
     public int hashCode() {
         return Objects.hash(literalList);
     }
+
+    @Override
+    public String toString() {
+        return Objects.toString(literalList);
+    }
 }

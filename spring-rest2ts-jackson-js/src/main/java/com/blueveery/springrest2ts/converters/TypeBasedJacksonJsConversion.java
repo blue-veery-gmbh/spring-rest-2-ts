@@ -3,6 +3,7 @@ package com.blueveery.springrest2ts.converters;
 import com.blueveery.springrest2ts.tsmodel.ILiteral;
 import com.blueveery.springrest2ts.tsmodel.TSArray;
 import com.blueveery.springrest2ts.tsmodel.TSArrowFunctionLiteral;
+import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSDecorator;
 import com.blueveery.springrest2ts.tsmodel.TSElement;
 import com.blueveery.springrest2ts.tsmodel.TSField;
@@ -13,9 +14,14 @@ import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.TSTypeLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSUnion;
+import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.blueveery.springrest2ts.converters.TypeMapper.tsObject;
 
 public class TypeBasedJacksonJsConversion implements ConversionListener {
     protected TSModule jacksonJSModule;
@@ -59,12 +65,23 @@ public class TypeBasedJacksonJsConversion implements ConversionListener {
                 );
             }
 
-            sourceType = typeList.size() == 1 ? (TSType) typeList.get(0) : TypeMapper.tsObject;
+            sourceType = typeList.size() == 1 ? (TSType) typeList.get(0) : tsObject;
         }
 
         if (sourceType instanceof TSArray) {
             TSArray tsArray = (TSArray) sourceType;
             return new TSLiteralArray(new TSTypeLiteral(tsArray), convertToTypeLiteral(tsArray.getElementType()));
+        }
+
+        if (sourceType instanceof TSParameterizedTypeReference) {
+            TSParameterizedTypeReference<?> parameterizedTypeReference = (TSParameterizedTypeReference<?>) sourceType;
+            TSComplexElement referencedType = (TSComplexElement) parameterizedTypeReference.getReferencedType();
+            for (Class<?> mappedFromClass : referencedType.getMappedFromJavaTypeSet()) {
+                if (Collection.class.isAssignableFrom(mappedFromClass)) {
+                    Optional<TSType> typeParameter = parameterizedTypeReference.getTsTypeParameterList().stream().findFirst();
+                    return new TSLiteralArray(new TSTypeLiteral(referencedType), convertToTypeLiteral(typeParameter.orElse(tsObject)));
+                }
+            }
         }
 
         return new TSLiteralArray(new TSTypeLiteral(TypeMapper.getTypeObjectTypeVersion(sourceType)));

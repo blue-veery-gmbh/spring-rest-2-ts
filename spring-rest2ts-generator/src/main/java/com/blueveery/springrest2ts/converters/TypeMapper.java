@@ -1,5 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
+import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.*;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import com.blueveery.springrest2ts.tsmodel.generics.TSFormalTypeParameter;
@@ -31,7 +32,17 @@ public class TypeMapper {
 
     public static TSModule systemModule = new TSModule("system", Paths.get(""), true);
 
+    public static TSClass tsSet;
+
+    static {
+        tsSet = new TSClass("Set", systemModule, new EmptyImplementationGenerator(), new TSFormalTypeParameter("T"));
+        tsSet.getMappedFromJavaTypeSet().add(Set.class);
+    }
+
+
     private static Map<Class, TSType> complexTypeMap = new HashMap<>();
+
+    public static Map<Class, TSComplexElement> complexTypeMapForClassHierarchy = new HashMap<>();
 
     public static void resetTypeMapping() {
         complexTypeMap.clear();
@@ -64,15 +75,14 @@ public class TypeMapper {
 
         if(complexTypeMap.containsKey(javaRawType)){
             TSType tsType = complexTypeMap.get(javaRawType);
-            if (tsType instanceof TSInterface) {
-                TSInterface tsInterface = (TSInterface) tsType;
-                return new TSInterfaceReference(tsInterface, actualParameterList);
+            return wrapTypeInTypeReference(tsType, actualParameterList);
+        }
+
+        for ( Class<?> hierarchyRoot: complexTypeMapForClassHierarchy.keySet()) {
+            if (hierarchyRoot.isAssignableFrom((Class<?>)javaRawType)) {
+                TSComplexElement tsType = complexTypeMapForClassHierarchy.get(hierarchyRoot);
+                return wrapTypeInTypeReference(tsType, actualParameterList);
             }
-            if (tsType instanceof TSClass) {
-                TSClass tsClass = (TSClass) tsType;
-                return new TSClassReference(tsClass, actualParameterList);
-            }
-            return tsType;
         }
 
         if(Object.class == javaRawType){
@@ -120,6 +130,18 @@ public class TypeMapper {
         }
 
         return fallbackType;
+    }
+
+    private static TSType wrapTypeInTypeReference(TSType tsType, List<TSType> actualParameterList) {
+        if (tsType instanceof TSInterface) {
+            TSInterface tsInterface = (TSInterface) tsType;
+            return new TSInterfaceReference(tsInterface, actualParameterList);
+        }
+        if (tsType instanceof TSClass) {
+            TSClass tsClass = (TSClass) tsType;
+            return new TSClassReference(tsClass, actualParameterList);
+        }
+        return tsType;
     }
 
     public static TSType getTypeObjectTypeVersion(TSType tsType) {

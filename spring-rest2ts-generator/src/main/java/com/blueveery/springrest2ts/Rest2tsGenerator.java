@@ -15,6 +15,7 @@ import com.blueveery.springrest2ts.filters.JavaTypeFilter;
 import com.blueveery.springrest2ts.filters.OrFilterOperator;
 import com.blueveery.springrest2ts.filters.RejectJavaTypeFilter;
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
+import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import org.slf4j.Logger;
@@ -45,7 +46,8 @@ public class Rest2tsGenerator {
 
     static Logger logger = LoggerFactory.getLogger("gen-logger");
     public static boolean generateAmbientModules = false;
-    private Map<Class, TSType> customTypeMapping = new HashMap<>();
+    private Map<Class<?>, TSType> customTypeMapping = new HashMap<>();
+    private Map<Class<?>, TSComplexElement> customTypeMappingForClassHierarchy = new HashMap<>();
 
     private JavaTypeFilter modelClassesCondition = new RejectJavaTypeFilter();
     private JavaTypeFilter restClassesCondition = new RejectJavaTypeFilter();
@@ -57,10 +59,12 @@ public class Rest2tsGenerator {
     private ModelClassesAbstractConverter modelClassesConverter;
     private RestClassConverter restClassesConverter;
 
-
-
-    public Map<Class, TSType> getCustomTypeMapping() {
+    public Map<Class<?>, TSType> getCustomTypeMapping() {
         return customTypeMapping;
+    }
+
+    public Map<Class<?>, TSComplexElement> getCustomTypeMappingForClassHierarchy() {
+        return customTypeMappingForClassHierarchy;
     }
 
     public void setModelClassesCondition(JavaTypeFilter modelClassesCondition) {
@@ -110,6 +114,7 @@ public class Rest2tsGenerator {
 
 
         registerCustomTypesMapping(customTypeMapping);
+        TypeMapper.complexTypeMapForClassHierarchy.putAll(customTypeMappingForClassHierarchy);
 
         exploreRestClasses(restClasses, modelClassesCondition, modelClasses);
         exploreModelClasses(modelClasses, restClassesCondition);
@@ -209,7 +214,7 @@ public class Rest2tsGenerator {
         return modelConversionExtensionList;
     }
 
-    private void registerCustomTypesMapping(Map<Class, TSType> customTypeMapping) {
+    private void registerCustomTypesMapping(Map<Class<?>, TSType> customTypeMapping) {
         for (Class nextJavaType : customTypeMapping.keySet()) {
             TSType tsType = customTypeMapping.get(nextJavaType);
             TypeMapper.registerTsType(nextJavaType, tsType);

@@ -8,6 +8,7 @@ import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -29,6 +30,12 @@ public abstract class TSComplexElement extends TSScopedElement implements IDecor
         this.implementationGenerator = implementationGenerator;
     }
 
+    public TSComplexElement(
+            String name, TSModule module, ImplementationGenerator implementationGenerator, TSFormalTypeParameter... formalTypeParameters
+    ) {
+        this(name, module, implementationGenerator);
+        tsFormalTypeParameterList.addAll(Arrays.asList(formalTypeParameters));
+    }
 
     public SortedSet<TSField> getTsFields() {
         return tsFields;
