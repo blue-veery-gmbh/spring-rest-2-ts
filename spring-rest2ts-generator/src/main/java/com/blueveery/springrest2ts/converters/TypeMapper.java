@@ -33,10 +33,17 @@ public class TypeMapper {
     public static TSModule systemModule = new TSModule("system", Paths.get(""), true);
 
     public static TSClass tsSet;
+    public static TSClass tsMap;
 
     static {
         tsSet = new TSClass("Set", systemModule, new EmptyImplementationGenerator(), new TSFormalTypeParameter("T"));
         tsSet.getMappedFromJavaTypeSet().add(Set.class);
+
+        tsMap = new TSClass(
+                "Map", systemModule, new EmptyImplementationGenerator(),
+                new TSFormalTypeParameter("K"), new TSFormalTypeParameter("V")
+        );
+        tsMap.getMappedFromJavaTypeSet().add(Map.class);
     }
 
 
@@ -79,7 +86,7 @@ public class TypeMapper {
         }
 
         for ( Class<?> hierarchyRoot: complexTypeMapForClassHierarchy.keySet()) {
-            if (hierarchyRoot.isAssignableFrom((Class<?>)javaRawType)) {
+            if (hierarchyRoot.isAssignableFrom((Class<?>) javaRawType)) {
                 TSComplexElement tsType = complexTypeMapForClassHierarchy.get(hierarchyRoot);
                 return wrapTypeInTypeReference(tsType, actualParameterList);
             }

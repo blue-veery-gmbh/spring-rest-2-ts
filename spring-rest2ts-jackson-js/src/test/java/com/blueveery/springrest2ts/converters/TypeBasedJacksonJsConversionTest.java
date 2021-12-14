@@ -25,11 +25,13 @@ import org.junit.Test;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsDate;
+import static com.blueveery.springrest2ts.converters.TypeMapper.tsMap;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsObject;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsObjectBoolean;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsObjectNumber;
@@ -134,6 +136,28 @@ public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapp
         tsGenerator.getCustomTypeMappingForClassHierarchy().put(Set.class, tsSet);
         ILiteral[] expectedTypeLiteral = {new TSTypeLiteral(tsSet), new TSLiteralArray(new TSTypeLiteral(tsObject))};
         checkJsonClassType("tagsHashSet", User.class, expectedTypeLiteral);
+    }
+
+    @Test
+    public void mapOfStringsFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
+        tsGenerator.getCustomTypeMappingForClassHierarchy().put(Map.class, tsMap);
+        TSTypeLiteral tsStringTypeLiteral = new TSTypeLiteral(tsObjectString);
+        ILiteral[] expectedTypeLiteral = {new TSTypeLiteral(tsMap), new TSLiteralArray(tsStringTypeLiteral, tsStringTypeLiteral)};
+        checkJsonClassType("tagsMap", User.class, expectedTypeLiteral);
+    }
+
+    @Test
+    public void mapOfNumbersFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
+        tsGenerator.getCustomTypeMappingForClassHierarchy().put(Map.class, tsMap);
+        ILiteral[] expectedTypeLiteral = {new TSTypeLiteral(tsMap), new TSLiteralArray(new TSTypeLiteral(tsObjectString), new TSTypeLiteral(tsObjectNumber))};
+        checkJsonClassType("numbersMap", User.class, expectedTypeLiteral);
+    }
+
+    @Test
+    public void mapOfDatesFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
+        tsGenerator.getCustomTypeMappingForClassHierarchy().put(Map.class, tsMap);
+        ILiteral[] expectedTypeLiteral = {new TSTypeLiteral(tsMap), new TSLiteralArray(new TSTypeLiteral(tsObjectString), new TSTypeLiteral(tsDate))};
+        checkJsonClassType("datesMap", User.class, expectedTypeLiteral);
     }
 
     private void checkJsonClassType(

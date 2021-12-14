@@ -94,18 +94,53 @@ test("date field should be deserialized with proper type", () => {
 })
 
 
-test("set of strings field should be deserialized with proper type", () => {
+test("map of strings field should be deserialized with proper type", () => {
 
     class User {
         @JsonProperty()
         @JsonClassType({
-            type:() => [Set, [String]]
+            type:() => [Map, [String, String]]
         })
-        tagsSet: Set<string> ;
+        tagsMap: Map<string, string> ;
     }
 
-    const user = objectMapper.parse<User>('{"tagsSet": ["green", "blue", "green"]}', {mainCreator: () => [User]});
+    const user = objectMapper.parse<User>('{"tagsMap": {"green": "safe", "red": "danger"}}', {mainCreator: () => [User]});
     expect(user).toBeInstanceOf(User)
-    expect(user.tagsSet).toBeInstanceOf(Set)
-    expect(user.tagsSet.size).toEqual(2)
+    expect(user.tagsMap).toBeInstanceOf(Map)
+    expect(user.tagsMap.size).toEqual(2)
+})
+
+test("map of numbers field should be deserialized with proper type", () => {
+
+    class User {
+        @JsonProperty()
+        @JsonClassType({
+            type:() => [Map, [String, Number]]
+        })
+        numbersMap: Map<string, number> ;
+    }
+
+    const user = objectMapper.parse<User>('{"numbersMap": {"one": 1, "two": 2}}', {mainCreator: () => [User]});
+    expect(user).toBeInstanceOf(User)
+    expect(user.numbersMap).toBeInstanceOf(Map)
+    expect(user.numbersMap.get('one')).toBe(1)
+    expect(user.numbersMap.size).toEqual(2)
+})
+
+
+test("map of dates field should be deserialized with proper type", () => {
+
+    class User {
+        @JsonProperty()
+        @JsonClassType({
+            type:() => [Map, [String, Date]]
+        })
+        datesMap: Map<string, Date> ;
+    }
+
+    const user = objectMapper.parse<User>('{"datesMap": {"today": 1639498278935}}', {mainCreator: () => [User]});
+    expect(user).toBeInstanceOf(User)
+    expect(user.datesMap).toBeInstanceOf(Map)
+    expect(user.datesMap.get('today')).toBeInstanceOf(Date)
+    expect(user.datesMap.size).toEqual(1)
 })

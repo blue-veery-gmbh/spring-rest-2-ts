@@ -18,6 +18,7 @@ import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -43,12 +44,17 @@ public class TypeBasedJacksonJsConversion implements ConversionListener {
 
     private void addJsonClassTypeDecorator(TSField tsField) {
         TSJsonLiteral classTypeLiteral = new TSJsonLiteral();
+        ILiteral returnValue = wrapIntoTSLiteralArray(convertToTypeLiteral(tsField.getType()));
         classTypeLiteral.getFieldMap().put("type",
-                new TSArrowFunctionLiteral(convertToTypeLiteral(tsField.getType()))
+                new TSArrowFunctionLiteral(returnValue)
         );
         TSDecorator jsonClassTypeDecorator = new TSDecorator(jsonClassTypeFunction);
         jsonClassTypeDecorator.getTsLiteralList().add(classTypeLiteral);
         tsField.getTsDecoratorList().add(jsonClassTypeDecorator);
+    }
+
+    private ILiteral wrapIntoTSLiteralArray(ILiteral returnValue) {
+        return returnValue instanceof TSLiteralArray ? returnValue : new TSLiteralArray(returnValue);
     }
 
     private ILiteral convertToTypeLiteral(TSType type) {
@@ -70,20 +76,34 @@ public class TypeBasedJacksonJsConversion implements ConversionListener {
 
         if (sourceType instanceof TSArray) {
             TSArray tsArray = (TSArray) sourceType;
-            return new TSLiteralArray(new TSTypeLiteral(tsArray), convertToTypeLiteral(tsArray.getElementType()));
+            return new TSLiteralArray(new TSTypeLiteral(tsArray), wrapIntoTSLiteralArray(convertToTypeLiteral(tsArray.getElementType())));
         }
 
         if (sourceType instanceof TSParameterizedTypeReference) {
             TSParameterizedTypeReference<?> parameterizedTypeReference = (TSParameterizedTypeReference<?>) sourceType;
             TSComplexElement referencedType = (TSComplexElement) parameterizedTypeReference.getReferencedType();
             for (Class<?> mappedFromClass : referencedType.getMappedFromJavaTypeSet()) {
+                List<TSType> tsTypeParameterList = parameterizedTypeReference.getTsTypeParameterList();
                 if (Collection.class.isAssignableFrom(mappedFromClass)) {
-                    Optional<TSType> typeParameter = parameterizedTypeReference.getTsTypeParameterList().stream().findFirst();
-                    return new TSLiteralArray(new TSTypeLiteral(referencedType), convertToTypeLiteral(typeParameter.orElse(tsObject)));
+                    Optional<TSType> typeParameter = tsTypeParameterList.stream().findFirst();
+                    return new TSLiteralArray(new TSTypeLiteral(referencedType), wrapIntoTSLiteralArray(
+                            convertToTypeLiteral(typeParameter.orElse(tsObject)))
+                    );
+                }
+                if (Map.class.isAssignableFrom(mappedFromClass)) {
+                    Optional<TSType> keyParameter = tsTypeParameterList.size() > 0 ? Optional.of(tsTypeParameterList.get(0)) : Optional.empty();
+                    Optional<TSType> valueParameter = tsTypeParameterList.size() > 1 ? Optional.of(tsTypeParameterList.get(1)) : Optional.empty();
+                    return new TSLiteralArray(
+                                new TSTypeLiteral(referencedType),
+                                new TSLiteralArray(
+                                    convertToTypeLiteral(keyParameter.orElse(tsObject)),
+                                    convertToTypeLiteral(valueParameter.orElse(tsObject))
+                                )
+                            );
                 }
             }
         }
 
-        return new TSLiteralArray(new TSTypeLiteral(TypeMapper.getTypeObjectTypeVersion(sourceType)));
+        return new TSTypeLiteral(TypeMapper.getTypeObjectTypeVersion(sourceType));
     }
 }
