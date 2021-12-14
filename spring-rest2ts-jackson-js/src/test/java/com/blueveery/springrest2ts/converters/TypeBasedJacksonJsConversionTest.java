@@ -26,12 +26,15 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedSet;
 
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsDate;
+import static com.blueveery.springrest2ts.converters.TypeMapper.tsObject;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsObjectBoolean;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsObjectNumber;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsObjectString;
+import static com.blueveery.springrest2ts.converters.TypeMapper.tsSet;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsString;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -119,15 +122,29 @@ public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapp
         checkJsonClassType("joinDate", User.class, new TSTypeLiteral(tsDate));
     }
 
+    @Test
+    public void setOfStringsFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
+        tsGenerator.getCustomTypeMappingForClassHierarchy().put(Set.class, tsSet);
+        ILiteral[] expectedTypeLiteral = {new TSTypeLiteral(tsSet), new TSLiteralArray(new TSTypeLiteral(tsObjectString))};
+        checkJsonClassType("tagsSet", User.class, expectedTypeLiteral);
+    }
+
+    @Test
+    public void hashSetOfStringsFieldShouldHaveJsonClassTypeWithCorrectType() throws IOException {
+        tsGenerator.getCustomTypeMappingForClassHierarchy().put(Set.class, tsSet);
+        ILiteral[] expectedTypeLiteral = {new TSTypeLiteral(tsSet), new TSLiteralArray(new TSTypeLiteral(tsObject))};
+        checkJsonClassType("tagsHashSet", User.class, expectedTypeLiteral);
+    }
+
     private void checkJsonClassType(
-            String fieldName, Class javaClass, ILiteral... expectedTypeLiteral
+            String fieldName, Class<?> javaClass, ILiteral... expectedTypeLiteral
     ) throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
         checkJsonClassType(tsModules, fieldName, javaClass, expectedTypeLiteral);
     }
 
     private void checkJsonClassType(
-            SortedSet<TSModule> tsModules, String fieldName, Class javaClass, ILiteral... expectedTypeLiteral
+            SortedSet<TSModule> tsModules, String fieldName, Class<?> javaClass, ILiteral... expectedTypeLiteral
     ) throws IOException {
         TSClass tsClass = (TSClass) findTSComplexElement(tsModules, javaClass.getSimpleName());
         Optional<TSDecorator> jsonClassType = tsClass.getFieldByName(fieldName).getTsDecoratorList()
