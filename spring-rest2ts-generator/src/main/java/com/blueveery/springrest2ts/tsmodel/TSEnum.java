@@ -36,4 +36,15 @@ public class TSEnum extends TSScopedElement {
 
         writer.write("}");
     }
+
+    public TSEnumConstant add(String name) {
+        TSEnumConstant enumConstant = new TSEnumConstant(name);
+        enumConstant.setOwner(this);
+        tsEnumConstantList.add(enumConstant);
+        return enumConstant;
+    }
+
+    public TSEnumConstant getByName(String name) {
+        return tsEnumConstantList.stream().filter(ec -> name.equals(ec.getName())).findFirst().get();
+    }
 }
