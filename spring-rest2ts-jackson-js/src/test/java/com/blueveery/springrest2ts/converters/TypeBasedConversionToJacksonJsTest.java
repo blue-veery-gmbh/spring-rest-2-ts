@@ -13,6 +13,7 @@ import com.blueveery.springrest2ts.tsmodel.TSClass;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSDecorator;
 import com.blueveery.springrest2ts.tsmodel.TSImport;
+import com.blueveery.springrest2ts.tsmodel.TSInterface;
 import com.blueveery.springrest2ts.tsmodel.TSJsonLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSLiteralArray;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
@@ -151,6 +152,13 @@ public class TypeBasedConversionToJacksonJsTest extends JacksonJsTest {
         assertThat(tsImport.getWhat()).contains(typeBasedJacksonJsConversion.jsonPropertyFunction);
         assertThat(tsImport.getWhat()).contains(typeBasedJacksonJsConversion.jsonClassTypeFunction);
         printTSElement(tsModules.first());
+    }
+
+    @Test
+    public void interfaceFieldShouldNotHaveDecorators() throws IOException {
+        SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
+        TSInterface tsInterface = (TSInterface) findTSComplexElement(tsModules, KeyboardInterface.class.getSimpleName());
+        assertThat(tsInterface.getTsFields().first().getTsDecoratorList()).isEmpty();
     }
 
     private void checkJsonClassType(
