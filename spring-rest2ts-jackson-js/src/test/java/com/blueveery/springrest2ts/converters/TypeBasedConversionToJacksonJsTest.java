@@ -145,6 +145,12 @@ public class TypeBasedConversionToJacksonJsTest extends JacksonJsTest {
     }
 
     @Test
+    public void mapConvertedToObjectShouldHaveJsonClassTypeWithCorrectType() throws IOException {
+        ILiteral[] expectedTypeLiteral = {new TSTypeLiteral(tsObject)};
+        checkJsonClassType("datesMap", User.class, expectedTypeLiteral);
+    }
+
+    @Test
     public void decoratorsShouldBeImportedWhenAdded() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
         TSImport tsImport = tsModules.first().getImportMap().get(typeBasedJacksonJsConversion.jacksonJSModule);
