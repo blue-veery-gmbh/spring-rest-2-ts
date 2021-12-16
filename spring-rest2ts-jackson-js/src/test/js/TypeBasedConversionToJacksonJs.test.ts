@@ -78,6 +78,21 @@ test("array of strings field should be deserialized with proper type", () => {
     expect(user.roleList).toBeInstanceOf(Array)
 })
 
+test("set of string should be deserialized with proper type", () => {
+
+    class User {
+        @JsonProperty()
+        @JsonClassType({
+            type:() => [Set, [String]]
+        })
+        tagsHashSet: Set<string>;
+    }
+
+    const user = objectMapper.parse<User>('{"tagsHashSet": ["admin", "hr"]}', {mainCreator: () => [User]});
+    expect(user).toBeInstanceOf(User)
+    expect(user.tagsHashSet).toBeInstanceOf(Set)
+})
+
 test("date field should be deserialized with proper type", () => {
 
     class User {

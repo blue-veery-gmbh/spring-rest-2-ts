@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.blueveery.springrest2ts.converters.TypeMapper.tsAny;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsObject;
 
 public class TypeBasedConversionToJacksonJs implements ConversionListener {
@@ -87,7 +88,7 @@ public class TypeBasedConversionToJacksonJs implements ConversionListener {
             return new TSLiteralArray(new TSTypeLiteral(tsArray), wrapIntoTSLiteralArray(convertToTypeLiteral(tsArray.getElementType())));
         }
 
-        if (sourceType instanceof TSMap) {
+        if (sourceType == tsAny || sourceType instanceof TSMap) {
             return new TSLiteralArray(new TSTypeLiteral(tsObject));
         }
 
