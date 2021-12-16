@@ -26,18 +26,21 @@ import static com.blueveery.springrest2ts.converters.TypeMapper.tsObject;
 
 public class TypeBasedConversionToJacksonJs implements ConversionListener {
     protected TSModule jacksonJSModule;
-    protected TSDecorator jsonProperty;
+    protected final TSFunction jsonPropertyFunction;
     protected final TSFunction jsonClassTypeFunction;
+    private TSDecorator jsonProperty;
 
     public TypeBasedConversionToJacksonJs() {
         jacksonJSModule = new TSModule("jackson-js", null, true);
-        jsonProperty = new TSDecorator(new TSFunction("JsonProperty", jacksonJSModule));
+        jsonPropertyFunction = new TSFunction("JsonProperty", jacksonJSModule);
+        jsonProperty = new TSDecorator(jsonPropertyFunction);
         jsonClassTypeFunction = new TSFunction("JsonClassType", jacksonJSModule);
     }
 
     @Override
     public void tsFieldCreated(Property property, TSField tsField) {
         tsField.getTsDecoratorList().add(jsonProperty);
+        tsField.getOwner().addScopedTypeUsage(jsonProperty.getTsFunction());
 
         addJsonClassTypeDecorator(tsField);
     }
@@ -51,6 +54,7 @@ public class TypeBasedConversionToJacksonJs implements ConversionListener {
         TSDecorator jsonClassTypeDecorator = new TSDecorator(jsonClassTypeFunction);
         jsonClassTypeDecorator.getTsLiteralList().add(classTypeLiteral);
         tsField.getTsDecoratorList().add(jsonClassTypeDecorator);
+        tsField.getOwner().addScopedTypeUsage(jsonClassTypeDecorator.getTsFunction());
     }
 
     private ILiteral wrapIntoTSLiteralArray(ILiteral returnValue) {
