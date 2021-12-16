@@ -12,6 +12,7 @@ import com.blueveery.springrest2ts.tsmodel.TSArrowFunctionLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSDecorator;
+import com.blueveery.springrest2ts.tsmodel.TSImport;
 import com.blueveery.springrest2ts.tsmodel.TSJsonLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSLiteralArray;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
@@ -54,7 +55,7 @@ public class TypeBasedConversionToJacksonJsTest extends JacksonJsTest {
     public void fieldShouldHaveJsonPropertyDecorator() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
         TSClass keyboard = (TSClass) findTSComplexElement(tsModules, Keyboard.class.getSimpleName());
-        assertThat(keyboard.getTsFields().first().getTsDecoratorList()).contains(typeBasedJacksonJsConversion.jsonProperty);
+        assertThat(findDecorator (typeBasedJacksonJsConversion.jsonPropertyFunction, keyboard.getTsFields().first().getTsDecoratorList())).isPresent();
         printTSElement(keyboard);
     }
 
@@ -140,6 +141,16 @@ public class TypeBasedConversionToJacksonJsTest extends JacksonJsTest {
         tsGenerator.getCustomTypeMappingForClassHierarchy().put(Map.class, tsMap);
         ILiteral[] expectedTypeLiteral = {new TSTypeLiteral(tsMap), new TSLiteralArray(new TSTypeLiteral(tsObjectString), new TSTypeLiteral(tsDate))};
         checkJsonClassType("datesMap", User.class, expectedTypeLiteral);
+    }
+
+    @Test
+    public void decoratorsShouldBeImportedWhenAdded() throws IOException {
+        SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
+        TSImport tsImport = tsModules.first().getImportMap().get(typeBasedJacksonJsConversion.jacksonJSModule);
+        assertThat(tsImport).isNotNull();
+        assertThat(tsImport.getWhat()).contains(typeBasedJacksonJsConversion.jsonPropertyFunction);
+        assertThat(tsImport.getWhat()).contains(typeBasedJacksonJsConversion.jsonClassTypeFunction);
+        printTSElement(tsModules.first());
     }
 
     private void checkJsonClassType(
