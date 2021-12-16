@@ -24,12 +24,12 @@ import java.util.stream.Collectors;
 
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsObject;
 
-public class TypeBasedJacksonJsConversion implements ConversionListener {
+public class TypeBasedConversionToJacksonJs implements ConversionListener {
     protected TSModule jacksonJSModule;
     protected TSDecorator jsonProperty;
     protected final TSFunction jsonClassTypeFunction;
 
-    public TypeBasedJacksonJsConversion() {
+    public TypeBasedConversionToJacksonJs() {
         jacksonJSModule = new TSModule("jackson-js", null, true);
         jsonProperty = new TSDecorator(new TSFunction("JsonProperty", jacksonJSModule));
         jsonClassTypeFunction = new TSFunction("JsonClassType", jacksonJSModule);

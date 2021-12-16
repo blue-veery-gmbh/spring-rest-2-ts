@@ -40,9 +40,9 @@ import static com.blueveery.springrest2ts.converters.TypeMapper.tsSet;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsString;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapper> {
+public class TypeBasedConversionToJacksonJsTest extends BaseTest<JacksonObjectMapper> {
 
-    private TypeBasedJacksonJsConversion typeBasedJacksonJsConversion;
+    private TypeBasedConversionToJacksonJs typeBasedJacksonJsConversion;
 
     @Override
     @Before
@@ -63,7 +63,7 @@ public class TypeBasedJacksonJsConversionTest extends BaseTest<JacksonObjectMapp
     @Override
     protected ModelClassesAbstractConverter getModelClassesConverter() {
         ModelClassesToTsClassesConverter modelClassesToTsClassesConverter = new ModelClassesToTsClassesConverter(new EmptyImplementationGenerator(), objectMapper);
-        typeBasedJacksonJsConversion = new TypeBasedJacksonJsConversion();
+        typeBasedJacksonJsConversion = new TypeBasedConversionToJacksonJs();
         modelClassesToTsClassesConverter.getConversionListener().getConversionListenerSet().add(typeBasedJacksonJsConversion);
         return modelClassesToTsClassesConverter;
     }
