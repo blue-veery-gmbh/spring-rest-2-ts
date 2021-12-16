@@ -11,6 +11,7 @@ import com.blueveery.springrest2ts.tsmodel.TSField;
 import com.blueveery.springrest2ts.tsmodel.TSFunction;
 import com.blueveery.springrest2ts.tsmodel.TSJsonLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSLiteralArray;
+import com.blueveery.springrest2ts.tsmodel.TSMap;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.TSTypeLiteral;
@@ -84,6 +85,10 @@ public class TypeBasedConversionToJacksonJs implements ConversionListener {
         if (sourceType instanceof TSArray) {
             TSArray tsArray = (TSArray) sourceType;
             return new TSLiteralArray(new TSTypeLiteral(tsArray), wrapIntoTSLiteralArray(convertToTypeLiteral(tsArray.getElementType())));
+        }
+
+        if (sourceType instanceof TSMap) {
+            return new TSLiteralArray(new TSTypeLiteral(tsObject));
         }
 
         if (sourceType instanceof TSParameterizedTypeReference) {

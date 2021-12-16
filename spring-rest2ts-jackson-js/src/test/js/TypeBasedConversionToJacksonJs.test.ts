@@ -127,6 +127,22 @@ test("map of numbers field should be deserialized with proper type", () => {
     expect(user.numbersMap.size).toEqual(2)
 })
 
+test("map of numbers mapped to JS object field should be deserialized with proper type", () => {
+
+    class User {
+        @JsonProperty()
+        @JsonClassType({
+            type:() => [Object]
+        })
+        numbersMap: {[key: string] :number};
+    }
+
+    const user = objectMapper.parse<User>('{"numbersMap": {"one": 1, "two": 2}}', {mainCreator: () => [User]});
+    expect(user).toBeInstanceOf(User)
+    expect(user.numbersMap).toBeInstanceOf(Object)
+    expect(user.numbersMap['one']).toBe(1)
+})
+
 
 test("map of dates field should be deserialized with proper type", () => {
 
