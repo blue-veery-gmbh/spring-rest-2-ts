@@ -3,6 +3,7 @@ package com.blueveery.springrest2ts.converters;
 import com.blueveery.springrest2ts.tsmodel.ILiteral;
 import com.blueveery.springrest2ts.tsmodel.TSArray;
 import com.blueveery.springrest2ts.tsmodel.TSArrowFunctionLiteral;
+import com.blueveery.springrest2ts.tsmodel.TSClass;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSDecorator;
 import com.blueveery.springrest2ts.tsmodel.TSElement;
@@ -39,10 +40,12 @@ public class TypeBasedConversionToJacksonJs implements ConversionListener {
 
     @Override
     public void tsFieldCreated(Property property, TSField tsField) {
-        tsField.getTsDecoratorList().add(jsonProperty);
-        tsField.getOwner().addScopedTypeUsage(jsonProperty.getTsFunction());
+        if (tsField.getOwner() instanceof TSClass) {
+            tsField.getTsDecoratorList().add(jsonProperty);
+            tsField.getOwner().addScopedTypeUsage(jsonProperty.getTsFunction());
 
-        addJsonClassTypeDecorator(tsField);
+            addJsonClassTypeDecorator(tsField);
+        }
     }
 
     private void addJsonClassTypeDecorator(TSField tsField) {
