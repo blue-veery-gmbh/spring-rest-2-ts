@@ -151,6 +151,12 @@ public class TypeBasedConversionToJacksonJsTest extends JacksonJsTest {
     }
 
     @Test
+    public void anyTypeShouldHaveJsonClassTypeWithCorrectType() throws IOException {
+        ILiteral[] expectedTypeLiteral = {new TSTypeLiteral(tsObject)};
+        checkJsonClassType("tagsHashSet", User.class, expectedTypeLiteral);
+    }
+
+    @Test
     public void decoratorsShouldBeImportedWhenAdded() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
         TSImport tsImport = tsModules.first().getImportMap().get(typeBasedJacksonJsConversion.jacksonJSModule);
