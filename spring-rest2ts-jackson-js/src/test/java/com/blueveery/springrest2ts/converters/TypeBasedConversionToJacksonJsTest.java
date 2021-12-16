@@ -1,8 +1,6 @@
 package com.blueveery.springrest2ts.converters;
 
 import com.blueveery.springrest2ts.filters.JavaTypeSetFilter;
-import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
-import com.blueveery.springrest2ts.tests.BaseTest;
 import com.blueveery.springrest2ts.tests.model.ExtendedKeyboard;
 import com.blueveery.springrest2ts.tests.model.Keyboard;
 import com.blueveery.springrest2ts.tests.model.KeyboardInterface;
@@ -18,13 +16,10 @@ import com.blueveery.springrest2ts.tsmodel.TSJsonLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSLiteralArray;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSTypeLiteral;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -40,9 +35,9 @@ import static com.blueveery.springrest2ts.converters.TypeMapper.tsSet;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsString;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TypeBasedConversionToJacksonJsTest extends BaseTest<JacksonObjectMapper> {
+public class TypeBasedConversionToJacksonJsTest extends JacksonJsTest {
 
-    private TypeBasedConversionToJacksonJs typeBasedJacksonJsConversion;
+    protected TypeBasedConversionToJacksonJs typeBasedJacksonJsConversion;
 
     @Override
     @Before
@@ -51,21 +46,8 @@ public class TypeBasedConversionToJacksonJsTest extends BaseTest<JacksonObjectMa
         tsGenerator.setModelClassesCondition(
                 new JavaTypeSetFilter(Product.class, Keyboard.class, ExtendedKeyboard.class, KeyboardInterface.class, User.class)
         );
-    }
-
-    @Override
-    protected JacksonObjectMapper createObjectMapper() {
-        JacksonObjectMapper jacksonObjectMapper = new JacksonObjectMapper();
-        jacksonObjectMapper.setFieldsVisibility(JsonAutoDetect.Visibility.ANY);
-        return jacksonObjectMapper;
-    }
-
-    @Override
-    protected ModelClassesAbstractConverter getModelClassesConverter() {
-        ModelClassesToTsClassesConverter modelClassesToTsClassesConverter = new ModelClassesToTsClassesConverter(new EmptyImplementationGenerator(), objectMapper);
         typeBasedJacksonJsConversion = new TypeBasedConversionToJacksonJs();
-        modelClassesToTsClassesConverter.getConversionListener().getConversionListenerSet().add(typeBasedJacksonJsConversion);
-        return modelClassesToTsClassesConverter;
+        modelClassesConverter.getConversionListener().getConversionListenerSet().add(typeBasedJacksonJsConversion);
     }
 
     @Test
@@ -73,7 +55,7 @@ public class TypeBasedConversionToJacksonJsTest extends BaseTest<JacksonObjectMa
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
         TSClass keyboard = (TSClass) findTSComplexElement(tsModules, Keyboard.class.getSimpleName());
         assertThat(keyboard.getTsFields().first().getTsDecoratorList()).contains(typeBasedJacksonJsConversion.jsonProperty);
-        printClass(keyboard);
+        printTSElement(keyboard);
     }
 
     @Test
@@ -171,10 +153,7 @@ public class TypeBasedConversionToJacksonJsTest extends BaseTest<JacksonObjectMa
             SortedSet<TSModule> tsModules, String fieldName, Class<?> javaClass, ILiteral... expectedTypeLiteral
     ) throws IOException {
         TSClass tsClass = (TSClass) findTSComplexElement(tsModules, javaClass.getSimpleName());
-        Optional<TSDecorator> jsonClassType = tsClass.getFieldByName(fieldName).getTsDecoratorList()
-                .stream()
-                .filter(d -> d.getTsFunction() == typeBasedJacksonJsConversion.jsonClassTypeFunction)
-                .findFirst();
+        Optional<TSDecorator> jsonClassType = findDecorator(typeBasedJacksonJsConversion.jsonClassTypeFunction, tsClass.getFieldByName(fieldName).getTsDecoratorList());
         assertThat(jsonClassType).isPresent();
         TSJsonLiteral actual = (TSJsonLiteral) jsonClassType.get().getTsLiteralList().get(0);
         assertThat(actual.getFieldMap().get("type")).isNotNull();
@@ -182,12 +161,6 @@ public class TypeBasedConversionToJacksonJsTest extends BaseTest<JacksonObjectMa
         ILiteral typesArray = ((TSArrowFunctionLiteral) actual.getFieldMap().get("type")).getReturnValue();
         assertThat(typesArray).isInstanceOf(TSLiteralArray.class);
         assertThat(((TSLiteralArray) typesArray).getLiteralList()).containsExactly(expectedTypeLiteral);
-        printClass(tsClass);
-    }
-
-    private void printClass(TSClass tsClass) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
-        tsClass.write(writer);
-        writer.flush();
+        printTSElement(tsClass);
     }
 }
