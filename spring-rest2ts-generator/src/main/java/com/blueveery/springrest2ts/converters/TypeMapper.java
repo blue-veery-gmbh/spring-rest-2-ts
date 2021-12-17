@@ -68,6 +68,7 @@ public class TypeMapper {
 
     public static void resetTypeMapping() {
         complexTypeMap.clear();
+        complexTypeMapForClassHierarchy.clear();
     }
 
     public static TSType map(Type javaType) {
