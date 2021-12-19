@@ -46,7 +46,7 @@ public abstract class ModelClassesAbstractConverter extends ClassConverter<Model
             return;
         }
 
-        if (property.getSetterType() != null && Objects.equals(property.getGetterType(), property.getSetterType())) {
+        if (property.getSetterType() != null && !Objects.equals(property.getGetterType(), property.getSetterType())) {
             nullableTypesStrategy.setAsNullableType(property.getSetterType(), property.getDeclaredAnnotations(), tsField);
         }
     }
