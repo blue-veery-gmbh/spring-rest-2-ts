@@ -14,6 +14,7 @@ import com.blueveery.springrest2ts.tsmodel.TSTypeLiteral;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.function.BiFunction;
 
@@ -25,7 +26,7 @@ public class JacksonAnnotationsConversionToJacksonJs extends TypeBasedConversion
     protected final TSEnum JsonTypeInfoAs;
 
     protected BiFunction<Class, Class, String> typeIdResolver = (Class type, Class rootType) -> {
-        throw new IllegalStateException("typeIdResolver needs to be provided when Id.NAME is used!");
+        throw new IllegalStateException("When Id.NAME is used you need to set typeIdResolver!");
     };
 
     public JacksonAnnotationsConversionToJacksonJs(BiFunction<Class, Class, String> typeIdResolver) {
@@ -42,6 +43,14 @@ public class JacksonAnnotationsConversionToJacksonJs extends TypeBasedConversion
 
     }
 
+    public BiFunction<Class, Class, String> getTypeIdResolver() {
+        return typeIdResolver;
+    }
+
+    public void setTypeIdResolver(BiFunction<Class, Class, String> typeIdResolver) {
+        this.typeIdResolver = typeIdResolver;
+    }
+
     @Override
     public void tsScopedTypeCreated(Class javaType, TSScopedElement tsScopedElement) {
         if (tsScopedElement instanceof TSClass) {
@@ -51,7 +60,10 @@ public class JacksonAnnotationsConversionToJacksonJs extends TypeBasedConversion
             JsonTypeInfo jsonTypeInfo = (JsonTypeInfo) javaType.getAnnotation(JsonTypeInfo.class);
             if (jsonTypeInfo != null) {
                 addJsonTypeInfoAnnotation(tsClass, jsonTypeInfo);
-                addJsonSubTypesAnnotation(tsClass);
+                getOrCreateJsonSubTypes(tsClass);
+                if (!Modifier.isAbstract(javaType.getModifiers())) {
+                    addTypeToJsonSubTypes(javaType, javaType, tsClass);
+                }
             } else {
                 tryToAddTypeToJsonSubTypes(javaType, tsClass);
             }
@@ -59,22 +71,32 @@ public class JacksonAnnotationsConversionToJacksonJs extends TypeBasedConversion
     }
 
     private void tryToAddTypeToJsonSubTypes(Class javaType, TSClass tsClass) {
-        Class javaRoot = findInheritanceRoot(javaType);
-        if (javaRoot != null) {
-            TSClass tsRoot = ((TSClassReference) TypeMapper.map(javaRoot)).getReferencedType();
-            TSDecorator jsonSubTypes = tsRoot.getTsDecoratorList().stream()
-                    .filter(d -> d.getTsFunction() == jsonSubTypesFunction).findFirst().get();
-            TSJsonLiteral jsonLiteral = (TSJsonLiteral) jsonSubTypes.getTsLiteralList().get(0);
-            TSLiteralArray types = (TSLiteralArray) jsonLiteral.getFieldMap().get("types");
-            TSJsonLiteral typeMapping = new TSJsonLiteral();
-            typeMapping.getFieldMap().put("class", new TSArrowFunctionLiteral(new TSTypeLiteral(tsClass)));
-            typeMapping.getFieldMap().put("name", getTypeName(javaType, javaRoot));
-            types.getLiteralList().add(typeMapping);
+        if (!Modifier.isAbstract(javaType.getModifiers())) {
+            Class javaRoot = findInheritanceRoot(javaType);
+            if (javaRoot != null) {
+                addTypeToJsonSubTypes(javaType, javaRoot, tsClass);
+            }
         }
     }
 
+    private void addTypeToJsonSubTypes(Class javaType, Class javaRoot, TSClass tsClass) {
+        TSClass tsRoot = ((TSClassReference) TypeMapper.map(javaRoot)).getReferencedType();
+        TSDecorator jsonSubTypes = getOrCreateJsonSubTypes(tsRoot);
+        TSJsonLiteral jsonLiteral = (TSJsonLiteral) jsonSubTypes.getTsLiteralList().get(0);
+        TSLiteralArray types = (TSLiteralArray) jsonLiteral.getFieldMap().get("types");
+        TSJsonLiteral typeMapping = new TSJsonLiteral();
+        typeMapping.getFieldMap().put("class", new TSArrowFunctionLiteral(new TSTypeLiteral(tsClass)));
+        typeMapping.getFieldMap().put("name", getTypeName(javaType, javaRoot));
+        types.getLiteralList().add(typeMapping);
+    }
+
+    private TSDecorator getOrCreateJsonSubTypes(TSClass tsRoot) {
+        return tsRoot.getTsDecoratorList().stream()
+                .filter(d -> d.getTsFunction() == jsonSubTypesFunction).findFirst().orElseGet(() ->addJsonSubTypesAnnotation(tsRoot));
+    }
+
     private ILiteral getTypeName(Class javaType, Class javaRoot) {
-        JsonTypeInfo jsonTypeInfo = (JsonTypeInfo) javaType.getAnnotation(JsonTypeInfo.class);
+        JsonTypeInfo jsonTypeInfo = (JsonTypeInfo) javaRoot.getAnnotation(JsonTypeInfo.class);
         switch (jsonTypeInfo.use()) {
             case CLASS:
                 return new TSLiteral("", TypeMapper.tsString, javaType.getName());
@@ -106,12 +128,14 @@ public class JacksonAnnotationsConversionToJacksonJs extends TypeBasedConversion
         return null;
     }
 
-    private void addJsonSubTypesAnnotation(TSClass tsClass) {
+    private TSDecorator addJsonSubTypesAnnotation(TSClass tsClass) {
         TSDecorator jsonSubTypesFunctionDecorator = new TSDecorator(jsonSubTypesFunction);
         TSJsonLiteral literal = new TSJsonLiteral();
         literal.getFieldMap().put("types", new TSLiteralArray());
         jsonSubTypesFunctionDecorator.getTsLiteralList().add(literal);
-        tsClass.addScopedTypeUsage(jsonTypeInfoFunction);
+        tsClass.getTsDecoratorList().add(jsonSubTypesFunctionDecorator);
+        tsClass.addScopedTypeUsage(jsonSubTypesFunction);
+        return jsonSubTypesFunctionDecorator;
     }
 
     private void addJsonTypeInfoAnnotation(TSClass tsClass, JsonTypeInfo jsonTypeInfo) {
@@ -125,7 +149,7 @@ public class JacksonAnnotationsConversionToJacksonJs extends TypeBasedConversion
             convertJsonTypeInfoProperty(jsonTypeInfo, jsonTypeInfoLiteral);
         }
 
-        tsClass.getTsDecoratorList().add(jsonTypeInfoDecorator);
+        tsClass.getTsDecoratorList().add(0, jsonTypeInfoDecorator);
     }
 
     private void convertJsonTypeInfoProperty(JsonTypeInfo jsonTypeInfo, TSJsonLiteral jsonTypeInfoLiteral) {
