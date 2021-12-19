@@ -6,6 +6,7 @@ import com.blueveery.springrest2ts.tsmodel.TSDecorator;
 import com.blueveery.springrest2ts.tsmodel.TSImport;
 import com.blueveery.springrest2ts.tsmodel.TSJsonLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSLiteral;
+import com.blueveery.springrest2ts.tsmodel.TSLiteralArray;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.assertj.core.util.Sets;
@@ -148,6 +149,18 @@ public class JacksonAnnotationsConversionToJacksonJsTest extends JacksonJsTest {
         assertThat(jsonClassType).isPresent();
         TSJsonLiteral jsonLiteral = (TSJsonLiteral) jsonClassType.get().getTsLiteralList().stream().findFirst().get();
         assertThat(jsonLiteral.getFieldMap().get("property")).isEqualTo(new TSLiteral("", TypeMapper.tsString, "typeId"));
+        printTSElement(tsModules.first());
+    }
+
+    @Test
+    public void addJsonSubTypesShouldBeConvertedCorrectlyIfIdNameIsUsed() throws IOException {
+        tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(Vehicle.class, Truck.class, Car.class));
+        SortedSet<TSModule> tsModules = tsGenerator.convert(Sets.set(getClass().getPackage().getName()));
+        TSClass vehicle = (TSClass) findTSComplexElement(tsModules, Vehicle.class.getSimpleName());
+        Optional<TSDecorator> jsonSubTypes = findDecorator(jacksonAnnotationsConversion.jsonSubTypesFunction, vehicle.getTsDecoratorList());
+        assertThat(jsonSubTypes).isPresent();
+        TSLiteralArray tsLiteralArray = (TSLiteralArray) jsonSubTypes.get().getTsLiteralList().stream().findFirst().get();
+        assertThat(tsLiteralArray.getLiteralList()).hasSize(2);
         printTSElement(tsModules.first());
     }
 }
