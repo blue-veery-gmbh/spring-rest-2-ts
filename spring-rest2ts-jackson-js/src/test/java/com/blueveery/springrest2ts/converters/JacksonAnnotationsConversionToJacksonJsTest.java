@@ -159,8 +159,48 @@ public class JacksonAnnotationsConversionToJacksonJsTest extends JacksonJsTest {
     @Test
     public void addJsonSubTypesShouldBeConvertedCorrectlyIfIdNameIsUsed() throws IOException {
         tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(Vehicle.class, Truck.class, Car.class));
+        jsonSubTypesAssertions(jacksonAnnotationsConversion, Vehicle.class);
+        System.out.println("+++++++++++++++json+++++++++++++++");
+        System.out.println(jacksonObjectMapper.writeValueAsString(new Vehicle[]{new Truck(), new Car(), new Vehicle()}));
+    }
+
+    @Test
+    public void addJsonSubTypesShouldBeConvertedCorrectlyIfClassNameIsUsed() throws IOException {
+        tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(Vehicle_CN.class, Truck_CN.class, Car_CN.class));
+        jsonSubTypesAssertions(jacksonAnnotationsConversion, Vehicle_CN.class);
+        System.out.println("+++++++++++++++json+++++++++++++++");
+        System.out.println(jacksonObjectMapper.writeValueAsString(new Vehicle_CN[]{new Truck_CN(), new Car_CN(), new Vehicle_CN()}));
+    }
+
+    @Test
+    public void addJsonSubTypesShouldBeConvertedCorrectlyIfMinClassNameIsUsed() throws IOException {
+        tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(Vehicle_MCN.class, Truck_MCN.class, Car_MCN.class));
+        jsonSubTypesAssertions(jacksonAnnotationsConversion, Vehicle_MCN.class);
+        System.out.println("+++++++++++++++json+++++++++++++++");
+        System.out.println(jacksonObjectMapper.writeValueAsString(new Vehicle_MCN[]{new Truck_MCN(), new Car_MCN(), new Vehicle_MCN()}));
+    }
+
+    @Test
+    public void addJsonSubTypesShouldBeConvertedCorrectlyIfMinClassNameAndWRAPPER_OBJECTIsUsed() throws IOException {
+        tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(Vehicle_WO.class, Truck_WO.class, Car_WO.class));
+        jsonSubTypesAssertions(jacksonAnnotationsConversion, Vehicle_WO.class);
+        System.out.println("+++++++++++++++json+++++++++++++++");
+        System.out.println(jacksonObjectMapper.writeValueAsString(new Vehicle_WO[]{new Truck_WO(), new Car_WO(), new Vehicle_WO()}));
+    }
+
+    @Test
+    public void addJsonSubTypesShouldBeConvertedCorrectlyIfMinClassNameAndWRAPPER_ARRAYIsUsed() throws IOException {
+        tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(Vehicle_WA.class, Truck_WA.class, Car_WA.class));
+        jsonSubTypesAssertions(jacksonAnnotationsConversion, Vehicle_WA.class);
+        System.out.println("+++++++++++++++json+++++++++++++++");
+        System.out.println(jacksonObjectMapper.writeValueAsString(new Vehicle_WA[]{new Truck_WA(), new Car_WA(), new Vehicle_WA()}));
+    }
+
+    private void jsonSubTypesAssertions(
+            JacksonAnnotationsConversionToJacksonJs jacksonAnnotationsConversion, Class<?> vehicleClass
+    ) throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(Sets.set(getClass().getPackage().getName()));
-        TSClass vehicle = (TSClass) findTSComplexElement(tsModules, Vehicle.class.getSimpleName());
+        TSClass vehicle = (TSClass) findTSComplexElement(tsModules, vehicleClass.getSimpleName());
         TSFunction jsonSubTypesFunction = jacksonAnnotationsConversion.jsonSubTypesFunction;
         Optional<TSDecorator> jsonSubTypes = findDecorator(jsonSubTypesFunction, vehicle.getTsDecoratorList());
         assertThat(jsonSubTypes).isPresent();
@@ -170,7 +210,5 @@ public class JacksonAnnotationsConversionToJacksonJsTest extends JacksonJsTest {
                 vehicle.getTsDecoratorList().stream().filter(d -> d.getTsFunction() == jsonSubTypesFunction).count()
         ).isOne();
         printTSElement(tsModules.first());
-        System.out.println("+++++++++++++++json+++++++++++++++");
-        System.out.println(jacksonObjectMapper.writeValueAsString(new Vehicle[]{new Truck(), new Car(), new Vehicle()}));
     }
 }
