@@ -111,7 +111,7 @@ public class JacksonAnnotationsConversionToJacksonJs extends TypeBasedConversion
 
     private String getMinimalClassName(Class javaType, Class javaRoot) {
         if ( javaType.getName().startsWith(javaRoot.getPackage().getName())) {
-            return javaType.getName().replaceFirst(javaRoot.getPackage().getName(), ".");
+            return javaType.getName().replaceFirst(javaRoot.getPackage().getName(), "");
         }
         return javaType.getName();
     }
