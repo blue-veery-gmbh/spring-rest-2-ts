@@ -4,6 +4,8 @@ import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSArray;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSField;
+import com.blueveery.springrest2ts.tsmodel.TSJsonLiteral;
+import com.blueveery.springrest2ts.tsmodel.TSLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.TSUnion;
 import com.fasterxml.jackson.annotation.JacksonInject;
@@ -91,7 +93,7 @@ public class JacksonObjectMapper implements ObjectMapper {
                 case PROPERTY:
                     String propertyName = jsonTypeInfoAnnotation.property();
                     if ("".equals(propertyName)) {
-                        propertyName = "@class";
+                        propertyName = jsonTypeInfoAnnotation.use().getDefaultPropertyName();
                     }
                     for (TSField tsField : tsComplexType.getTsFields()) {
                         if (propertyName.equals(tsField.getName())) {

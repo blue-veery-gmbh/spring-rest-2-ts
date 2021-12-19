@@ -3,12 +3,14 @@ package com.blueveery.springrest2ts.converters;
 import com.blueveery.springrest2ts.filters.JavaTypeSetFilter;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
 import com.blueveery.springrest2ts.tsmodel.TSDecorator;
+import com.blueveery.springrest2ts.tsmodel.TSFunction;
 import com.blueveery.springrest2ts.tsmodel.TSImport;
 import com.blueveery.springrest2ts.tsmodel.TSJsonLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSLiteralArray;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.util.Sets;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class JacksonAnnotationsConversionToJacksonJsTest extends JacksonJsTest {
     private JacksonAnnotationsConversionToJacksonJs jacksonAnnotationsConversion;
+    private ObjectMapper jacksonObjectMapper = new ObjectMapper();
 
     @Override
     @Before
@@ -29,6 +32,7 @@ public class JacksonAnnotationsConversionToJacksonJsTest extends JacksonJsTest {
         super.setUp();
         tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(Vehicle.class));
         jacksonAnnotationsConversion = new JacksonAnnotationsConversionToJacksonJs();
+        jacksonAnnotationsConversion.setTypeIdResolver((currentClass, rootClass2) -> currentClass.getSimpleName());
         modelClassesConverter.getConversionListener().getConversionListenerSet().add(jacksonAnnotationsConversion);
         javaPackageSet = Collections.singleton("com.blueveery.springrest2ts.converters");
     }
@@ -157,10 +161,16 @@ public class JacksonAnnotationsConversionToJacksonJsTest extends JacksonJsTest {
         tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(Vehicle.class, Truck.class, Car.class));
         SortedSet<TSModule> tsModules = tsGenerator.convert(Sets.set(getClass().getPackage().getName()));
         TSClass vehicle = (TSClass) findTSComplexElement(tsModules, Vehicle.class.getSimpleName());
-        Optional<TSDecorator> jsonSubTypes = findDecorator(jacksonAnnotationsConversion.jsonSubTypesFunction, vehicle.getTsDecoratorList());
+        TSFunction jsonSubTypesFunction = jacksonAnnotationsConversion.jsonSubTypesFunction;
+        Optional<TSDecorator> jsonSubTypes = findDecorator(jsonSubTypesFunction, vehicle.getTsDecoratorList());
         assertThat(jsonSubTypes).isPresent();
-        TSLiteralArray tsLiteralArray = (TSLiteralArray) jsonSubTypes.get().getTsLiteralList().stream().findFirst().get();
-        assertThat(tsLiteralArray.getLiteralList()).hasSize(2);
+        TSLiteralArray tsLiteralArray = (TSLiteralArray) ((TSJsonLiteral) jsonSubTypes.get().getTsLiteralList().stream().findFirst().get()).getFieldMap().get("types");
+        assertThat(tsLiteralArray.getLiteralList()).hasSize(3);
+        assertThat(
+                vehicle.getTsDecoratorList().stream().filter(d -> d.getTsFunction() == jsonSubTypesFunction).count()
+        ).isOne();
         printTSElement(tsModules.first());
+        System.out.println("+++++++++++++++json+++++++++++++++");
+        System.out.println(jacksonObjectMapper.writeValueAsString(new Vehicle[]{new Truck(), new Car(), new Vehicle()}));
     }
 }
