@@ -22,6 +22,7 @@ public class JacksonAnnotationsConversionToJacksonJs extends TypeBasedConversion
 
     protected final TSFunction jsonTypeInfoFunction;
     protected final TSFunction jsonSubTypesFunction;
+    protected final TSFunction jsonTypeNameFunction;
     protected final TSEnum jsonTypeInfoIdEnum;
     protected final TSEnum JsonTypeInfoAs;
 
@@ -36,11 +37,11 @@ public class JacksonAnnotationsConversionToJacksonJs extends TypeBasedConversion
 
     public JacksonAnnotationsConversionToJacksonJs() {
         jsonTypeInfoFunction = new TSFunction("JsonTypeInfo", jacksonJSModule);
-        jsonSubTypesFunction = new TSFunction("JsonSubTypes", jacksonJSModule);;
+        jsonSubTypesFunction = new TSFunction("JsonSubTypes", jacksonJSModule);
+        jsonTypeNameFunction = new TSFunction("JsonTypeName", jacksonJSModule);
 
         jsonTypeInfoIdEnum = new TSEnum("JsonTypeInfoId", jacksonJSModule);
         JsonTypeInfoAs = new TSEnum("JsonTypeInfoAs", jacksonJSModule);
-
     }
 
     public BiFunction<Class, Class, String> getTypeIdResolver() {
@@ -86,8 +87,16 @@ public class JacksonAnnotationsConversionToJacksonJs extends TypeBasedConversion
         TSLiteralArray types = (TSLiteralArray) jsonLiteral.getFieldMap().get("types");
         TSJsonLiteral typeMapping = new TSJsonLiteral();
         typeMapping.getFieldMap().put("class", new TSArrowFunctionLiteral(new TSTypeLiteral(tsClass)));
-        typeMapping.getFieldMap().put("name", getTypeName(javaType, javaRoot));
+        ILiteral typeName = getTypeName(javaType, javaRoot);
+        typeMapping.getFieldMap().put("name", typeName);
         types.getLiteralList().add(typeMapping);
+
+        TSDecorator jsonTypeName = new TSDecorator(jsonTypeNameFunction);
+        TSJsonLiteral literal = new TSJsonLiteral();
+        literal.getFieldMap().put("value", typeName);
+        jsonTypeName.getTsLiteralList().add(literal);
+        tsClass.getTsDecoratorList().add(jsonTypeName);
+        tsClass.addScopedTypeUsage(jsonTypeNameFunction);
     }
 
     private TSDecorator getOrCreateJsonSubTypes(TSClass tsRoot) {
@@ -129,13 +138,13 @@ public class JacksonAnnotationsConversionToJacksonJs extends TypeBasedConversion
     }
 
     private TSDecorator addJsonSubTypesAnnotation(TSClass tsClass) {
-        TSDecorator jsonSubTypesFunctionDecorator = new TSDecorator(jsonSubTypesFunction);
+        TSDecorator jsonSubTypesDecorator = new TSDecorator(jsonSubTypesFunction);
         TSJsonLiteral literal = new TSJsonLiteral();
         literal.getFieldMap().put("types", new TSLiteralArray());
-        jsonSubTypesFunctionDecorator.getTsLiteralList().add(literal);
-        tsClass.getTsDecoratorList().add(jsonSubTypesFunctionDecorator);
+        jsonSubTypesDecorator.getTsLiteralList().add(literal);
+        tsClass.getTsDecoratorList().add(jsonSubTypesDecorator);
         tsClass.addScopedTypeUsage(jsonSubTypesFunction);
-        return jsonSubTypesFunctionDecorator;
+        return jsonSubTypesDecorator;
     }
 
     private void addJsonTypeInfoAnnotation(TSClass tsClass, JsonTypeInfo jsonTypeInfo) {

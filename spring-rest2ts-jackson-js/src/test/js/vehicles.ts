@@ -1,4 +1,12 @@
-import {JsonClassType, JsonProperty, JsonSubTypes, JsonTypeInfo, JsonTypeInfoAs, JsonTypeInfoId} from 'jackson-js';
+import {
+    JsonClassType,
+    JsonProperty,
+    JsonSubTypes,
+    JsonTypeInfo,
+    JsonTypeInfoAs,
+    JsonTypeInfoId,
+    JsonTypeName
+} from 'jackson-js';
 
 @JsonTypeInfo({
     include: JsonTypeInfoAs.PROPERTY,
@@ -16,6 +24,9 @@ import {JsonClassType, JsonProperty, JsonSubTypes, JsonTypeInfo, JsonTypeInfoAs,
         name: 'Vehicle'
     }]
 })
+@JsonTypeName({
+    value: 'Vehicle'
+})
 export class Vehicle {
     @JsonProperty()
     @JsonClassType({
@@ -24,8 +35,14 @@ export class Vehicle {
     "@type": string;
 }
 
+@JsonTypeName({
+    value: 'Car'
+})
 export class Car extends Vehicle {
 }
 
+@JsonTypeName({
+    value: 'Truck'
+})
 export class Truck extends Vehicle {
 }
