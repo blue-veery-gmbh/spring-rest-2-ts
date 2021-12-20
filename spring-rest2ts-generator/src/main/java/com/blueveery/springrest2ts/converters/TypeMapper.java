@@ -36,7 +36,6 @@ public class TypeMapper {
     public static TSType tsNumber = new TSSimpleType("number");
     public static TSType tsString = new TSSimpleType("string");
     public static TSType tsBoolean = new TSSimpleType("boolean");
-    public static TSType tsDate = new TSSimpleType("Date");
     public static TSType tsObject = new TSSimpleType("Object");
     public static TSType tsAny = new TSSimpleType("any");
     public static TSType tsNull = new TSSimpleType("null");
@@ -47,11 +46,12 @@ public class TypeMapper {
     public static TSType tsObjectBoolean = new TSSimpleType("Boolean");
 
     public static TSModule systemModule = new TSModule("system", Paths.get(""), true);
-
+    public static TSClass tsDate;
     public static TSClass tsSet;
     public static TSClass tsMap;
 
     static {
+        tsDate = new TSClass("Date", systemModule, new EmptyImplementationGenerator());
         tsSet = new TSClass("Set", systemModule, new EmptyImplementationGenerator(), new TSFormalTypeParameter("T"));
         tsSet.getMappedFromJavaTypeSet().add(Set.class);
 
@@ -125,7 +125,7 @@ public class TypeMapper {
                 return tsNumber;
             }
             if (javaClass.isAssignableFrom(Date.class)) {
-                return tsDate;
+                return wrapTypeInTypeReference(tsDate, Collections.emptyList());
             }
             if (javaClass.isArray()) {
                 return new TSArray(TypeMapper.map(javaClass.getComponentType(), fallbackType, typeParametersMap));

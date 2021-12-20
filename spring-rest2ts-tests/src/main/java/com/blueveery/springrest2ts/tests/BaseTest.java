@@ -12,11 +12,19 @@ import com.blueveery.springrest2ts.tests.model.Keyboard;
 import com.blueveery.springrest2ts.tests.model.KeyboardInterface;
 import com.blueveery.springrest2ts.tests.model.Product;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
+import com.blueveery.springrest2ts.tsmodel.TSDecorator;
+import com.blueveery.springrest2ts.tsmodel.TSElement;
+import com.blueveery.springrest2ts.tsmodel.TSFunction;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import org.junit.After;
 import org.junit.Before;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -53,5 +61,18 @@ public abstract class BaseTest<M extends ObjectMapper> {
                 .stream()
                 .filter(t -> name.equals(t.getName()))
                 .findFirst().get();
+    }
+
+    protected void printTSElement(TSElement tsClass) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
+        tsClass.write(writer);
+        writer.flush();
+    }
+
+    protected Optional<TSDecorator> findDecorator(TSFunction tsFunction, List<TSDecorator> decoratorList) {
+        return decoratorList
+                .stream()
+                .filter(d -> d.getTsFunction() == tsFunction)
+                .findFirst();
     }
 }
