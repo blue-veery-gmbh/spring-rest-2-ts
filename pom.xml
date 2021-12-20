@@ -53,6 +53,7 @@
         <module>spring-rest2ts-gson</module>
         <module>spring-rest2ts-tests</module>
         <module>spring-rest2ts-jackson-js</module>
+        <module>spring-rest2ts-class-transformer</module>
     </modules>
     <dependencies>
             <dependency>
