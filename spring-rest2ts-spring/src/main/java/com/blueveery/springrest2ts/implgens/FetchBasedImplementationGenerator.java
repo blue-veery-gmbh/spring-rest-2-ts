@@ -73,7 +73,9 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
             writer.write(requestParamsBuilder.toString());
             writer.newLine();
 
-            String requestOptions = composeRequestOptions(requestBodyVar, isRequestBodyDefined, httpMethod, methodRequestMapping.consumes());
+            String requestOptions = composeRequestOptions(
+                    requestBodyVar, isRequestBodyDefined, httpMethod, methodRequestMapping.consumes(), method.getType()
+            );
 
             writer.write(
                     "return fetch(" + requestUrlVar + ".toString(), {"
@@ -107,7 +109,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
             return "";
         } else {
             ModelSerializerExtension modelSerializerExtension = this.modelSerializerExtension;
-            parseFunction = modelSerializerExtension.generateDeserializationCode("res");
+            parseFunction = modelSerializerExtension.generateDeserializationCode("res", actualType);
             return ".then(res => res.text()).then(res =>  " + parseFunction + ")";
         }
         return ".then(res =>  " + parseFunction + ")";
@@ -128,13 +130,14 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     }
 
     protected String composeRequestOptions(
-            String requestBodyVar, boolean isRequestBodyDefined, String httpMethod, String[] consumesContentType
+            String requestBodyVar, boolean isRequestBodyDefined, String httpMethod, String[] consumesContentType,
+            TSType returnType
     ) {
         String requestOptions = "";
         List<String> requestOptionsList = new ArrayList<>();
         if (("PUT".equals(httpMethod) || "POST".equals(httpMethod)) && isRequestBodyDefined) {
             addContentTypeHeader(consumesContentType, requestOptionsList);
-            requestOptionsList.add("body: " + modelSerializerExtension.generateSerializationCode(requestBodyVar));
+            requestOptionsList.add("body: " + modelSerializerExtension.generateSerializationCode(requestBodyVar, returnType));
         }
 
         requestOptions += String.join(", ", requestOptionsList);

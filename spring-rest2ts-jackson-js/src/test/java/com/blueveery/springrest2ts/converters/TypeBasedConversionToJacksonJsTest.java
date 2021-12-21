@@ -35,6 +35,7 @@ import static com.blueveery.springrest2ts.converters.TypeMapper.tsObjectNumber;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsObjectString;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsSet;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsString;
+import static com.blueveery.springrest2ts.jacksonjs.JacksonJsTypeTransformer.jacksonJSModule;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TypeBasedConversionToJacksonJsTest extends JacksonJsTest {
@@ -159,7 +160,7 @@ public class TypeBasedConversionToJacksonJsTest extends JacksonJsTest {
     @Test
     public void decoratorsShouldBeImportedWhenAdded() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        TSImport tsImport = tsModules.first().getImportMap().get(typeBasedJacksonJsConversion.jacksonJSModule);
+        TSImport tsImport = tsModules.first().getImportMap().get(jacksonJSModule);
         assertThat(tsImport).isNotNull();
         assertThat(tsImport.getWhat()).contains(typeBasedJacksonJsConversion.jsonPropertyFunction);
         assertThat(tsImport.getWhat()).contains(typeBasedJacksonJsConversion.jsonClassTypeFunction);

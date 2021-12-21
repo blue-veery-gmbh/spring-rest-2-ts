@@ -1,7 +1,6 @@
 package com.blueveery.springrest2ts.implgens;
 
 import com.blueveery.springrest2ts.converters.TypeMapper;
-import com.blueveery.springrest2ts.extensions.ModelSerializerExtension;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSDecorator;
@@ -111,7 +110,10 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
 
             List<TSParameter> requestBodyParam = findRequestBodyParam(method);
             boolean isJsonSerializationRequired = !requestBodyParam.isEmpty() && isJsonTransformationRequired(requestBodyParam.get(0).getType());
-            requestOptions = composeRequestBody(requestBody, isRequestBodyDefined, requestOptions, httpMethod, isJsonSerializationRequired, methodRequestMapping.consumes());
+            requestOptions = composeRequestBody(
+                    requestBody, isRequestBodyDefined, requestOptions, httpMethod, isJsonSerializationRequired,
+                    methodRequestMapping.consumes(), method.getType()
+            );
             requestOptions = composeRequestOptions(requestHeadersVar, requestParamsVar, isRequestParamDefined, isRequestHeaderDefined, requestOptions, isJsonParsingRequired);
 
             tsPath = pathStringBuilder.toString();
@@ -135,13 +137,12 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
         writer.write("    return this." + FIELD_NAME_HTTP_SERVICE + "." + httpMethod + getGenericType(method, isJsonParsingRequired) + "("
                 + tsPath
                 + requestOptions
-                + ")" + getParseResponseFunction(isJsonParsingRequired) + ";");
+                + ")" + getParseResponseFunction(isJsonParsingRequired, method.getType()) + ";");
     }
 
-    protected String getParseResponseFunction(boolean isJsonResponse) {
+    protected String getParseResponseFunction(boolean isJsonResponse, TSType returnType) {
         if (isJsonResponse) {
-            ModelSerializerExtension modelSerializerExtension = this.modelSerializerExtension;
-            String parseFunction = modelSerializerExtension.generateDeserializationCode("res");
+            String parseFunction = modelSerializerExtension.generateDeserializationCode("res", returnType);
             return ".pipe(map(res => " + parseFunction + "))";
         }
         return "";
@@ -186,11 +187,11 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
 
     protected String composeRequestBody(
             String requestBody, boolean isRequestBodyDefined, String requestOptions, String httpMethod,
-            boolean isJsonParsingRequired, String[] consumes
+            boolean isJsonParsingRequired, String[] consumes, TSType returnType
     ) {
         if (isPutOrPostMethod(httpMethod)) {
             if (isRequestBodyDefined) {
-                requestOptions = appendRequestBodyPart(requestBody, requestOptions, isJsonParsingRequired, consumes);
+                requestOptions = appendRequestBodyPart(requestBody, requestOptions, isJsonParsingRequired, consumes, returnType);
             } else {
                 requestOptions += ", null ";
             }
@@ -199,10 +200,10 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
     }
 
     protected String appendRequestBodyPart(
-            String requestBody, String requestOptions, boolean isJsonParsingRequired, String[] consumes
+            String requestBody, String requestOptions, boolean isJsonParsingRequired, String[] consumes, TSType returnType
     ) {
         if (isJsonParsingRequired) {
-            requestOptions += ", " + modelSerializerExtension.generateSerializationCode(requestBody) + " ";
+            requestOptions += ", " + modelSerializerExtension.generateSerializationCode(requestBody, returnType) + " ";
         } else {
             requestOptions += ", " + requestBody + " ";
         }

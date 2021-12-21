@@ -18,6 +18,8 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.function.BiFunction;
 
+import static com.blueveery.springrest2ts.jacksonjs.JacksonJsTypeTransformer.jacksonJSModule;
+
 public class JacksonAnnotationsConversionToJacksonJs extends TypeBasedConversionToJacksonJs {
 
     protected final TSFunction jsonTypeInfoFunction;

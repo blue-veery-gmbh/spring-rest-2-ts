@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.SortedSet;
 
+import static com.blueveery.springrest2ts.jacksonjs.JacksonJsTypeTransformer.jacksonJSModule;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class JacksonAnnotationsConversionToJacksonJsTest extends JacksonJsTest {
@@ -40,7 +41,7 @@ public class JacksonAnnotationsConversionToJacksonJsTest extends JacksonJsTest {
     @Test
     public void jsonTypeInfoDecoratorShouldBeImportedWhenAdded() throws IOException {
         SortedSet<TSModule> tsModules = tsGenerator.convert(javaPackageSet);
-        TSImport tsImport = tsModules.first().getImportMap().get(jacksonAnnotationsConversion.jacksonJSModule);
+        TSImport tsImport = tsModules.first().getImportMap().get(jacksonJSModule);
         assertThat(tsImport).isNotNull();
         assertThat(tsImport.getWhat()).contains(jacksonAnnotationsConversion.jsonTypeInfoFunction);
         assertThat(tsImport.getWhat()).contains(jacksonAnnotationsConversion.jsonTypeInfoIdEnum);
