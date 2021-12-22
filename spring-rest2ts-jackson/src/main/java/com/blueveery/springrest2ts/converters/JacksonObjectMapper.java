@@ -259,7 +259,7 @@ public class JacksonObjectMapper implements ObjectMapper {
         }
 
 
-        TSField tsField = new TSField(property.getName(), tsComplexType, fieldType);
+        TSField tsField = new TSField(property.getName(), tsComplexType, fieldType, property);
         tsField.addAllAnnotations(property.getDeclaredAnnotations());
         if (!applyJsonIgnoreProperties(property, tsField)) {
             applyReadOnly(tsField, property);
