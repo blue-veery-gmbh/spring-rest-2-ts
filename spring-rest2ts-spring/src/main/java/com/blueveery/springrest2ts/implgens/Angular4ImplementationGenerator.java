@@ -11,7 +11,6 @@ import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSParameter;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.BufferedWriter;
@@ -20,7 +19,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getRequestMapping;
 
@@ -108,11 +107,12 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
             String requestOptions = "";
             String requestBody = requestBodyBuilder.toString();
 
-            List<TSParameter> requestBodyParam = findRequestBodyParam(method);
-            boolean isJsonSerializationRequired = !requestBodyParam.isEmpty() && isJsonTransformationRequired(requestBodyParam.get(0).getType());
+            List<TSParameter> requestBodyParams = findRequestBodyParam(method);
+            Optional<TSParameter> requestBodyParam = requestBodyParams.stream().findFirst();
+            boolean isJsonSerializationRequired = requestBodyParam.isPresent() && isJsonTransformationRequired(requestBodyParam.get().getType());
             requestOptions = composeRequestBody(
                     requestBody, isRequestBodyDefined, requestOptions, httpMethod, isJsonSerializationRequired,
-                    methodRequestMapping.consumes(), method.getType()
+                    methodRequestMapping.consumes(), requestBodyParam
             );
             requestOptions = composeRequestOptions(requestHeadersVar, requestParamsVar, isRequestParamDefined, isRequestHeaderDefined, requestOptions, isJsonParsingRequired);
 
@@ -121,28 +121,17 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
         }
     }
 
-    private List<TSParameter> findRequestBodyParam(TSMethod method) {
-        return method.getParameterList()
-                .stream()
-                .filter(
-                        p -> p.getAnnotationList()
-                                .stream()
-                                .anyMatch(a -> a instanceof RequestBody)
-                )
-                .collect(Collectors.toList());
-    }
-
     protected void writeReturnStatement(BufferedWriter writer, String httpMethod, TSMethod method,
                                         String tsPath, String requestOptions, boolean isJsonParsingRequired) throws IOException {
         writer.write("    return this." + FIELD_NAME_HTTP_SERVICE + "." + httpMethod + getGenericType(method, isJsonParsingRequired) + "("
                 + tsPath
                 + requestOptions
-                + ")" + getParseResponseFunction(isJsonParsingRequired, method.getType()) + ";");
+                + ")" + getParseResponseFunction(isJsonParsingRequired, method) + ";");
     }
 
-    protected String getParseResponseFunction(boolean isJsonResponse, TSType returnType) {
+    protected String getParseResponseFunction(boolean isJsonResponse, TSMethod method) {
         if (isJsonResponse) {
-            String parseFunction = modelSerializerExtension.generateDeserializationCode("res", returnType);
+            String parseFunction = modelSerializerExtension.generateDeserializationCode("res", method);
             return ".pipe(map(res => " + parseFunction + "))";
         }
         return "";
@@ -187,11 +176,11 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
 
     protected String composeRequestBody(
             String requestBody, boolean isRequestBodyDefined, String requestOptions, String httpMethod,
-            boolean isJsonParsingRequired, String[] consumes, TSType returnType
+            boolean isJsonParsingRequired, String[] consumes, Optional<TSParameter> requestBodyParam
     ) {
         if (isPutOrPostMethod(httpMethod)) {
             if (isRequestBodyDefined) {
-                requestOptions = appendRequestBodyPart(requestBody, requestOptions, isJsonParsingRequired, consumes, returnType);
+                requestOptions = appendRequestBodyPart(requestBody, requestOptions, isJsonParsingRequired, consumes, requestBodyParam.get());
             } else {
                 requestOptions += ", null ";
             }
@@ -200,10 +189,10 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
     }
 
     protected String appendRequestBodyPart(
-            String requestBody, String requestOptions, boolean isJsonParsingRequired, String[] consumes, TSType returnType
+            String requestBody, String requestOptions, boolean isJsonParsingRequired, String[] consumes, TSParameter requestBodyParam
     ) {
         if (isJsonParsingRequired) {
-            requestOptions += ", " + modelSerializerExtension.generateSerializationCode(requestBody, returnType) + " ";
+            requestOptions += ", " + modelSerializerExtension.generateSerializationCode(requestBody, requestBodyParam) + " ";
         } else {
             requestOptions += ", " + requestBody + " ";
         }

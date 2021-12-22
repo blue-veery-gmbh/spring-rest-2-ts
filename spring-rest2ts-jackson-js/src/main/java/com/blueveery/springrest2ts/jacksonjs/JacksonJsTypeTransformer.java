@@ -5,12 +5,15 @@ import com.blueveery.springrest2ts.tsmodel.ILiteral;
 import com.blueveery.springrest2ts.tsmodel.TSArray;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSElement;
+import com.blueveery.springrest2ts.tsmodel.TSEnum;
+import com.blueveery.springrest2ts.tsmodel.TSLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSLiteralArray;
 import com.blueveery.springrest2ts.tsmodel.TSMap;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.TSTypeLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSUnion;
+import com.blueveery.springrest2ts.tsmodel.generics.TSFormalTypeParameter;
 import com.blueveery.springrest2ts.tsmodel.generics.TSParameterizedTypeReference;
 
 import java.util.Collection;
@@ -21,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsAny;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsObject;
+import static com.blueveery.springrest2ts.converters.TypeMapper.tsObjectNumber;
 
 public class JacksonJsTypeTransformer {
     public static final TSModule jacksonJSModule = new TSModule("jackson-js", null, true);
@@ -47,8 +51,12 @@ public class JacksonJsTypeTransformer {
             return new TSLiteralArray(new TSTypeLiteral(tsArray), wrapIntoTSLiteralArray(convertToTypeLiteral(tsArray.getElementType())));
         }
 
-        if (sourceType == tsAny || sourceType instanceof TSMap) {
+        if (sourceType == tsAny || sourceType instanceof TSMap || sourceType instanceof TSFormalTypeParameter) {
             return new TSLiteralArray(new TSTypeLiteral(tsObject));
+        }
+
+        if (sourceType instanceof TSEnum) {
+            return new TSLiteralArray(new TSTypeLiteral(tsObjectNumber));
         }
 
         if (sourceType instanceof TSParameterizedTypeReference) {
@@ -73,6 +81,9 @@ public class JacksonJsTypeTransformer {
                             )
                     );
                 }
+            }
+            if (!parameterizedTypeReference.getTsTypeParameterList().isEmpty()) {
+                return new TSLiteral("", tsAny, ((TSParameterizedTypeReference<?>) sourceType).getReferencedType().getName());
             }
         }
 

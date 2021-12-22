@@ -26,11 +26,11 @@ public interface ModelSerializerExtension {
         throw new UnsupportedOperationException();
     }
 
-    default String generateSerializationCode(String modelVariableName, TSType returnType) {
+    default String generateSerializationCode(String modelVariableName, TSParameter tsParameter) {
         return generateSerializationCode(modelVariableName);
     }
 
-    default String generateDeserializationCode(String modelVariableName, TSType returnType) {
+    default String generateDeserializationCode(String modelVariableName, TSMethod tsMethod) {
         return generateDeserializationCode(modelVariableName);
     }
 }

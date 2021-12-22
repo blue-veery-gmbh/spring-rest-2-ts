@@ -36,7 +36,6 @@ public class TypeMapper {
     public static TSType tsNumber = new TSSimpleType("number");
     public static TSType tsString = new TSSimpleType("string");
     public static TSType tsBoolean = new TSSimpleType("boolean");
-    public static TSType tsDate = new TSSimpleType("Date");
     public static TSType tsObject = new TSSimpleType("Object");
     public static TSType tsAny = new TSSimpleType("any");
     public static TSType tsNull = new TSSimpleType("null");
@@ -48,10 +47,14 @@ public class TypeMapper {
 
     public static TSModule systemModule = new TSModule("system", Paths.get(""), true);
 
+    public static TSClass tsArrayCollection;
     public static TSClass tsSet;
     public static TSClass tsMap;
-
+    public static TSClass tsDate;
     static {
+        tsArrayCollection = new TSClass("Array", systemModule, new EmptyImplementationGenerator(), new TSFormalTypeParameter("T"));
+        tsArrayCollection.getMappedFromJavaTypeSet().add(Collection.class);
+
         tsSet = new TSClass("Set", systemModule, new EmptyImplementationGenerator(), new TSFormalTypeParameter("T"));
         tsSet.getMappedFromJavaTypeSet().add(Set.class);
 
@@ -60,6 +63,7 @@ public class TypeMapper {
                 new TSFormalTypeParameter("K"), new TSFormalTypeParameter("V")
         );
         tsMap.getMappedFromJavaTypeSet().add(Map.class);
+        tsDate = new TSClass("Date", systemModule, new EmptyImplementationGenerator());
     }
 
     private static Map<Class, TSType> complexTypeMap = new HashMap<>();

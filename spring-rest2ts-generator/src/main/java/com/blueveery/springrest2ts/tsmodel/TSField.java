@@ -9,6 +9,7 @@ import java.io.IOException;
 public class TSField extends TSComplexTypeMember {
     private boolean optional;
     private boolean readOnly;
+    private ILiteral initializationStatement;
 
     public TSField(String name, TSComplexElement owner, TSType type) {
         super(name, owner, type);
@@ -31,6 +32,14 @@ public class TSField extends TSComplexTypeMember {
         return readOnly;
     }
 
+    public ILiteral getInitializationStatement() {
+        return initializationStatement;
+    }
+
+    public void setInitializationStatement(ILiteral initializationStatement) {
+        this.initializationStatement = initializationStatement;
+    }
+
     @Override
     public void write(BufferedWriter writer) throws IOException {
         tsComment.write(writer);
@@ -50,6 +59,10 @@ public class TSField extends TSComplexTypeMember {
             } else {
                 writer.write(type.getName());
             }
+        }
+        if (initializationStatement != null) {
+            writer.write(" = ");
+            initializationStatement.write(writer);
         }
         writer.write(";");
     }

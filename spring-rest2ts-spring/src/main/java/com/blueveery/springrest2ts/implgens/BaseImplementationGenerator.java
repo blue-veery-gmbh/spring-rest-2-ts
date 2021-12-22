@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class BaseImplementationGenerator implements ImplementationGenerator {
 
@@ -24,6 +25,17 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
     protected List<? extends ConversionExtension> extensionSet;
 
     protected ModelSerializerExtension modelSerializerExtension = new StandardJsonSerializerExtension();
+
+    protected List<TSParameter> findRequestBodyParam(TSMethod method) {
+        return method.getParameterList()
+                .stream()
+                .filter(
+                        p -> p.getAnnotationList()
+                                .stream()
+                                .anyMatch(a -> a instanceof RequestBody)
+                )
+                .collect(Collectors.toList());
+    }
 
     protected abstract void initializeHttpParams(StringBuilder requestParamsBuilder, String requestParamsVar);
 

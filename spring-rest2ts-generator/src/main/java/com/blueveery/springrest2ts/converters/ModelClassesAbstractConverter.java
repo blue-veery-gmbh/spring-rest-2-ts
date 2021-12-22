@@ -24,6 +24,14 @@ public abstract class ModelClassesAbstractConverter extends ClassConverter<Model
         this.defaultObjectMapper = objectMapper;
     }
 
+    public ObjectMapper getDefaultObjectMapper() {
+        return defaultObjectMapper;
+    }
+
+    public void setDefaultObjectMapper(ObjectMapper defaultObjectMapper) {
+        this.defaultObjectMapper = defaultObjectMapper;
+    }
+
     public Map<String, ObjectMapper> getObjectMapperMap() {
         return objectMapperMap;
     }

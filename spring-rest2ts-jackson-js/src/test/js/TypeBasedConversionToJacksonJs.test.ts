@@ -1,4 +1,5 @@
 import {JsonClassType, JsonProperty, ObjectMapper} from "jackson-js";
+import {Order, OrderPaymentStatus} from "./enums";
 
 describe("checks for jackson-js annotation generated based on java type info", () => {
     const objectMapper = new ObjectMapper();
@@ -174,5 +175,15 @@ describe("checks for jackson-js annotation generated based on java type info", (
         expect(user.datesMap).toBeInstanceOf(Map)
         expect(user.datesMap.get('today')).toBeInstanceOf(Date)
         expect(user.datesMap.size).toEqual(1)
+    })
+
+    test("enums should be serialized and deserialized with proper type", () => {
+        const order = new Order();
+        order.paymentStatus = OrderPaymentStatus.PAYMENT_FAILED
+        let jsonData = objectMapper.stringify(order);
+
+        const clonedOrder = objectMapper.parse<Order>(jsonData, {mainCreator: () => [Order]});
+        expect(clonedOrder).toBeInstanceOf(Order)
+        expect(clonedOrder.paymentStatus).toBe(OrderPaymentStatus.PAYMENT_FAILED)
     })
 })

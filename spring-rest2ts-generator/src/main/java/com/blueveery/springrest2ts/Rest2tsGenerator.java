@@ -91,8 +91,16 @@ public class Rest2tsGenerator {
         this.modelClassesConverter = modelClassesConverter;
     }
 
+    public ModelClassesAbstractConverter getModelClassesConverter() {
+        return modelClassesConverter;
+    }
+
     public void setRestClassesConverter(RestClassConverter restClassesConverter) {
         this.restClassesConverter = restClassesConverter;
+    }
+
+    public RestClassConverter getRestClassesConverter() {
+        return restClassesConverter;
     }
 
     public void setNullableTypesStrategy(NullableTypesStrategy nullableTypesStrategy) {

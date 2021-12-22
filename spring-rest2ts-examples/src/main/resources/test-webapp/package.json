@@ -21,6 +21,7 @@
   "dependencies": {
     "@angular/common": "^8.2.3",
     "@angular/core": "^8.2.3",
+    "jackson-js": "^1.1.0",
     "rxjs": "^6.5.2",
     "rxjs-compat": "^6.5.2"
   }

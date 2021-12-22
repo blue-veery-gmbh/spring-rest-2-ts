@@ -15,9 +15,11 @@ import com.blueveery.springrest2ts.tsmodel.TSDecorator;
 import com.blueveery.springrest2ts.tsmodel.TSImport;
 import com.blueveery.springrest2ts.tsmodel.TSInterface;
 import com.blueveery.springrest2ts.tsmodel.TSJsonLiteral;
+import com.blueveery.springrest2ts.tsmodel.TSLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSLiteralArray;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
 import com.blueveery.springrest2ts.tsmodel.TSTypeLiteral;
+import org.assertj.core.util.Sets;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,6 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 
+import static com.blueveery.springrest2ts.converters.TypeMapper.tsAny;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsDate;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsMap;
 import static com.blueveery.springrest2ts.converters.TypeMapper.tsObject;
@@ -143,6 +146,43 @@ public class TypeBasedConversionToJacksonJsTest extends JacksonJsTest {
         tsGenerator.getCustomTypeMappingForClassHierarchy().put(Map.class, tsMap);
         ILiteral[] expectedTypeLiteral = {new TSTypeLiteral(tsMap), new TSLiteralArray(new TSTypeLiteral(tsObjectString), new TSTypeLiteral(tsDate))};
         checkJsonClassType("datesMap", User.class, expectedTypeLiteral);
+    }
+
+    @Test
+    public void fieldWithGenericTypeShouldHaveJsonClassTypeWithCorrectType() throws IOException {
+        class ValueContainer<T> {
+            T value;
+        }
+        class ValueContainerRef {
+            ValueContainer<String> ref;
+        }
+        tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(ValueContainer.class, ValueContainerRef.class));
+        SortedSet<TSModule> tsModules = tsGenerator.convert(Sets.set(this.getClass().getPackage().getName()));
+
+        ILiteral expectedTypeLiteral = new TSLiteral("", tsAny, "ValueContainer");
+        checkJsonClassType("ref", ValueContainerRef.class, expectedTypeLiteral);
+
+        expectedTypeLiteral = new TSTypeLiteral(tsObject);
+        checkJsonClassType("value", ValueContainer.class, expectedTypeLiteral);
+    }
+
+    enum OrderPaymentStatus {
+        UNPAID,
+        PAYMENT_CONFIRMED,
+        PAYMENT_FAILED
+    }
+    @Test
+    public void fieldWithEnumTypeShouldHaveJsonClassTypeWithCorrectType() throws IOException {
+        class Order {
+            OrderPaymentStatus paymentStatus;
+        }
+        tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(OrderPaymentStatus.class, Order.class));
+        SortedSet<TSModule> tsModules = tsGenerator.convert(Sets.set(this.getClass().getPackage().getName()));
+
+        ILiteral expectedTypeLiteral = new TSTypeLiteral( tsObjectNumber);
+        checkJsonClassType("paymentStatus", Order.class, expectedTypeLiteral);
+        System.out.println("******module******");
+        printTSElement(tsModules.first());
     }
 
     @Test

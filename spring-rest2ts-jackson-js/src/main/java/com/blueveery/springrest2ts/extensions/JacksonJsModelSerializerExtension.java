@@ -1,10 +1,14 @@
 package com.blueveery.springrest2ts.extensions;
 
+import com.blueveery.springrest2ts.converters.TypeMapper;
 import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.ILiteral;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
-import com.blueveery.springrest2ts.tsmodel.TSType;
+import com.blueveery.springrest2ts.tsmodel.TSField;
+import com.blueveery.springrest2ts.tsmodel.TSLiteral;
+import com.blueveery.springrest2ts.tsmodel.TSMethod;
+import com.blueveery.springrest2ts.tsmodel.TSParameter;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -15,22 +19,47 @@ import static com.blueveery.springrest2ts.jacksonjs.JacksonJsTypeTransformer.jac
 import static com.blueveery.springrest2ts.jacksonjs.JacksonJsTypeTransformer.wrapIntoTSLiteralArray;
 
 public class JacksonJsModelSerializerExtension implements ModelSerializerExtension {
-    private final TSClass objectMapper;
+    private final TSClass objectMapperClass;
+    private String objectMapperFieldName = "objectMapper";
 
     public JacksonJsModelSerializerExtension() {
-        objectMapper = new TSClass("ObjectMapper", jacksonJSModule, new EmptyImplementationGenerator());
+        objectMapperClass = new TSClass("ObjectMapper", jacksonJSModule, new EmptyImplementationGenerator());
     }
 
     @Override
     public void addComplexTypeUsage(TSComplexElement tsComplexElement) {
-        tsComplexElement.addScopedTypeUsage(objectMapper);
+        tsComplexElement.addScopedTypeUsage(objectMapperClass);
     }
 
     @Override
-    public String generateSerializationCode(String modelVariableName, TSType returnType) {
+    public void addImplementationSpecificFields(TSComplexElement tsComplexElement) {
+        if (tsComplexElement instanceof TSClass) {
+            TSClass tsParentClass = (TSClass) tsComplexElement;
+            while (tsParentClass.getExtendsClass() != null) {
+                tsParentClass = tsParentClass.getExtendsClass().getReferencedType();
+            }
+            TSField objectMapperField = tsParentClass.getFieldByName(objectMapperFieldName);
+            if (objectMapperField == null) {
+                objectMapperField = new TSField(objectMapperFieldName, tsParentClass, objectMapperClass);
+                objectMapperField.setReadOnly(true);
+                objectMapperField.setInitializationStatement(new TSLiteral("", TypeMapper.tsAny, "new ObjectMapper()"));
+                tsParentClass.addTsField(objectMapperField);
+                tsParentClass.addScopedTypeUsage(objectMapperClass);
+            }
+        }
+    }
+
+    @Override
+    public String generateSerializationCode(String modelVariableName, TSParameter tsParameter) {
         StringBuilder stringifyStatement = new StringBuilder();
-        stringifyStatement.append("objectMapper.stringify<");
-        stringifyStatement.append(returnType.getName());
+        if (tsParameter.isOptional() || tsParameter.isNullable()) {
+            stringifyStatement.append(modelVariableName);
+            stringifyStatement.append(" && ");
+        }
+        stringifyStatement.append("this.");
+        stringifyStatement.append(objectMapperFieldName);
+        stringifyStatement.append(".stringify<");
+        stringifyStatement.append(tsParameter.getType().getName());
         stringifyStatement.append(">(");
         stringifyStatement.append(modelVariableName);
         stringifyStatement.append(")");
@@ -38,15 +67,21 @@ public class JacksonJsModelSerializerExtension implements ModelSerializerExtensi
     }
 
     @Override
-    public String generateDeserializationCode(String modelVariableName, TSType returnType) {
+    public String generateDeserializationCode(String modelVariableName, TSMethod tsMethod) {
         try {
             StringBuilder parseStatement = new StringBuilder();
-            parseStatement.append("objectMapper.parse<");
-            parseStatement.append(returnType.getName());
+            if (tsMethod.isNullable()) {
+                parseStatement.append(modelVariableName);
+                parseStatement.append(" && ");
+            }
+            parseStatement.append("this.");
+            parseStatement.append(objectMapperFieldName);
+            parseStatement.append(".parse<");
+            parseStatement.append(tsMethod.getType().getName());
             parseStatement.append(">(");
             parseStatement.append(modelVariableName);
             parseStatement.append(", {mainCreator: () => ");
-            ILiteral iLiteral = wrapIntoTSLiteralArray(convertToTypeLiteral(returnType));
+            ILiteral iLiteral = wrapIntoTSLiteralArray(convertToTypeLiteral(tsMethod.getType()));
             StringWriter stringWriter = new StringWriter();
             BufferedWriter writer = new BufferedWriter(stringWriter);
             iLiteral.write(writer);
