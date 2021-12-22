@@ -86,6 +86,13 @@ public abstract class TSComplexElement extends TSScopedElement implements IDecor
             TSParameterizedTypeReference typeReference = (TSParameterizedTypeReference) tsType;
             module.scopedTypeUsage(typeReference);
         }
+        if(tsType instanceof TSUnion){
+            TSUnion tsUnion = (TSUnion) tsType;
+            tsUnion.getJoinedTsElementList().stream()
+                    .filter(e -> e instanceof TSType)
+                    .map(e -> (TSType)e)
+                    .forEach(this::addScopedTypeUsage);
+        }
     }
 
     protected void writeMembers(BufferedWriter writer) throws IOException {
