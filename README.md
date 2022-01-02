@@ -386,6 +386,10 @@ For Java `JsonTypeInfo.include()` following settings how to include in the JSON 
    + `WRAPPER_OBJECT` mapped to `WRAPPER_OBJECT`
    + `WRAPPER_ARRAY` mapped to `WRAPPER_ARRAY`
 
+Classes in one inheritance hierarchy must be mapped to the same TS module because derived types are used on the top level
+class in `JacksonJs` decorators, which will cause circular dependencies between modules but the same problem will be at the
+backend with packages.
+
 ### Custom type mapping for class hierarchy
 Having possibility to map JSON to real ES6 class instances, `tsGenerator` has new mapping `customTypeMappingForClassHierarchy`
 which allows to map Java class and all derived classes to specified TypeScript class. It makes sens mainly for collections.
@@ -405,7 +409,9 @@ Settings above will map all Java
 in case where Java inheritance trees overlaps like for  `Collection` and `Set` the nearest Java type is selected so in this case 
 `HashSet` will be mapped to JS `Set` not to `Array`
 
-JS `Date` is supported if it is serialized to number, the same is for `Enum`s  
+JS `Date` is supported if it is serialized to number, the same is for `Enum`s. To add support for other `JacksonJS` 
+decorators, users could create own conversion listener and add it together with `JacksonAnnotationsConversionToJacksonJs`
+to model converter. In `JacksonAnnotationsConversionToJacksonJs` we tried to add only the most basic `JacksonJs` decorators.
 
 <b style="color:red">
 We must add that `jackson-js` is not actively supported at this moment, but it is the best library for this purpose which 
