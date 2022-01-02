@@ -91,13 +91,9 @@ public class ModelClassesToTsAngular2JsonApiConverter
         TSDecorator jsonApiModelConfigDecorator = new TSDecorator(jsonApiModelConfigFunction);
         TSJsonLiteral jsonApiModelConfigParam = new TSJsonLiteral();
 
-        String typeName = null;
         JsonApiModelConfig jsonApiModelConfig = (JsonApiModelConfig) javaClass.getAnnotation(JsonApiModelConfig.class);
-        if (jsonApiModelConfig != null) {
-            typeName = jsonApiModelConfig.type();
-        } else {
-            typeName = tsClass.getName().toLowerCase() + "s";
-        }
+        String typeName = jsonApiModelConfig != null ? jsonApiModelConfig.type() : tsClass.getName().toLowerCase() + "s";
+
         jsonApiModelConfigParam.getFieldMap().put("type", new TSLiteral("", TypeMapper.tsString, typeName));
         jsonApiModelConfigDecorator.getTsLiteralList().add(jsonApiModelConfigParam);
 

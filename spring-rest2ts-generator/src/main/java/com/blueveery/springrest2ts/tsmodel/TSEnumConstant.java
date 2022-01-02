@@ -22,8 +22,4 @@ public class TSEnumConstant extends TSElement {
     public void setOwner(TSEnum tsEnum) {
         this.owner = tsEnum;
     }
-
-    public String getFQName() {
-        return owner.getName()+"."+getName();
-    }
 }

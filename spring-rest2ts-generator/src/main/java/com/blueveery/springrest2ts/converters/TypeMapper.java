@@ -160,8 +160,8 @@ public class TypeMapper {
 
     public static Optional<Class> findNearestHierarchyRoot(Set<Class> roots, Type currentType) {
         class TypeDistance implements Comparable<TypeDistance> {
-            public Class type;
-            public int distance;
+            public final Class type;
+            public final int distance;
 
             public TypeDistance(Class type, int distance) {
                 this.type = type;

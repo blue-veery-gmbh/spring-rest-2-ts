@@ -4,7 +4,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 
 public class TSArrowFunctionLiteral implements ILiteral {
-    ILiteral returnValue;
+    private final ILiteral returnValue;
 
     public TSArrowFunctionLiteral(ILiteral returnValue) {
         this.returnValue = returnValue;

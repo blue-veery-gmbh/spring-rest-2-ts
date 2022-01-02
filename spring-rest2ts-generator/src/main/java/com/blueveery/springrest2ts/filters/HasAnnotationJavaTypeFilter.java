@@ -9,21 +9,21 @@ import java.lang.annotation.Target;
 import java.util.stream.Stream;
 
 public class HasAnnotationJavaTypeFilter implements JavaTypeFilter {
-    Class annotation;
+    private final Class annotation;
 
     public HasAnnotationJavaTypeFilter(Class annotation) {
         if (!annotation.isAnnotation()) {
-            throw new IllegalStateException("Annotation required");
+            throw new IllegalArgumentException("Annotation required");
         }
 
         Target targetAnnotation = (Target) annotation.getAnnotation(Target.class);
         if (targetAnnotation != null && Stream.of(targetAnnotation.value()).noneMatch(t -> t == ElementType.TYPE)) {
-            throw new IllegalStateException(annotation.getSimpleName() + " is not a type annotation");
+            throw new IllegalArgumentException(annotation.getSimpleName() + " is not a type annotation");
         }
 
         Retention retentionAnnotation = (Retention) annotation.getAnnotation(Retention.class);
         if (retentionAnnotation != null && retentionAnnotation.value() != RetentionPolicy.RUNTIME) {
-            throw new IllegalStateException(annotation.getSimpleName() + " is not a runtime annotation");
+            throw new IllegalArgumentException(annotation.getSimpleName() + " is not a runtime annotation");
         }
 
         this.annotation = annotation;

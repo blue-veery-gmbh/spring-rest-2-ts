@@ -56,14 +56,14 @@ public class JacksonJsModelSerializerExtension implements ModelSerializerExtensi
             stringifyStatement.append(modelVariableName);
             stringifyStatement.append(" && ");
         }
-        stringifyStatement.append("this.");
-        stringifyStatement.append(objectMapperFieldName);
-        stringifyStatement.append(".stringify<");
-        stringifyStatement.append(tsParameter.getType().getName());
-        stringifyStatement.append(">(");
-        stringifyStatement.append(modelVariableName);
-        stringifyStatement.append(")");
-        return stringifyStatement.toString();
+        return stringifyStatement.append("this.")
+                .append(objectMapperFieldName)
+                .append(".stringify<")
+                .append(tsParameter.getType().getName())
+                .append(">(")
+                .append(modelVariableName)
+                .append(")")
+                .toString();
     }
 
     @Override

@@ -61,11 +61,7 @@ public class ModelClassesToTsClassesConverter extends ModelClassesAbstractConver
 
             TSType superClass = TypeMapper.map(javaClass.getAnnotatedSuperclass().getType());
             TSClassReference tsSuperClassReference;
-            if (superClass instanceof TSClassReference) {
-                tsSuperClassReference = (TSClassReference) superClass;
-            } else {
-                tsSuperClassReference = getDefaultBaseClass();
-            }
+            tsSuperClassReference =  superClass instanceof TSClassReference ? (TSClassReference) superClass : getDefaultBaseClass();
 
             if (tsSuperClassReference != null) {
                 tsClass.setExtendsClass(tsSuperClassReference);

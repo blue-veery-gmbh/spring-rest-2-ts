@@ -15,7 +15,7 @@ import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.function.BiFunction;
 
 import static com.blueveery.springrest2ts.jacksonjs.JacksonJsTypeTransformer.jacksonJSModule;
@@ -174,7 +174,7 @@ public class JacksonAnnotationsConversionToJacksonJs extends TypeBasedConversion
     }
 
     private void convertJsonTypeInfoUse(TSClass tsClass, JsonTypeInfo jsonTypeInfo, TSJsonLiteral jsonTypeInfoLiteral) {
-        if (Arrays.asList(JsonTypeInfo.Id.NAME, JsonTypeInfo.Id.CLASS, JsonTypeInfo.Id.MINIMAL_CLASS).contains(jsonTypeInfo.use())) {
+        if (EnumSet.of(JsonTypeInfo.Id.NAME, JsonTypeInfo.Id.CLASS, JsonTypeInfo.Id.MINIMAL_CLASS).contains(jsonTypeInfo.use())) {
             jsonTypeInfoLiteral.getFieldMap().put("use", new TSLiteral("", TypeMapper.tsAny, "JsonTypeInfoId.NAME"));
             tsClass.addScopedTypeUsage(jsonTypeInfoIdEnum);
         } else {
