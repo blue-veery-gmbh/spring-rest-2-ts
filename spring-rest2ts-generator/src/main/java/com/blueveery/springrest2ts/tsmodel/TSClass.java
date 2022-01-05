@@ -1,8 +1,10 @@
 package com.blueveery.springrest2ts.tsmodel;
 
 
+import com.blueveery.springrest2ts.implgens.EmptyImplementationGenerator;
 import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.generics.TSClassReference;
+import com.blueveery.springrest2ts.tsmodel.generics.TSFormalTypeParameter;
 import com.blueveery.springrest2ts.tsmodel.generics.TSInterfaceReference;
 
 import java.io.BufferedWriter;
@@ -25,6 +27,17 @@ public class TSClass extends TSComplexElement {
         isAbstract = false;
     }
 
+    public TSClass(String name, TSModule module) {
+        this(name, module, new EmptyImplementationGenerator());
+    }
+
+    public TSClass(
+            String name, TSModule module,
+            ImplementationGenerator implementationGenerator,
+            TSFormalTypeParameter... formalTypeParameters
+    ) {
+        super(name, module, implementationGenerator, formalTypeParameters);
+    }
 
     public TSClassReference getExtendsClass() {
         return extendsClass;

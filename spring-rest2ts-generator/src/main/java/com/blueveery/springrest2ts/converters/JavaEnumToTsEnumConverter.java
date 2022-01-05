@@ -35,7 +35,7 @@ public class JavaEnumToTsEnumConverter extends ComplexTypeConverter {
     public void convert(Class javaClass, NullableTypesStrategy nullableTypesStrategy) {
         TSEnum tsEnum = (TSEnum) TypeMapper.map(javaClass);
         for (Object enumConstant : javaClass.getEnumConstants()) {
-            tsEnum.getTsEnumConstantList().add(new TSEnumConstant(((Enum) enumConstant).name()));
+            tsEnum.add(((Enum) enumConstant).name());
         }
         tsEnum.addAllAnnotations(javaClass.getAnnotations());
         conversionListener.tsScopedTypeCreated(javaClass, tsEnum);

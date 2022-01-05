@@ -56,6 +56,10 @@ public class TSModule extends TSElement implements ICommentedElement {
         return scopedTypesSet;
     }
 
+    public Map<TSModule, TSImport> getImportMap() {
+        return importMap;
+    }
+
     @Override
     public TSComment getTsComment() {
         return tsComment;

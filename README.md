@@ -4,7 +4,10 @@ spring-rest2ts-generator generates TypeScript code based on Spring MVC REST cont
 spring-rest2ts-generator started from Spring MVC but we noticed that it is easy to support also JAX-RS annotations and such support
 has been added in version 1.2.4. For model conversion Jackson or Gson annotations could be used.
 
-In version 1.2.4 we also added support for [angular2-jsonapi](https://github.com/ghidoz/angular2-jsonapi) which is a lightweight Angular2+ adapter for JSON API 
+In version 1.4.0 there is added support for [jackson-js](https://github.com/pichillilorenzo/jackson-js) library which 
+allows to deserialize JSON to ES6 classes which gives possibility to use in the model types which are missing in the JSON like
+Date, Map, Set and in the code we can use `intanceof` operator on instances. Details are in the paragraph 
+[Jackon-js  conversion listener](#jackon-js-conversion-listener-since-ver-1-4-0)
  
  
 # Features
@@ -36,6 +39,7 @@ generated code will reflect these changes which will avoid compile-time error in
    + model converter which generates TypeScript classes aligned with angular2-jsonapi library       
    + model serializers extension which allows to configure custom JSON serializers/deserializers : since ver 1.2.6       
    + Gson serializer support since version 1.3.0
+   + jackson-js support since version 1.4.0
    
 ## Installation 
 To add a dependency on spring-rest2ts-generator using Maven, use the following:
@@ -43,41 +47,47 @@ To add a dependency on spring-rest2ts-generator using Maven, use the following:
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-generator</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-spring</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-spring-data</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
     <!-- only if spring data is used-->
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-jackson</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-jax-rs</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
     <!-- only if JAX-RS is used-->
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-angular2json-impl</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
     <!-- only if angular2json is used-->
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-gson</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
     <!-- only if Gson is used-->
+</dependency>
+<dependency>
+    <groupId>com.blue-veery</groupId>
+    <artifactId>spring-rest2ts-jackson-js</artifactId>
+    <version>1.4.0</version>
+    <!-- only if jackson-js is used-->
 </dependency>
 ```          
            
@@ -245,9 +255,9 @@ There are following filters which allows to build complex conditions:
 ## Java model classes converter
 Java classes which describe payload model are generated to TypeScript interfaces. Java collections are converted into 
 JavaScript arrays, Java Map is converted into object where key has a string type and value is converted Typescript Type
-During model serialization to JSON, object mapper is applying some mappings(some of them are required for example in JSON, Date type must be
-represented as string or number) based on some default configuration or dedicated annotations. Currently, Jackson Object
-mapper and Gson Object mapper are supported. 
+During model serialization to JSON, object mapper is applying some mappings(some of them are required for example in 
+the JSON, Date type must be represented as string or number) based on some default configuration or dedicated annotations. 
+Currently, Jackson Object mapper and Gson Object mapper are supported. 
 
 ### Jackson Object mapper
 JacksonObjectMapper allows to set fields, getters and setters visibility. Based on this Typescript 
@@ -350,8 +360,66 @@ and `FetchBasedImplementationGenerator` so code could be generated for Angular a
 ``` 
 Class `JaxRsGenerationTest` contains examples how to generate TypeScript code from JAX-RS REST endpoints     
 
-## Java model classes to angular2-json-api  converter - since ver 1.2.4
+## Jackon-js  conversion listener - since ver 1.4.0
+[jackson-js](https://github.com/pichillilorenzo/jackson-js) library which
+allows to deserialize JSON to ES6 classes which gives possibility to use in the model types, which are missing in the JSON like
+`Date`, `Map`, `Set`. In the code we can also use `intanceof` operator on instances. 
+This conversion is based on the following classes:
+   + `ModelClassesToTsClassesConverter` which converts Java classes to Typescript classes
+   + `JacksonAnnotationsConversionToJacksonJs` it is conversion listener which extends conversion made by `ModelClassesToTsClassesConverter` and adds `jackson-js` decorators based on the Java types and Jackson annotations  
+   + `JacksonJsModelSerializerExtension` adds in REST services calls to `objectMapper` to serialize/deserialize objects
 
+Class `com/blueveery/springrest2ts/examples/test/JacksonJSTest` has example how to configure generator for code generation
+compatible with `jackon-js` library.
+Current conversion supports following decorators:
+   + `@JsonTypeInfo`, `@JsonSubTypes`, `@JsonTypeName` to allows `jackosn-js` deserialize  polymorphic collections and fields
+   + `@JsonClassType` and `@JsonProperty()` on fields with proper metadata which allows `jackosn-js` library to deserialize JSON to ES6 class instances
+
+### Inheritance support
+Type name conversion is supported for following settings on The Java side:
+   + `JsonTypeInfo.Id.NAME` in that case there is required implementation of typeIdResolver which gets on input current class and inheritance root class and produces class name 
+   + `JsonTypeInfo.Id.CLASS` for decorators `@JsonSubTypes`, `@JsonTypeName` there is used full Java class name
+   + `JsonTypeInfo.Id.MINIMAL_CLASS` for decorators `@JsonSubTypes`, `@JsonTypeName` there is used minimal Java class name
+
+For Java `JsonTypeInfo.include()` following settings how to include in the JSON type info are supported:
+   + `PROPERTY` & `EXISTING_PROPERTY` mapped to `PROPERTY`
+   + `WRAPPER_OBJECT` mapped to `WRAPPER_OBJECT`
+   + `WRAPPER_ARRAY` mapped to `WRAPPER_ARRAY`
+
+Classes in one inheritance hierarchy must be mapped to the same TS module because derived types are used on the top level
+class in `JacksonJs` decorators, which will cause circular dependencies between modules but the same problem will be at the
+backend with packages.
+
+### Custom type mapping for class hierarchy
+Having possibility to map JSON to real ES6 class instances, `tsGenerator` has new mapping `customTypeMappingForClassHierarchy`
+which allows to map Java class and all derived classes to specified TypeScript class. It makes sens mainly for collections.
+If we want to say that all fields which has type `Set` or type which implements this interface should be mapped to JS `Set`
+we can add following mappings:
+```java
+        tsGenerator.getCustomTypeMappingForClassHierarchy().put(Map.class, TypeMapper.tsMap);
+        tsGenerator.getCustomTypeMappingForClassHierarchy().put(Collection.class, TypeMapper.tsArrayCollection);
+        tsGenerator.getCustomTypeMappingForClassHierarchy().put(Set.class, TypeMapper.tsSet);
+        tsGenerator.getCustomTypeMappingForClassHierarchy().put(Date.class, TypeMapper.tsDate);
+```
+Settings above will map all Java 
+   + maps to JS `Map`  
+   + collection to JS `Array` class  
+   + sets to JS `Set`
+   + date and inherited types to JS `Date`
+in case where Java inheritance trees overlaps like for  `Collection` and `Set` the nearest Java type is selected so in this case 
+`HashSet` will be mapped to JS `Set` not to `Array`
+
+JS `Date` is supported if it is serialized to number, the same is for `Enum`s. To add support for other `JacksonJS` 
+decorators, users could create own conversion listener and add it together with `JacksonAnnotationsConversionToJacksonJs`
+to model converter. In `JacksonAnnotationsConversionToJacksonJs` we tried to add only the most basic `JacksonJs` decorators.
+
+<b style="color:red">
+We must add that `jackson-js` is not actively supported at this moment, but it is the best library for this purpose which 
+we were able to find.</b> Maybe if there will be interested in this solution we will find contributor which will 
+keep this library up to date. Having classes and decorators at the TypeScript side will open possibilities for integration 
+with many others libraries, feedback if this is desired direction is welcome.   
+
+## Java model classes to angular2-json-api  converter - since ver 1.2.4
 [angular2-jsonapi](https://github.com/ghidoz/angular2-jsonapi) is an TypeScript
 library which converts in web application incoming JSON into classes and classes into JSON.
 Given advantage is that TypeScript interfaces doesn't exists in runtime in opposite to classes but to use classes, 
@@ -373,7 +441,7 @@ type name, Java model class must be annotated with `JsonApiModelConfig` annotati
     <dependency>
         <groupId>com.blue-veery</groupId>
         <artifactId>spring-rest2ts-angular2json-api</artifactId>
-        <version>1.3.0</version>
+        <version>1.4.0</version>
     </dependency>
 ```
 which needs to be included in Java project. 
@@ -402,7 +470,7 @@ To have such config generated, generator configuration needs to create such vari
 Configuration examples are in class Angular2JsonApiTest
 
 <b style="color:red">This converter is an experimental version, generated code could 
-contains some inconsistencies since we weren't able to find rules 
+contain some inconsistencies since we weren't able to find rules 
 how to apply angular2-jsonapi decorators to fields, only examples,
 base on which incorrect conclusions could be made!</b>
    

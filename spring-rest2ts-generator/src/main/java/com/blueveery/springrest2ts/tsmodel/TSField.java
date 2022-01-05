@@ -1,5 +1,7 @@
 package com.blueveery.springrest2ts.tsmodel;
 
+import com.blueveery.springrest2ts.converters.Property;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 
@@ -9,11 +11,17 @@ import java.io.IOException;
 public class TSField extends TSComplexTypeMember {
     private boolean optional;
     private boolean readOnly;
+    private ILiteral initializationStatement;
+    private Property sourceProperty;
 
     public TSField(String name, TSComplexElement owner, TSType type) {
         super(name, owner, type);
     }
 
+    public TSField(String name, TSComplexElement owner, TSType type, Property sourceProperty) {
+        super(name, owner, type);
+        this.sourceProperty = sourceProperty;
+    }
 
     public boolean isOptional() {
         return optional;
@@ -29,6 +37,22 @@ public class TSField extends TSComplexTypeMember {
 
     public boolean getReadOnly() {
         return readOnly;
+    }
+
+    public ILiteral getInitializationStatement() {
+        return initializationStatement;
+    }
+
+    public void setInitializationStatement(ILiteral initializationStatement) {
+        this.initializationStatement = initializationStatement;
+    }
+
+    public Property getSourceProperty() {
+        return sourceProperty;
+    }
+
+    public void setSourceProperty(Property sourceProperty) {
+        this.sourceProperty = sourceProperty;
     }
 
     @Override
@@ -50,6 +74,10 @@ public class TSField extends TSComplexTypeMember {
             } else {
                 writer.write(type.getName());
             }
+        }
+        if (initializationStatement != null) {
+            writer.write(" = ");
+            initializationStatement.write(writer);
         }
         writer.write(";");
     }

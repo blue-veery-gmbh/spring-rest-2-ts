@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static com.blueveery.springrest2ts.spring.RequestMappingUtility.getRequestMapping;
 
@@ -72,8 +73,11 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
 
             writer.write(requestParamsBuilder.toString());
             writer.newLine();
-
-            String requestOptions = composeRequestOptions(requestBodyVar, isRequestBodyDefined, httpMethod, methodRequestMapping.consumes());
+            List<TSParameter> requestBodyParams = findRequestBodyParam(method);
+            Optional<TSParameter> requestBodyParam = requestBodyParams.stream().findFirst();
+            String requestOptions = composeRequestOptions(
+                    requestBodyVar, isRequestBodyDefined, httpMethod, methodRequestMapping.consumes(), requestBodyParam
+            );
 
             writer.write(
                     "return fetch(" + requestUrlVar + ".toString(), {"
@@ -107,7 +111,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
             return "";
         } else {
             ModelSerializerExtension modelSerializerExtension = this.modelSerializerExtension;
-            parseFunction = modelSerializerExtension.generateDeserializationCode("res");
+            parseFunction = modelSerializerExtension.generateDeserializationCode("res", method);
             return ".then(res => res.text()).then(res =>  " + parseFunction + ")";
         }
         return ".then(res =>  " + parseFunction + ")";
@@ -128,13 +132,14 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     }
 
     protected String composeRequestOptions(
-            String requestBodyVar, boolean isRequestBodyDefined, String httpMethod, String[] consumesContentType
+            String requestBodyVar, boolean isRequestBodyDefined, String httpMethod, String[] consumesContentType,
+            Optional<TSParameter> inputParam
     ) {
         String requestOptions = "";
         List<String> requestOptionsList = new ArrayList<>();
         if (("PUT".equals(httpMethod) || "POST".equals(httpMethod)) && isRequestBodyDefined) {
             addContentTypeHeader(consumesContentType, requestOptionsList);
-            requestOptionsList.add("body: " + modelSerializerExtension.generateSerializationCode(requestBodyVar));
+            requestOptionsList.add("body: " + modelSerializerExtension.generateSerializationCode(requestBodyVar, inputParam.get()));
         }
 
         requestOptions += String.join(", ", requestOptionsList);

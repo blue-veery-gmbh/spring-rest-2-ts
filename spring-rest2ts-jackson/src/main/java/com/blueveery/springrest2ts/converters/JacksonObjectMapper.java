@@ -4,6 +4,8 @@ import com.blueveery.springrest2ts.implgens.ImplementationGenerator;
 import com.blueveery.springrest2ts.tsmodel.TSArray;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSField;
+import com.blueveery.springrest2ts.tsmodel.TSJsonLiteral;
+import com.blueveery.springrest2ts.tsmodel.TSLiteral;
 import com.blueveery.springrest2ts.tsmodel.TSType;
 import com.blueveery.springrest2ts.tsmodel.TSUnion;
 import com.fasterxml.jackson.annotation.JacksonInject;
@@ -56,6 +58,12 @@ public class JacksonObjectMapper implements ObjectMapper {
         return gettersVisibility;
     }
 
+    public void setAllAccessMethodsVisibility(JsonAutoDetect.Visibility visibility) {
+        this.gettersVisibility = visibility;
+        this.isGetterVisibility = visibility;
+        this.settersVisibility = visibility;
+    }
+
     public void setGettersVisibility(JsonAutoDetect.Visibility gettersVisibility) {
         this.gettersVisibility = gettersVisibility;
     }
@@ -85,7 +93,7 @@ public class JacksonObjectMapper implements ObjectMapper {
                 case PROPERTY:
                     String propertyName = jsonTypeInfoAnnotation.property();
                     if ("".equals(propertyName)) {
-                        propertyName = "@class";
+                        propertyName = jsonTypeInfoAnnotation.use().getDefaultPropertyName();
                     }
                     for (TSField tsField : tsComplexType.getTsFields()) {
                         if (propertyName.equals(tsField.getName())) {
@@ -251,7 +259,7 @@ public class JacksonObjectMapper implements ObjectMapper {
         }
 
 
-        TSField tsField = new TSField(property.getName(), tsComplexType, fieldType);
+        TSField tsField = new TSField(property.getName(), tsComplexType, fieldType, property);
         tsField.addAllAnnotations(property.getDeclaredAnnotations());
         if (!applyJsonIgnoreProperties(property, tsField)) {
             applyReadOnly(tsField, property);
