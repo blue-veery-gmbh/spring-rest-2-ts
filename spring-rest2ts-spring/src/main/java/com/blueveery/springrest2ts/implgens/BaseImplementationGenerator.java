@@ -217,4 +217,7 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
         return classLevelPath + pathSeparator +  methodLevelPath + "'";
     }
 
+    protected boolean bodyIsAllowedInRequest(String httpMethod) {
+        return "PUT".equals(httpMethod) || "POST".equals(httpMethod) || "PATCH".equals(httpMethod);
+    }
 }
