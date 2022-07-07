@@ -47,46 +47,46 @@ To add a dependency on spring-rest2ts-generator using Maven, use the following:
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-generator</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-spring</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-spring-data</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
     <!-- only if spring data is used-->
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-jackson</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-jax-rs</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
     <!-- only if JAX-RS is used-->
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-angular2json-impl</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
     <!-- only if angular2json is used-->
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-gson</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
     <!-- only if Gson is used-->
 </dependency>
 <dependency>
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts-jackson-js</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
     <!-- only if jackson-js is used-->
 </dependency>
 ```          
@@ -441,7 +441,7 @@ type name, Java model class must be annotated with `JsonApiModelConfig` annotati
     <dependency>
         <groupId>com.blue-veery</groupId>
         <artifactId>spring-rest2ts-angular2json-api</artifactId>
-        <version>1.4.0</version>
+        <version>1.5.0</version>
     </dependency>
 ```
 which needs to be included in Java project. 

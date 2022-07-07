@@ -39,13 +39,13 @@ public class HasAnnotationJavaTypeFilterTest {
     public void sourceTimeAnnotationAreNotAcceptedAsFilters() {
         assertThatThrownBy(() -> {
             new HasAnnotationJavaTypeFilter(SourceTimeAnnotation.class);
-        }).isInstanceOf(IllegalStateException.class).hasMessage("SourceTimeAnnotation is not a runtime annotation");
+        }).isInstanceOf(IllegalArgumentException.class).hasMessage("SourceTimeAnnotation is not a runtime annotation");
     }
 
     @Test
     public void onlyTypeLevelAnnotationAreAcceptedAsFilters() {
         assertThatThrownBy(() -> {
             new HasAnnotationJavaTypeFilter(Override.class);
-        }).isInstanceOf(IllegalStateException.class).hasMessage("Override is not a type annotation");
+        }).isInstanceOf(IllegalArgumentException.class).hasMessage("Override is not a type annotation");
     }
 }
