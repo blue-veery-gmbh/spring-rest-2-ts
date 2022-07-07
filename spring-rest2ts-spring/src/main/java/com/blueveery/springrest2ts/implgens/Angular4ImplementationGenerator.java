@@ -178,7 +178,7 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
             String requestBody, boolean isRequestBodyDefined, String requestOptions, String httpMethod,
             boolean isJsonParsingRequired, String[] consumes, Optional<TSParameter> requestBodyParam
     ) {
-        if (isPutOrPostMethod(httpMethod)) {
+        if (bodyIsAllowedInRequest(httpMethod)) {
             if (isRequestBodyDefined) {
                 requestOptions = appendRequestBodyPart(requestBody, requestOptions, isJsonParsingRequired, consumes, requestBodyParam.get());
             } else {
@@ -224,15 +224,11 @@ public class Angular4ImplementationGenerator extends BaseImplementationGenerator
     protected String getContentTypeHeaderFromRequestMapping(
             String httpMethod, RequestMapping requestMapping, boolean isRequestBodyDefined
     ) {
-        if (isPutOrPostMethod(httpMethod) && isRequestBodyDefined) {
+        if (bodyIsAllowedInRequest(httpMethod) && isRequestBodyDefined) {
             String contentType = getContentType(requestMapping.consumes());
             return "new HttpHeaders().set('Content-type'," + " '" + contentType + "');";
         }
         return "";
-    }
-
-    protected boolean isPutOrPostMethod(String httpMethod) {
-        return "PUT".equals(httpMethod) || "POST".equals(httpMethod);
     }
 
     @Override

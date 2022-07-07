@@ -137,7 +137,7 @@ public class FetchBasedImplementationGenerator extends BaseImplementationGenerat
     ) {
         String requestOptions = "";
         List<String> requestOptionsList = new ArrayList<>();
-        if (("PUT".equals(httpMethod) || "POST".equals(httpMethod)) && isRequestBodyDefined) {
+        if ((bodyIsAllowedInRequest(httpMethod)) && isRequestBodyDefined) {
             addContentTypeHeader(consumesContentType, requestOptionsList);
             requestOptionsList.add("body: " + modelSerializerExtension.generateSerializationCode(requestBodyVar, inputParam.get()));
         }
