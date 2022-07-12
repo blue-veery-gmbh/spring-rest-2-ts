@@ -4,6 +4,7 @@ import com.blueveery.springrest2ts.converters.ComplexTypeConverter;
 import com.blueveery.springrest2ts.converters.DefaultNullableTypesStrategy;
 import com.blueveery.springrest2ts.converters.JavaEnumToTsEnumConverter;
 import com.blueveery.springrest2ts.converters.JavaPackageToTsModuleConverter;
+import com.blueveery.springrest2ts.converters.MappingAction;
 import com.blueveery.springrest2ts.converters.ModelClassesAbstractConverter;
 import com.blueveery.springrest2ts.converters.NullableTypesStrategy;
 import com.blueveery.springrest2ts.converters.RestClassConverter;
@@ -47,6 +48,8 @@ public class Rest2tsGenerator {
     static Logger logger = LoggerFactory.getLogger("gen-logger");
     public static boolean generateAmbientModules = false;
     private Map<Class<?>, TSType> customTypeMapping = new HashMap<>();
+
+    private static Map<Class, MappingAction> customTypeMappingActions = new HashMap<>();
     private Map<Class<?>, TSComplexElement> customTypeMappingForClassHierarchy = new HashMap<>();
 
     private JavaTypeFilter modelClassesCondition = new RejectJavaTypeFilter();
@@ -61,6 +64,10 @@ public class Rest2tsGenerator {
 
     public Map<Class<?>, TSType> getCustomTypeMapping() {
         return customTypeMapping;
+    }
+
+    public static Map<Class, MappingAction> getCustomTypeMappingActions() {
+        return customTypeMappingActions;
     }
 
     public Map<Class<?>, TSComplexElement> getCustomTypeMappingForClassHierarchy() {
@@ -122,6 +129,7 @@ public class Rest2tsGenerator {
 
 
         registerCustomTypesMapping(customTypeMapping);
+        registerCustomTypesMappingActions(customTypeMappingActions);
         TypeMapper.complexTypeMapForClassHierarchy.putAll(customTypeMappingForClassHierarchy);
 
         exploreRestClasses(restClasses, modelClassesCondition, modelClasses);
@@ -226,6 +234,13 @@ public class Rest2tsGenerator {
         for (Class nextJavaType : customTypeMapping.keySet()) {
             TSType tsType = customTypeMapping.get(nextJavaType);
             TypeMapper.registerTsType(nextJavaType, tsType);
+        }
+    }
+
+    private void registerCustomTypesMappingActions(Map<Class, MappingAction> customTypeMappingActions) {
+        for (Class nextJavaType : customTypeMappingActions.keySet()) {
+            MappingAction mappingAction = customTypeMappingActions.get(nextJavaType);
+            TypeMapper.registerMappingAction(nextJavaType, mappingAction);
         }
     }
 
