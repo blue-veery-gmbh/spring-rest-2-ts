@@ -40,6 +40,7 @@ generated code will reflect these changes which will avoid compile-time error in
    + model serializers extension which allows to configure custom JSON serializers/deserializers : since ver 1.2.6       
    + Gson serializer support since version 1.3.0
    + jackson-js support since version 1.4.0
+   + Spring WebFlux types (Mono and Flux) support since version 1.5.0
    
 ## Installation 
 To add a dependency on spring-rest2ts-generator using Maven, use the following:
@@ -88,6 +89,12 @@ To add a dependency on spring-rest2ts-generator using Maven, use the following:
     <artifactId>spring-rest2ts-jackson-js</artifactId>
     <version>1.5.0</version>
     <!-- only if jackson-js is used-->
+</dependency>
+<dependency>
+    <groupId>com.blue-veery</groupId>
+    <artifactId>spring-rest2ts-webflux</artifactId>
+    <version>1.5.0</version>
+    <!-- only if webflux is used-->
 </dependency>
 ```          
            
@@ -335,6 +342,17 @@ before REST method call in Pageable object pageNumber and pageSize must be set a
 Others fields are calculated on the server and sent back to client in Page object
 
 If parameter with type `Pageable` is marked with annotation `@PageableDefault`, parameter in TypeScript is optional 
+
+## Spring WebFlux Support - since ver 1.5.0
+To generate typescript code from reactive REST controllers, apart from other configuration required for controllers
+you need to use `WebFluxConfigurator` in the following way:
+```java
+    WebFluxConfigurator.configure(tsGenerator);
+```
+With such configuration `Mono` type is unpacked and type parameter for `Mono` is used as return type:
+`Mono<Product>` is converted to `Product`
+`Flux` type is converted into array where item type is taken from `Flux` type parameter:
+`Flux<Product>` is converted to `Product[]`
 
 ## JaX-RS REST controllers converter - since ver 1.2.4
 Since version 1.2.4 there is provided `JaxRsRestToTsConverter` which converts JAX-RS controllers into TypeScript services. 

@@ -67,12 +67,14 @@ public class TypeMapper {
     }
 
     private static Map<Class, TSType> complexTypeMap = new HashMap<>();
+    private static Map<Class, MappingAction> complexTypeMappingActions = new HashMap<>();
 
     public static Map<Class, TSComplexElement> complexTypeMapForClassHierarchy = new HashMap<>();
 
     public static void resetTypeMapping() {
         complexTypeMap.clear();
         complexTypeMapForClassHierarchy.clear();
+        complexTypeMappingActions.clear();
     }
 
     public static TSType map(Type javaType) {
@@ -83,7 +85,8 @@ public class TypeMapper {
         return map(javaType, tsAny, typeParametersMap);
     }
 
-    public static TSType map(Type javaType, TSType fallbackType, Map<TypeVariable, Type> typeParametersMap) {
+    public static TSType map(Type javaType, TSType fallbackType,
+        Map<TypeVariable, Type> typeParametersMap) {
         if (javaType instanceof TypeVariable) {
             Type actualType = typeParametersMap.get(javaType);
             if (actualType != null) {
@@ -109,6 +112,11 @@ public class TypeMapper {
         if (hierarchyRoot.isPresent()) {
             TSComplexElement tsType = complexTypeMapForClassHierarchy.get(hierarchyRoot.get());
             return wrapTypeInTypeReference(tsType, actualParameterList);
+        }
+
+        if (complexTypeMappingActions.containsKey(javaRawType)) {
+            MappingAction mappingAction = complexTypeMappingActions.get(javaRawType);
+            return mappingAction.map(javaType);
         }
 
         if (Object.class == javaRawType) {
@@ -249,6 +257,12 @@ public class TypeMapper {
         if (tsType instanceof TSScopedElement) {
             TSScopedElement tsScopedElement = (TSScopedElement) tsType;
             tsScopedElement.getMappedFromJavaTypeSet().add(javaType);
+        }
+    }
+
+    public static void registerMappingAction(Class javaType, MappingAction mappingAction) {
+        if (!complexTypeMappingActions.containsKey(javaType)) {
+            complexTypeMappingActions.put(javaType, mappingAction);
         }
     }
 }
