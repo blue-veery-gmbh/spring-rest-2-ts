@@ -5,17 +5,17 @@
     <parent>
         <artifactId>spring-rest2ts</artifactId>
         <groupId>com.blue-veery</groupId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.5.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>spring-rest2ts-webflux</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <version>1.5.0</version>
     <dependencies>
         <dependency>
             <groupId>com.blue-veery</groupId>
             <artifactId>spring-rest2ts-generator</artifactId>
-            <version>1.5.0-SNAPSHOT</version>
+            <version>1.5.0</version>
         </dependency>
         <dependency>
             <groupId>io.projectreactor</groupId>
@@ -26,7 +26,7 @@
         <dependency>
             <groupId>com.blue-veery</groupId>
             <artifactId>spring-rest2ts-tests</artifactId>
-            <version>1.5.0-SNAPSHOT</version>
+            <version>1.5.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>com.blue-veery</groupId>
             <artifactId>spring-rest2ts-spring</artifactId>
-            <version>1.5.0-SNAPSHOT</version>
+            <version>1.5.0</version>
             <scope>test</scope>
         </dependency>
 
