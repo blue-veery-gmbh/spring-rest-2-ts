@@ -251,9 +251,7 @@ public class TypeMapper {
     }
 
     public static void registerTsType(Class javaType, TSType tsType) {
-        if (!complexTypeMap.containsKey(javaType)) {
-            complexTypeMap.put(javaType, tsType);
-        }
+        complexTypeMap.putIfAbsent(javaType, tsType);
         if (tsType instanceof TSScopedElement) {
             TSScopedElement tsScopedElement = (TSScopedElement) tsType;
             tsScopedElement.getMappedFromJavaTypeSet().add(javaType);
@@ -261,9 +259,7 @@ public class TypeMapper {
     }
 
     public static void registerMappingAction(Class javaType, MappingAction mappingAction) {
-        if (!complexTypeMappingActions.containsKey(javaType)) {
-            complexTypeMappingActions.put(javaType, mappingAction);
-        }
+        complexTypeMappingActions.putIfAbsent(javaType, mappingAction);
     }
 }
 
