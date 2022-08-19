@@ -164,6 +164,8 @@ public class TSModule extends TSElement implements ICommentedElement {
         for (TSType tsType : typeReference.getTsTypeParameterList()) {
             if (tsType instanceof TSParameterizedTypeReference) {
                 scopedTypeUsage((TSParameterizedTypeReference<?>) tsType);
+            } else if (tsType instanceof TSScopedElement) {
+                scopedTypeUsage((TSScopedElement)tsType);
             }
         }
     }
