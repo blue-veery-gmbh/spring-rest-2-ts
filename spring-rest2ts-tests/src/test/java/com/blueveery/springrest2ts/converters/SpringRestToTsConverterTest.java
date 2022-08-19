@@ -6,11 +6,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.blueveery.springrest2ts.Rest2tsGenerator;
 import com.blueveery.springrest2ts.converters.ctrls.ProductController;
 import com.blueveery.springrest2ts.converters.enums.ProductType;
+import com.blueveery.springrest2ts.converters.enums.SingleResult;
 import com.blueveery.springrest2ts.filters.JavaTypeSetFilter;
 import com.blueveery.springrest2ts.implgens.Angular4ImplementationGenerator;
 import com.blueveery.springrest2ts.tests.ComplexElementFinder;
 import com.blueveery.springrest2ts.tsmodel.TSElement;
 import com.blueveery.springrest2ts.tsmodel.TSModule;
+import com.blueveery.springrest2ts.tsmodel.TSScopedElement;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -35,7 +37,7 @@ public class SpringRestToTsConverterTest implements ComplexElementFinder {
   @Before
   public void setUp() {
     tsGenerator = new Rest2tsGenerator();
-    tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(ProductType.class));
+    tsGenerator.setModelClassesCondition(new JavaTypeSetFilter(ProductType.class, SingleResult.class));
     tsGenerator.setRestClassesCondition(new JavaTypeSetFilter(ProductController.class));
     objectMapper = new JacksonObjectMapper();
     modelClassesConverter = new ModelClassesToTsInterfacesConverter(objectMapper);
@@ -59,7 +61,16 @@ public class SpringRestToTsConverterTest implements ComplexElementFinder {
         .filter(m -> m.getName().contains("ctrls"))
         .findFirst()
         .get();
+    TSScopedElement tsProductType = findScopedElement(
+        tsEnumModule, ProductType.class.getSimpleName()
+    );
+
+    TSScopedElement tsSingleResult = findScopedElement(
+        tsEnumModule, SingleResult.class.getSimpleName()
+    );
     assertThat(tsCtrlsModule.getImportMap().get(tsEnumModule)).isNotNull();
+    assertThat(tsCtrlsModule.getImportMap().get(tsEnumModule).getWhat()).contains(tsSingleResult);
+    assertThat(tsCtrlsModule.getImportMap().get(tsEnumModule).getWhat()).contains(tsProductType);
 
     printTSElement(tsCtrlsModule);
   }
