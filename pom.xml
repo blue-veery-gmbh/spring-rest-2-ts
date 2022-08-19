@@ -6,7 +6,7 @@
 
     <groupId>com.blue-veery</groupId>
     <artifactId>spring-rest2ts</artifactId>
-    <version>1.5.0</version>
+    <version>1.5.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>spring-rest2ts</name>
