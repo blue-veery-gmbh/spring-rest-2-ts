@@ -257,7 +257,7 @@ There are following filters which allows to build complex conditions:
    + RejectJavaTypeFilter
    + OrFilterOperator
    + AndFilterOperator
-   + NotFilterOperator
+   + NotJavaTypeFilter
     
 ## Java model classes converter
 Java classes which describe payload model are generated to TypeScript interfaces. Java collections are converted into 
