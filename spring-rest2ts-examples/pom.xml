@@ -24,7 +24,7 @@
     <inceptionYear>2019</inceptionYear>
 
     <properties>
-        <com.fasterxml.jackson.version>2.12.3</com.fasterxml.jackson.version>
+        <com.fasterxml.jackson.version>2.12.7.1</com.fasterxml.jackson.version>
     </properties>
 
     <dependencies>
