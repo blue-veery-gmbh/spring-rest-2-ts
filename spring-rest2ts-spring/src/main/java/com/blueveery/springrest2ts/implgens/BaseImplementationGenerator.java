@@ -5,6 +5,7 @@ import com.blueveery.springrest2ts.extensions.ConversionExtension;
 import com.blueveery.springrest2ts.extensions.ModelSerializerExtension;
 import com.blueveery.springrest2ts.extensions.RestConversionExtension;
 import com.blueveery.springrest2ts.extensions.StandardJsonSerializerExtension;
+import com.blueveery.springrest2ts.tsmodel.TSArray;
 import com.blueveery.springrest2ts.tsmodel.TSClass;
 import com.blueveery.springrest2ts.tsmodel.TSComplexElement;
 import com.blueveery.springrest2ts.tsmodel.TSMethod;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.pattern.PathPatternParser;
+import org.springframework.web.util.pattern.PatternParseException;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -89,11 +92,76 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
         return "";
     }
 
-    protected void replaceInStringBuilder(StringBuilder pathStringBuilder, String targetToReplace, String replacement) {
-        int start = pathStringBuilder.lastIndexOf(targetToReplace);
-        validatePathVariableParameter(pathStringBuilder, targetToReplace, start);
-        int end = start + targetToReplace.length();
-        pathStringBuilder.replace(start, end, replacement);
+    protected void replaceInStringBuilder(StringBuilder pathStringBuilder, String pathVariableName, TSParameter tsParameter) {
+        final String captureTheRest = "{*" + pathVariableName + "}";
+        final String captureVariable = "{" + pathVariableName + "}";
+
+        stripPatternParserFeatures(pathStringBuilder);
+        
+        int startCaptureVariable = pathStringBuilder.lastIndexOf(captureVariable);
+        int startCaptureTheRest = pathStringBuilder.lastIndexOf(captureTheRest);
+        
+        if (startCaptureTheRest != -1) {
+            if (tsParameter.getType() instanceof TSArray) {
+                pathStringBuilder.replace(startCaptureTheRest,
+                    startCaptureTheRest + captureTheRest.length(),
+                    "' + " + pathVariableName +
+                    ".flatMap(x=>encodeURIComponent(x)).join('/') + '");
+            } else {
+                pathStringBuilder.replace(startCaptureTheRest,
+                    startCaptureTheRest + captureTheRest.length(),
+                    "' + encodeURIComponent(" + pathVariableName + ") + '");
+            }
+        } else if (startCaptureVariable != -1) {
+            pathStringBuilder.replace(startCaptureVariable,
+                startCaptureVariable + captureVariable.length(),
+                "' + encodeURIComponent(" + pathVariableName + ") + '");
+        } else {
+            validatePathVariableParameter(pathStringBuilder, pathVariableName, -1);  
+        }
+
+    }
+
+    protected static void stripPatternParserFeatures(StringBuilder pathStringBuilder)
+    {
+      stripPatternParserFeatures(pathStringBuilder, 0);
+    }
+
+    protected static void stripPatternParserFeatures(StringBuilder pathStringBuilder, int fromIndex)
+    {
+        int bracketStartIndex = pathStringBuilder.indexOf("{", fromIndex);
+        if (bracketStartIndex == -1) {
+            return;
+        }
+        int bracketEndIndex = unescapedIndexOf(pathStringBuilder, "}", bracketStartIndex + 1);
+        if (bracketStartIndex + 1 < pathStringBuilder.length()) {
+            int innerBracketStartIndex = unescapedIndexOf(pathStringBuilder, "{", bracketStartIndex + 1);
+            while(bracketEndIndex > 0 && (bracketEndIndex + 1 < pathStringBuilder.length()) &&
+                innerBracketStartIndex > bracketStartIndex &&
+                innerBracketStartIndex < bracketEndIndex) {
+                innerBracketStartIndex = unescapedIndexOf(pathStringBuilder, "{", innerBracketStartIndex + 1);
+                bracketEndIndex  = unescapedIndexOf(pathStringBuilder, "}", bracketEndIndex + 1);
+            }
+        }
+        if (bracketEndIndex == -1) {
+            return;
+        }
+        int colonIndex = pathStringBuilder.indexOf(":", bracketStartIndex);
+        if (colonIndex > bracketEndIndex) {
+            stripPatternParserFeatures(pathStringBuilder, bracketEndIndex);
+        } else  if (colonIndex < bracketEndIndex && colonIndex > bracketStartIndex) {
+            pathStringBuilder.replace(colonIndex, bracketEndIndex, "");
+            stripPatternParserFeatures(pathStringBuilder, fromIndex);
+        }
+    }
+
+    private static int unescapedIndexOf(StringBuilder pathStringBuilder, final String character, int fromIndex) {
+        int characterIndex = pathStringBuilder.indexOf(character, fromIndex);
+        while(characterIndex > 0 && (characterIndex + 1 < pathStringBuilder.length()) &&
+            pathStringBuilder.charAt(characterIndex - 1) == '\\') {
+            characterIndex = pathStringBuilder.indexOf(character, characterIndex + 1);
+        }
+        return characterIndex;
     }
 
     private void validatePathVariableParameter(StringBuilder pathStringBuilder, String targetToReplace, int start) {
@@ -126,7 +194,7 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
             }
             PathVariable pathVariable = tsParameter.findAnnotation(PathVariable.class);
             if (pathVariable != null) {
-                addPathVariable(pathStringBuilder, tsParameterName, pathVariable);
+                addPathVariable(pathStringBuilder, tsParameter, pathVariable);
                 continue;
             }
             RequestParam requestParam = tsParameter.findAnnotation(RequestParam.class);
@@ -177,18 +245,17 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
         return requestParamName;
     }
 
-    protected void addPathVariable(StringBuilder pathStringBuilder, String tsParameterName, PathVariable pathVariable) {
+    protected void addPathVariable(StringBuilder pathStringBuilder, TSParameter tsParameter, PathVariable pathVariable) {
         String variableName = pathVariable.value();
         if ("".equals(variableName)){
             variableName = pathVariable.name();
         }
 
         if ("".equals(variableName)) {
-            variableName = tsParameterName;
+            variableName = tsParameter.getName();
         }
 
-        String targetToReplace = "{" + variableName + "}";
-        replaceInStringBuilder(pathStringBuilder, targetToReplace, "' + " + tsParameterName + " + '");
+        replaceInStringBuilder(pathStringBuilder, variableName, tsParameter);
     }
 
     protected boolean isStringBuilderEmpty(StringBuilder requestParamsBuilder) {
@@ -210,6 +277,8 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
     protected String getEndpointPath(RequestMapping methodRequestMapping, RequestMapping classRequestMapping) {
         String classLevelPath = getPathFromRequestMapping(classRequestMapping);
         String methodLevelPath = getPathFromRequestMapping(methodRequestMapping);
+        validateParsePattern(classLevelPath);
+        validateParsePattern(methodLevelPath);
         String pathSeparator = "";
         if (!classLevelPath.endsWith("/") && !(methodLevelPath.startsWith("/") || "".equals(methodLevelPath))) {
             pathSeparator="/";
@@ -219,5 +288,15 @@ public abstract class BaseImplementationGenerator implements ImplementationGener
 
     protected boolean bodyIsAllowedInRequest(String httpMethod) {
         return "PUT".equals(httpMethod) || "POST".equals(httpMethod) || "PATCH".equals(httpMethod);
+    }
+    
+    private static void validateParsePattern(final String pattern) {
+        if (!"".equals(pattern)) {
+            try {
+                new PathPatternParser().parse(pattern);
+            } catch (PatternParseException ex) {
+                throw new IllegalStateException(ex);
+            }
+        }
     }
 }

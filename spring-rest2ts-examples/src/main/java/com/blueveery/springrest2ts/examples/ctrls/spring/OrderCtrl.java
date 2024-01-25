@@ -17,12 +17,11 @@ import java.util.List;
 @RequestMapping("api/order")
 public class OrderCtrl extends BaseCtrlImpl<OrderDTO> implements CreateObjectCtrl<OrderDTO> {
 
-    @RequestMapping(path = "/{id}", method = RequestMethod.GET, produces = {"application/json"})
+    @RequestMapping(path = "/{id:^[0-9]{1,19}$}", method = RequestMethod.GET, produces = {"application/json"})
     @ResponseBody
     public OrderDTO getOrder(@PathVariable int id) {
         return new OrderDTO();
     }
-
 
     @PutMapping(path = "/{id}", consumes = {"application/json"}, produces = {"application/json"})
     @ResponseBody
@@ -33,6 +32,12 @@ public class OrderCtrl extends BaseCtrlImpl<OrderDTO> implements CreateObjectCtr
     @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteOrder(@PathVariable("id") int id) {
+
+    }
+
+    @RequestMapping(path = "/batch/{*ids}", method = RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void batchDeleteOrders(@PathVariable("ids") int[] ids) {
 
     }
 
